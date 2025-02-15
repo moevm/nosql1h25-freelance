@@ -7,25 +7,25 @@ import ProjectPage from "./pages/ProjectPage.jsx";
 export const authRoutes = [
     {
         path: ADMIN_ROUTE,
-        component: Admin
+        element: <Admin />
     }
 ]
 
 export const publicRoutes = [
     {
         path: PROJECTS_ROUTE,
-        component: Projects
+        element: <Projects />
     },
     {
         path: LOGIN_ROUTE,
-        component: Auth
+        element: <Auth />
     },
     {
         path: REGISTRATION_ROUTE,
-        component: Auth
+        element: <Auth />
     },
     {
         path: PROJECT_ROUTE + '/:id',
-        component: ProjectPage
+        element: <ProjectPage />
     }
 ]
