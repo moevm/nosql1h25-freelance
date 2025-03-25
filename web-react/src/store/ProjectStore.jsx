@@ -15,6 +15,12 @@ export default class ProjectStore {
             {id: 2, name: "Нарисуйте дерево", rating: 5}
         ];
         this._selectedType = {}
+        this._rewards = [
+            {id: 1, name: "10000"},
+            {id: 2, name: "15000"},
+            {id: 3, name: "30000"},
+        ]
+        this._selectedReward = {}
         makeAutoObservable(this);
     }
 
@@ -34,6 +40,14 @@ export default class ProjectStore {
         this._selectedType = type;
     }
 
+    setRewards(rewards) {
+        this._rewards = rewards;
+    }
+
+    setSelectedReward(reward) {
+        this._selectedReward = reward;
+    }
+
     get isAuth() {
         return this._isAuth;
     }
@@ -48,5 +62,13 @@ export default class ProjectStore {
 
     get selectedType() {
         return this._selectedType;
+    }
+
+    get rewards(){
+        return this._rewards;
+    }
+
+    get selectedReward() {
+        return this._selectedReward;
     }
 }
