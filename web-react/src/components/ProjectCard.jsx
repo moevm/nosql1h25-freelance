@@ -4,7 +4,9 @@ import {Col} from "react-bootstrap";
 const ProjectCard = (project) => {
     return (
         <Col md={3}>
-            CARD
+            CARD1
+            CARD2
+            CARD3
         </Col>
     );
 };
