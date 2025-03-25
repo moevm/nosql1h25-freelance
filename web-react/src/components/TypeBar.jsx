@@ -9,7 +9,10 @@ const TypeBar = () => {
     return (
         <ListGroup>
             {project?.types?.map((type) => (
-                <ListGroup.Item key={type.id}>
+                <ListGroup.Item
+                    active = { type.id === project.selectedType.id }
+                    onClick={() => project.setSelectedType(type)}
+                    key={type.id}>
                     {type.name}
                 </ListGroup.Item>
             ))}
