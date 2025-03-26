@@ -3,7 +3,7 @@ import { Card, Badge } from 'react-bootstrap';
 
 const ProjectPage = () => {
     const project = {
-        title: 'Дизайн логотипа для стартапа', // Исправлено name → title
+        title: 'Дизайн логотипа для стартапа',
         type: 'Дизайн',
         prize: '5000',
         deadline: '15 марта 2025',
