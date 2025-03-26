@@ -11,14 +11,14 @@ export default class ProjectStore {
             {id: 5, name: "Моделирование"}
         ];
         this._projects = [
-            {id: 1, name: "Сверстайте сайт", rating: 4},
-            {id: 2, name: "Нарисуйте дерево", rating: 5},
-            {id: 3, name: "Сверстайте сайт", rating: 4},
-            {id: 4, name: "Нарисуйте дерево", rating: 5},
-            {id: 5, name: "Сверстайте сайт", rating: 4},
-            {id: 6, name: "Нарисуйте дерево", rating: 5},
-            {id: 7, name: "Сверстайте сайт", rating: 4},
-            {id: 8, name: "Нарисуйте дерево", rating: 5}
+            {id: 1, name: "Сверстайте сайт1", rating: 4},
+            {id: 2, name: "Нарисуйте дерево2", rating: 5},
+            {id: 3, name: "Сверстайте сайт3", rating: 4},
+            {id: 4, name: "Нарисуйте дерево4", rating: 5},
+            {id: 5, name: "Сверстайте сайт5", rating: 4},
+            {id: 6, name: "Нарисуйте дерево6", rating: 5},
+            {id: 7, name: "Сверстайте сайт7", rating: 4},
+            {id: 8, name: "Нарисуйте дерево8", rating: 5}
         ];
         this._selectedType = {}
         this._rewards = [
