@@ -11,7 +11,7 @@ const NavBar = () => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
             <Container>
-                <Navbar.Brand as={NavLink} to={PROJECTS_ROUTE}>Мои Проекты</Navbar.Brand>
+                <Navbar.Brand as={NavLink} to={PROJECTS_ROUTE}>DevContest</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
