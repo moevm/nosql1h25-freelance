@@ -11,7 +11,6 @@ const ProjectsList = () => {
             {project.projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
             ))}
-            
         </Row>
     );
 };
