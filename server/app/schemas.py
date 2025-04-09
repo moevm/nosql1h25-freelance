@@ -1,25 +1,25 @@
+from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from typing import List, Optional
-from pydantic import BaseModel, Field
+
 
 class Review(BaseModel):
-    id: Optional[str]
     score: float
     commentary: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
 class Solution(BaseModel):
-    id: Optional[str]
     freelancerId: str
     description: str
-    status: int
+    status: int = 1
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviews: List[Review] = []
 
+
 class Contest(BaseModel):
-    id: Optional[str] = Field(default=None)
     employerId: str
     title: str
     annotation: str
@@ -28,15 +28,22 @@ class Contest(BaseModel):
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     endBy: datetime
     type: int
-    status: int
+    status: int = 1
     winnerId: Optional[str] = None
     solutions: List[Solution] = []
 
+
 class User(BaseModel):
-    id: Optional[str]
     email: str
     login: str
     password: str
     role: int
-    status: int
+    status: int = 1
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+def validate_contest(data: dict) -> dict:
+    return Contest(**data).dict()
+
+def validate_user(data: dict) -> dict:
+    return User(**data).dict()

@@ -1,19 +1,19 @@
-from fastapi import APIRouter
+from flask import Blueprint, request, jsonify
 from app.database import contests_collection
-from app.models import Contest
+from app.utils import serialize_mongo
+from app.schemas import validate_contest
 
-router = APIRouter()
 
-@router.post("/contests")
-def create_contest(contest: Contest):
-    contest_dict = contest.dict()
-    res = contests_collection.insert_one(contest_dict)
-    return {"id": str(res.inserted_id)}
+contests_bp = Blueprint('contests', __name__)
 
-@router.get("/contests")
+@contests_bp.route("/contests", methods=["POST"])
+def create_contest():
+    data = request.get_json()
+    contest = validate_contest(data)
+    res = contests_collection.insert_one(contest)
+    return jsonify({"id": str(res.inserted_id)}), 201
+
+@contests_bp.route("/contests", methods=["GET"])
 def get_contests():
-    contests = []
-    for contest in contests_collection.find({}):
-        contest['_id'] = str(contest['_id'])  # сериализация ObjectId
-        contests.append(contest)
-    return contests
+    contests = list(contests_collection.find({}))
+    return jsonify(serialize_mongo(contests))
