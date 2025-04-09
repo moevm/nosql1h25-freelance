@@ -4,14 +4,14 @@ import {Context} from "../main.jsx";
 import {ListGroup} from "react-bootstrap";
 
 const RewardsBar = () => {
-    const {project} = useContext(Context);
+    const {contest} = useContext(Context);
 
     return (
         <ListGroup>
-            {project.rewards.map((reward) => (
+            {contest.rewards.map((reward) => (
                 <ListGroup.Item
-                    active = { reward.id === project.selectedReward.id }
-                    onClick={() => project.setSelectedReward(reward)}
+                    active = { reward.id === contest.selectedReward.id }
+                    onClick={() => contest.setSelectedReward(reward)}
                     key={reward.id}>
                     {reward.name}
                 </ListGroup.Item>

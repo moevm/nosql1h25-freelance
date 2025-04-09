@@ -1,4 +1,5 @@
 import {makeAutoObservable} from "mobx";
+import { fetchData } from "../services/apiService";
 
 export default class ContestStore {
     constructor() {
@@ -10,15 +11,15 @@ export default class ContestStore {
             {id: 4, name: "Нейминг"},
             {id: 5, name: "Моделирование"}
         ];
-        this._projects = [
-            {id: 1, name: "Сверстайте сайт1", rating: 4},
-            {id: 2, name: "Нарисуйте дерево2", rating: 5},
-            {id: 3, name: "Сверстайте сайт3", rating: 4},
-            {id: 4, name: "Нарисуйте дерево4", rating: 5},
-            {id: 5, name: "Сверстайте сайт5", rating: 4},
-            {id: 6, name: "Нарисуйте дерево6", rating: 5},
-            {id: 7, name: "Сверстайте сайт7", rating: 4},
-            {id: 8, name: "Нарисуйте дерево8", rating: 5}
+        this._contests = [
+            // {id: 1, name: "Сверстайте сайт1", rating: 4},
+            // {id: 2, name: "Нарисуйте дерево2", rating: 5},
+            // {id: 3, name: "Сверстайте сайт3", rating: 4},
+            // {id: 4, name: "Нарисуйте дерево4", rating: 5},
+            // {id: 5, name: "Сверстайте сайт5", rating: 4},
+            // {id: 6, name: "Нарисуйте дерево6", rating: 5},
+            // {id: 7, name: "Сверстайте сайт7", rating: 4},
+            // {id: 8, name: "Нарисуйте дерево8", rating: 5}
         ];
         this._selectedType = {}
         this._rewards = [
@@ -38,8 +39,8 @@ export default class ContestStore {
         this._types = types;
     }
 
-    setProjects(projects) {
-        this._projects = projects;
+    setContests(contest) {
+        this._contests = contest;
     }
 
     setSelectedType(type) {
@@ -62,8 +63,8 @@ export default class ContestStore {
         return this._types;
     }
 
-    get projects() {
-        return this._projects;
+    get contests() {
+        return this._contests;
     }
 
     get selectedType() {
@@ -76,5 +77,14 @@ export default class ContestStore {
 
     get selectedReward() {
         return this._selectedReward;
+    }
+
+    async fetchContests() {
+        try {
+            const contests = await fetchData("/contests");
+            this.setContests(contests);
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        }
     }
 }

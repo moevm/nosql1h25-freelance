@@ -4,14 +4,14 @@ import {Context} from "../main.jsx";
 import {ListGroup} from "react-bootstrap";
 
 const TypeBar = () => {
-    const {project} = useContext(Context);
+    const {contest} = useContext(Context);
 
     return (
         <ListGroup>
-            {project?.types?.map((type) => (
+            {contest?.types?.map((type) => (
                 <ListGroup.Item
-                    active = { type.id === project.selectedType.id }
-                    onClick={() => project.setSelectedType(type)}
+                    active = { type.id === contest.selectedType.id }
+                    onClick={() => contest.setSelectedType(type)}
                     key={type.id}>
                     {type.name}
                 </ListGroup.Item>

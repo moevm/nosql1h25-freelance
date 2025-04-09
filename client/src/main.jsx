@@ -10,7 +10,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
       <Context.Provider value={{
           user: new UserStore(),
-          project: new ContestStore(),
+          contest: new ContestStore(),
       }}>
     <App />
       </Context.Provider>
