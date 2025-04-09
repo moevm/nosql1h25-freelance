@@ -2,12 +2,12 @@ import React, {useContext} from 'react';
 import {Row, Col} from "react-bootstrap";
 import TypeBar from "../components/TypeBar.jsx";
 import RewardBar from "../components/RewardsBar.jsx";
-import ProjectsList from "../components/ProjectsList.jsx";
+import ContestsList from "../components/ContestsList.jsx";
 import {Context} from "../main.jsx";
 import { Link } from 'react-router-dom';
 import {CREATE_CONTEST_ROUTE} from "../utils/consts.js"; // Или NavLink, если нужно активное состояние
 
-const Projects = () => {
+const Contests = () => {
     const { user } = useContext(Context);
 
     return (
@@ -24,11 +24,11 @@ const Projects = () => {
                     <RewardBar />
                 </Col>
                 <Col md={9}>
-                    <ProjectsList />
+                    <ContestsList />
                 </Col>
             </Row>
         </div>
     );
 };
 
-export default Projects;
+export default Contests;

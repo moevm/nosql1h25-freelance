@@ -2,14 +2,14 @@ import {
     ADMIN_ROUTE,
     CREATE_CONTEST_ROUTE,
     LOGIN_ROUTE,
-    PROJECT_ROUTE,
-    PROJECTS_ROUTE,
+    CONTEST_ROUTE,
+    CONTESTS_ROUTE,
     REGISTRATION_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
-import Projects from "./pages/Projects.jsx";
+import Contests from "./pages/Contests.jsx";
 import Admin from "./pages/Admin.jsx";
-import ProjectPage from "./pages/ProjectPage.jsx";
+import ContestPage from "./pages/ContestPage.jsx";
 import CreateContest from "./pages/CreateContest.jsx";
 
 export const authRoutes = [
@@ -25,8 +25,8 @@ export const authRoutes = [
 
 export const publicRoutes = [
     {
-        path: PROJECTS_ROUTE,
-        element: <Projects />
+        path: CONTESTS_ROUTE,
+        element: <Contests />
     },
     {
         path: LOGIN_ROUTE,
@@ -37,7 +37,7 @@ export const publicRoutes = [
         element: <Auth />
     },
     {
-        path: PROJECT_ROUTE + '/:id',
-        element: <ProjectPage />
+        path: CONTEST_ROUTE + '/:id',
+        element: <ContestPage />
     }
 ]

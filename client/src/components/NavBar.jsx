@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Context } from "../main.jsx";
 import { NavLink } from "react-router-dom";
-import { PROJECTS_ROUTE, ADMIN_ROUTE } from "../utils/consts.js";
+import { CONTESTS_ROUTE, ADMIN_ROUTE } from "../utils/consts.js";
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { observer } from "mobx-react-lite";
 
@@ -11,7 +11,7 @@ const NavBar = () => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
             <Container>
-                <Navbar.Brand as={NavLink} to={PROJECTS_ROUTE}>DevContest</Navbar.Brand>
+                <Navbar.Brand as={NavLink} to={CONTESTS_ROUTE}>DevContest</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
