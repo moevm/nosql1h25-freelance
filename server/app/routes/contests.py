@@ -14,6 +14,6 @@ def create_contest(contest: Contest):
 def get_contests():
     contests = []
     for contest in contests_collection.find({}):
-        contest['_id'] = str(contest['_id'])  # 👈 сериализация ObjectId
+        contest['_id'] = str(contest['_id'])  # сериализация ObjectId
         contests.append(contest)
     return contests
