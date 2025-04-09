@@ -1,7 +1,7 @@
 import React, {useContext} from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { authRoutes, publicRoutes } from "../routes.jsx";
-import {PROJECTS_ROUTE} from "../utils/consts.js";
+import {CONTESTS_ROUTE} from "../utils/consts.js";
 import {Context} from "../main.jsx";
 import { observer } from "mobx-react-lite";
 
@@ -18,7 +18,7 @@ const AppRouter = () => {
                 <Route key={path} path={path} element={element} exact />
             )}
             {/*перенаправление по умолчанию*/}
-            <Route path="*" element={<Navigate to={PROJECTS_ROUTE} />} />
+            <Route path="*" element={<Navigate to={CONTESTS_ROUTE} />} />
         </Routes>
     );
 };

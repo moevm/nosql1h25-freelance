@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Badge } from 'react-bootstrap';
 
-const ProjectPage = () => {
+const ContestPage = () => {
     const project = {
         title: 'Дизайн логотипа для стартапа',
         type: 'Дизайн',
@@ -54,4 +54,4 @@ const ProjectPage = () => {
     );
 };
 
-export default ProjectPage;
+export default ContestPage;

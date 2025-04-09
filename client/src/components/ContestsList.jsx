@@ -1,18 +1,18 @@
 import React, {useContext} from 'react';
 import {Context} from "../main.jsx";
 import {Row} from "react-bootstrap";
-import ProjectCard from "./ProjectCard.jsx";
+import ContestCard from "./ContestCard.jsx";
 
-const ProjectsList = () => {
+const ContestsList = () => {
     const {project} = useContext(Context);
 
     return (
         <Row>
             {project.projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ContestCard key={project.id} project={project} />
             ))}
         </Row>
     );
 };
 
-export default ProjectsList;
+export default ContestsList;

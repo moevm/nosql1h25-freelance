@@ -1,6 +1,6 @@
 import {makeAutoObservable} from "mobx";
 
-export default class ProjectStore {
+export default class ContestStore {
     constructor() {
         this._isAuth = false;
         this._types = [

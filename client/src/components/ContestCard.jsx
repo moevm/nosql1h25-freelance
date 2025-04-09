@@ -1,15 +1,15 @@
 import React from 'react';
 import { Card, Col } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
-import {PROJECT_ROUTE} from "../utils/consts.js";
+import {CONTEST_ROUTE} from "../utils/consts.js";
 
-const ProjectCard = ({ project }) => {
+const ContestCard = ({ project }) => {
     const navigate = useNavigate()
 
     return (
         <Col
             md={4}
-            onClick={() => navigate(PROJECT_ROUTE + '/' + project.id)}
+            onClick={() => navigate(CONTEST_ROUTE + '/' + project.id)}
         >
             <Card
                 style={{ width: 300 }}
@@ -34,4 +34,4 @@ const ProjectCard = ({ project }) => {
     );
 };
 
-export default ProjectCard;
+export default ContestCard;
