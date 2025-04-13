@@ -1,6 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import { Context } from "../main.jsx";
-import { Row } from "react-bootstrap";
+import {Container, Row} from "react-bootstrap";
 import ContestCard from "./ContestCard.jsx";
 import { observer } from "mobx-react-lite";
 

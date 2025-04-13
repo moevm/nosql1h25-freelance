@@ -7,7 +7,7 @@ import { BsStar, BsTrophy } from 'react-icons/bs';
 const ContestCard = ({ contest }) => {
     const navigate = useNavigate()
     //TODO isOpen
-    const isOpen = true;
+    const isOpen = new Date(contest.endBy) > new Date();
     const statusText = isOpen ? 'Открыт' : 'Закрыт';
     const statusColor = isOpen ? 'bg-success' : 'bg-danger';
 
@@ -22,9 +22,8 @@ const ContestCard = ({ contest }) => {
         >
             <Card
                 border="light"
-                className="mt-2 shadow-sm"
+                className="mt-3 shadow-sm"
                 style={{
-                    width: '100%',
                     height: '230px',
                 }}
             >
@@ -32,7 +31,6 @@ const ContestCard = ({ contest }) => {
                     {/*Название*/}
                     <div className="d-flex justify-content-between align-items-center">
                         <Card.Title className="text-truncate" style={{
-                            maxWidth: '200px',
                             fontSize: '1.25rem',
                             fontWeight: 'bold',
                             color: 'black'
@@ -54,7 +52,7 @@ const ContestCard = ({ contest }) => {
                 <Card.Body>
                     {/* Компания и приз */}
                     <div className="d-flex justify-content-between align-items-center">
-                        <span style={{fontSize: '0.9rem', color: '#543787'}}>
+                        <span style={{color: '#543787'}}>
                             {/* TODO Отображать создателя */}
                             {'TechSolutions Inc.'}
                         </span>
@@ -69,9 +67,16 @@ const ContestCard = ({ contest }) => {
                     <div className="d-flex justify-content-between align-items-center mt-2">
                         <span
                             className={`badge ${statusColor}`}
-                            style={{fontSize: '0.6rem'}}
+                            style={{fontSize: '0.8rem'}}
                         >
                             {statusText}
+                        </span>
+                        <span>
+                             {isOpen? "До" : "C"} {new Date(contest.endBy).toLocaleDateString('ru-RU', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric'
+                        })}
                         </span>
                     </div>
                 </Card.Body>
