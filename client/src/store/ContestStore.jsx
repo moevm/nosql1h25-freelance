@@ -80,4 +80,9 @@ export default class ContestStore {
             console.error("Ошибка при отправке:", error);
         }
     }
+
+    getTypeNameById(typeId) {
+        const type = this._types.find(t => t.id === typeId);
+        return type ? type.name : null;  // возвращает название типа или null, если не найден
+    }
 }

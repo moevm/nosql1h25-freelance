@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card, Col } from "react-bootstrap";
-import { useNavigate } from 'react-router-dom';
+import {Card, Col} from "react-bootstrap";
+import {useNavigate} from 'react-router-dom';
 import {CONTEST_ROUTE} from "../utils/consts.js";
 
-const ContestCard = ({ contest }) => {
+const ContestCard = ({ contest, type }) => {
     const navigate = useNavigate()
 
     return (
@@ -17,19 +17,24 @@ const ContestCard = ({ contest }) => {
                 className="mt-2"
             >
                 <Card.Body>
+                    <div className="mt-2">
+                        <span className="text-truncate" style={{maxWidth: '250px'}}>
+                            Тип: {type}
+                        </span>
+                    </div>
                     <div className="d-flex justify-content-between align-items-center">
                         <span className="text-truncate" style={{maxWidth: '250px'}}>
-                            {contest.title}
+                            Название: {contest.title}
                         </span>
                     </div>
                     <div className="mt-2">
                         <span className="text-truncate" style={{maxWidth: '250px'}}>
-                            {contest.annotation}
+                            Краткое описание: {contest.annotation}
                         </span>
                     </div>
                     <div className="mt-2">
                         <span className="text-truncate" style={{maxWidth: '250px'}}>
-                            {contest.prizepool}
+                            Приз: {contest.prizepool}
                         </span>
                     </div>
                 </Card.Body>
