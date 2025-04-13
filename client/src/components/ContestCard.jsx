@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import {CONTEST_ROUTE} from "../utils/consts.js";
 import { BsStar, BsTrophy } from 'react-icons/bs';
 
-const ContestCard = ({ contest, type }) => {
+const ContestCard = ({ contest }) => {
     const navigate = useNavigate()
     //TODO isOpen
     const isOpen = true;
@@ -14,11 +14,19 @@ const ContestCard = ({ contest, type }) => {
     return (
         <Col
             md={4}
-            onClick={() => navigate(CONTEST_ROUTE + '/' + contest.id)}
+            onClick={(e) => {
+                const selection = window.getSelection();
+                if (selection && selection.toString().length > 0) return;
+                navigate(CONTEST_ROUTE + '/' + contest.id);
+            }}
         >
             <Card
                 border="light"
                 className="mt-2 shadow-sm"
+                style={{
+                    width: '100%',
+                    height: '230px',
+                }}
             >
                 <Card.Body>
                     {/*Название*/}
@@ -31,22 +39,26 @@ const ContestCard = ({ contest, type }) => {
                         }}>
                             {contest.title}
                         </Card.Title>
-                        <div className="d-flex align-items-center">
+                        <div className="d-flex justify-content-between align-items-center">
                             <BsStar color="gold" className="me-1"/>
                             <span>{contest.rating || '4.8'}</span>
                         </div>
                     </div>
                     {/* Описание */}
-                    <Card.Text className="mt-2" style={{fontSize: '0.9rem', color: '#333'}}>
-                        {contest.annotation}
-                    </Card.Text>
+                    <div style={{height:'70px'}}>
+                        <Card.Text className="mt-2" style={{fontSize: '0.9rem', color: '#333'}}>
+                            {contest.annotation}
+                        </Card.Text>
+                    </div>
+                </Card.Body>
+                <Card.Body>
                     {/* Компания и приз */}
-                    <div className="d-flex justify-content-between align-items-center mt-3">
+                    <div className="d-flex justify-content-between align-items-center">
                         <span style={{fontSize: '0.9rem', color: '#543787'}}>
                             {/* TODO Отображать создателя */}
                             {'TechSolutions Inc.'}
                         </span>
-                        <div className="d-flex align-items-center">
+                        <div>
                             <BsTrophy color="green" className="me-1"/>
                             <span style={{fontSize: '0.9rem', fontWeight: 'bold', color: 'green'}}>
                                 {contest.prizepool} ₽.
