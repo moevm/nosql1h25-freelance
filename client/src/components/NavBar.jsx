@@ -9,7 +9,7 @@ const NavBar = () => {
     const { user } = useContext(Context);
 
     return (
-        <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
+        <Navbar variant="dark" expand="lg" className="mb-4" style={{ backgroundColor: '#543787' }}>
             <Container>
                 <Navbar.Brand as={NavLink} to={CONTESTS_ROUTE}>DevContest</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
