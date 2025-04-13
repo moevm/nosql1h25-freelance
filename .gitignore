@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 /templates
+/server/app/__pycache__
+/server/app/routes/__pycache__
