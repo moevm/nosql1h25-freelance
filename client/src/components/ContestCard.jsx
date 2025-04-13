@@ -22,7 +22,7 @@ const ContestCard = ({ contest }) => {
         >
             <Card
                 border="light"
-                className="mt-3 shadow-sm"
+                className="mt-3 shadow"
                 style={{
                     height: '230px',
                 }}
