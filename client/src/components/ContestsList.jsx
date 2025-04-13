@@ -16,8 +16,8 @@ const ContestsList = observer(() => {
             {contest.contests.length === 0 ? (
                 <div>Загрузка проектов...</div>
             ) : (
-                contest.contests.map((cont) => (
-                    <ContestCard key={cont.id} contest={cont} />
+                contest.contests.map((contest) => (
+                    <ContestCard key={contest.id} contest={contest} />
                 ))
             )}
         </Row>

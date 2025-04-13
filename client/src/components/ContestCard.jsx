@@ -16,17 +16,21 @@ const ContestCard = ({ contest }) => {
                 border="dark"
                 className="mt-2"
             >
-                <Card.Body >
+                <Card.Body>
                     <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-truncate" style={{ maxWidth: '250px' }}>
-                            {contest.name}
-                        </span>
-                        <span>
-                            {contest.rating}
+                        <span className="text-truncate" style={{maxWidth: '250px'}}>
+                            {contest.title}
                         </span>
                     </div>
                     <div className="mt-2">
-                        ОПИСАНИЕ
+                        <span className="text-truncate" style={{maxWidth: '250px'}}>
+                            {contest.annotation}
+                        </span>
+                    </div>
+                    <div className="mt-2">
+                        <span className="text-truncate" style={{maxWidth: '250px'}}>
+                            {contest.prizepool}
+                        </span>
                     </div>
                 </Card.Body>
             </Card>
