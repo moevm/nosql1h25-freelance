@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   server:
-    build: /server
+    build: ./server
+    volumes:
+      - ./server:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -10,10 +12,12 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/
       - DB_NAME=freelance_db
+      - FLASK_APP=app.main
+      - FLASK_ENV=development
 
   web:
     build:
-      context: /client
+      context: ./client
       dockerfile: Dockerfile
     ports:
       - "3000:80"  # 80 в контейнере, 3000 для доступа снаружи

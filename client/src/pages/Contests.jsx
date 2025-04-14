@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {Row, Col} from "react-bootstrap";
+import {Row, Col, Container} from "react-bootstrap";
 import TypeBar from "../components/TypeBar.jsx";
 import RewardBar from "../components/RewardsBar.jsx";
 import ContestsList from "../components/ContestsList.jsx";
@@ -11,23 +11,24 @@ const Contests = () => {
     const { user } = useContext(Context);
 
     return (
-        <div>
+        <Container>
             <Row>
-                <Col md={3}>
+                <Col md={2}>
                     <Link
+                        style={{ backgroundColor: '#543787' }}
                         to={CREATE_CONTEST_ROUTE}
-                        className="btn btn-primary mb-3"
+                        className="btn btn-primary"
                     >
                         Добавить конкурс
                     </Link>
                     <TypeBar />
                     <RewardBar />
                 </Col>
-                <Col md={9}>
+                <Col md={10}>
                     <ContestsList />
                 </Col>
             </Row>
-        </div>
+        </Container>
     );
 };
 

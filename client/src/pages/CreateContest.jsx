@@ -11,6 +11,7 @@ const CreateContest = () => {
     const [description, setDescription] = useState('');
     const [prizepool, setPrizepool] = useState('');
     const [endBy, setEndBy] = useState('');
+    const [title, setTitle] = useState('');
 
     const handleSubmit = async () => {
         if (!type || !annotation || !description || !prizepool || !endBy) {
@@ -20,7 +21,7 @@ const CreateContest = () => {
 
         const data = {
             employerId: "1", // временно хардкод, нужно брать из авторизации
-            title: annotation.slice(0, 20),
+            title: title,
             annotation,
             prizepool: parseInt(prizepool),
             description,
@@ -55,7 +56,12 @@ const CreateContest = () => {
                         ))}
                     </Dropdown.Menu>
                 </Dropdown>
-
+                <Form.Control
+                    className="mb-3"
+                    placeholder="Название"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                />
                 <Form.Control
                     className="mb-3"
                     placeholder="Краткое описание"
