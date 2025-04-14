@@ -6,6 +6,7 @@ from app.schemas import validate_contest
 
 contests_bp = Blueprint("contests", __name__)
 
+# Маршрут для создания нового конкурса
 @contests_bp.route("/contests", methods=["POST"])
 def create_contest():
     data = request.get_json()
@@ -13,6 +14,7 @@ def create_contest():
     res = contests_collection.insert_one(contest)
     return jsonify({"id": str(res.inserted_id)}), 201
 
+# Маршрут для получения списка всех конкурсов
 @contests_bp.route("/contests", methods=["GET"])
 def get_contests():
     contests = list(contests_collection.find({}))

@@ -6,6 +6,7 @@ from app.schemas import validate_user
 
 users_bp = Blueprint("users", __name__)
 
+# Маршрут для создания нового пользователя
 @users_bp.route("/users", methods=["POST"])
 def create_user():
     data = request.get_json()
@@ -13,6 +14,7 @@ def create_user():
     res = users_collection.insert_one(user)
     return jsonify({"id": str(res.inserted_id)}), 201
 
+# Маршрут для получения списка всех пользователей (без паролей)
 @users_bp.route("/users", methods=["GET"])
 def get_users():
     users = list(users_collection.find({}, {"password": 0}))
