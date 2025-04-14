@@ -15,12 +15,8 @@ export default class ContestStore {
 
         ];
         this._selectedType = {}
-        this._rewards = [
-            {id: 1, name: "10000"},
-            {id: 2, name: "15000"},
-            {id: 3, name: "30000"},
-        ]
-        this._selectedReward = {}
+        this._minReward = 0;
+        this._maxReward = 10000000;
         makeAutoObservable(this);
     }
 
@@ -40,14 +36,27 @@ export default class ContestStore {
         this._selectedType = type;
     }
 
-    setRewards(rewards) {
-        this._rewards = rewards;
+    setMinReward(min) {
+        this._minReward = min;
     }
 
-    setSelectedReward(reward) {
-        this._selectedReward = reward;
+    setMaxReward(max) {
+        this._maxReward = max;
     }
 
+    setReward({ min, max }) {
+        this.setMinReward(min);
+        this.setMaxReward(max);
+    }
+
+    get minReward() {
+        return this._minReward;
+    }
+
+    get maxReward() {
+        return this._maxReward;
+    }
+    
     get isAuth() {
         return this._isAuth;
     }
@@ -64,12 +73,8 @@ export default class ContestStore {
         return this._selectedType;
     }
 
-    get rewards(){
-        return this._rewards;
-    }
-
-    get selectedReward() {
-        return this._selectedReward;
+    get reward(){
+        return this._reward;
     }
 
     async fetchContests() {
