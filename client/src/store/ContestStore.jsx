@@ -16,7 +16,7 @@ export default class ContestStore {
         ];
         this._selectedType = {}
         this._minReward = 0;
-        this._maxReward = 10000000;
+        this._maxReward = 9999999;
         makeAutoObservable(this);
     }
 
@@ -56,7 +56,7 @@ export default class ContestStore {
     get maxReward() {
         return this._maxReward;
     }
-    
+
     get isAuth() {
         return this._isAuth;
     }
