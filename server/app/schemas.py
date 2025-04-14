@@ -27,10 +27,15 @@ class Contest(BaseModel):
     description: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     endBy: datetime
-    type: int
+    type: str
     status: int = 1
     winnerId: Optional[str] = None
     solutions: List[Solution] = []
+
+
+# Пока что только name, в дальнейшем можно добавить описание, подтипы и тд
+class ContestType(BaseModel):
+    name: str
 
 
 class User(BaseModel):
@@ -44,6 +49,7 @@ class User(BaseModel):
 
 def validate_contest(data: dict) -> dict:
     return Contest(**data).dict()
+
 
 def validate_user(data: dict) -> dict:
     return User(**data).dict()
