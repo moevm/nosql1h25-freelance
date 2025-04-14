@@ -4,16 +4,8 @@ import { fetchData } from "../services/apiService";
 export default class ContestStore {
     constructor() {
         this._isAuth = false;
-        this._types = [
-            {id: 1, name: "Программирование"},
-            {id: 2, name: "Дизайн"},
-            {id: 3, name: "Иллюстрации"},
-            {id: 4, name: "Нейминг"},
-            {id: 5, name: "Моделирование"}
-        ];
-        this._contests = [
-
-        ];
+        this._types = [];
+        this._contests = [];
         this._selectedType = {}
         this._minReward = 0;
         this._maxReward = 9999999;
@@ -86,8 +78,18 @@ export default class ContestStore {
         }
     }
 
+    async fetchTypes() {
+        try {
+            const types = await fetchData("/contest-types");
+            this.setTypes(types);
+        } catch (error) {
+            console.error("Ошибка при загрузке типов конкурсов:", error);
+        }
+    }
+
     getTypeNameById(typeId) {
-        const type = this._types.find(t => t.id === typeId);
-        return type ? type.name : null;  // возвращает название типа или null, если не найден
+        if (!typeId) return null;
+        const type = this._types.find(t => t._id === typeId || t.id === typeId);
+        return type?.name || "Неизвестный тип";
     }
 }
