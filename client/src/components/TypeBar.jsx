@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {observer} from "mobx-react-lite";
 import {Context} from "../main.jsx";
 import {InputGroup, ListGroup, Form, Dropdown} from "react-bootstrap";
-import { BsSearch, BsTrophy, BsCalendar } from 'react-icons/bs';
+import { BsTags } from 'react-icons/bs';
 
 const TypeBar = () => {
     const { contest } = useContext(Context);
@@ -25,7 +25,7 @@ const TypeBar = () => {
                 border: '1px solid #ced4da',
                 borderRadius: '0.375rem 0 0 0.375rem'
             }}>
-                <BsTrophy color='#543787'/>
+                <BsTags color='#543787'/>
             </div>
             <Dropdown style={{flex: 1}}>
                 <Dropdown.Toggle
