@@ -4,7 +4,7 @@ from app.utils import serialize_mongo
 from app.schemas import validate_contest
 
 
-contests_bp = Blueprint('contests', __name__)
+contests_bp = Blueprint("contests", __name__)
 
 @contests_bp.route("/contests", methods=["POST"])
 def create_contest():

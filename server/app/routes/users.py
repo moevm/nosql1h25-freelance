@@ -4,7 +4,7 @@ from app.utils import serialize_mongo
 from app.schemas import validate_user
 
 
-users_bp = Blueprint('users', __name__)
+users_bp = Blueprint("users", __name__)
 
 @users_bp.route("/users", methods=["POST"])
 def create_user():

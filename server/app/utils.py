@@ -9,8 +9,8 @@ def serialize_mongo(obj: Union[dict, List[dict]]) -> Union[dict, List[dict]]:
 
 def serialize_mongo_doc(doc: dict) -> dict:
     doc = dict(doc)
-    if '_id' in doc:
-        doc['id'] = str(doc['_id'])
-        del doc['_id']
+    if "_id" in doc:
+        doc["id"] = str(doc["_id"])
+        del doc["_id"]
     # можно добавить сериализацию ObjectId и вложенных объектов тут при необходимости
     return doc
