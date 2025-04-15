@@ -1,7 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { Container, Form, Button, Dropdown } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
+import { observer } from "mobx-react-lite";
 
 const CreateContest = () => {
     const { contest } = useContext(Context);
@@ -12,6 +13,10 @@ const CreateContest = () => {
     const [prizepool, setPrizepool] = useState('');
     const [endBy, setEndBy] = useState('');
     const [title, setTitle] = useState('');
+
+    useEffect(() => {
+        contest.fetchTypes();
+    }, []);
 
     const handleSubmit = async () => {
         if (!type || !annotation || !description || !prizepool || !endBy) {
@@ -93,4 +98,4 @@ const CreateContest = () => {
     );
 };
 
-export default CreateContest;
+export default observer(CreateContest);
