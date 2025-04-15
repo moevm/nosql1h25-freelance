@@ -32,6 +32,15 @@ const NavBar = () => {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
+                        {/* Кнопка "Админ панель" всегда отображается */}
+                        <Button
+                            variant="outline-light"
+                            className="me-2"
+                            onClick={() => navigate(ADMIN_ROUTE)}
+                        >
+                            Админ панель
+                        </Button>
+
                         {user.isAuth ? (
                             <>
                                 {/* Если пользователь Фрилансер (role: 1) */}
