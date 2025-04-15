@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.database import contests_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_contest
+from datetime import datetime
 
 
 contests_bp = Blueprint("contests", __name__)
@@ -20,19 +21,22 @@ def get_contests():
     contests = list(contests_collection.find({}))
     return jsonify(serialize_mongo(contests))
 
-# Маршрут для получения отсортированных конкурсов
 @contests_bp.route("/contests/filter", methods=["GET"])
 def get_filtered_contests():
-    try:
-        min_reward = int(request.args.get("minReward", 0))
-        max_reward = int(request.args.get("maxReward", 9999999))
+    min_reward = int(request.args.get("minReward", 0))
+    max_reward = int(request.args.get("maxReward", 9999999))
+    end_by = request.args.get("endBy", None)
 
-        query = {
-            "prizepool": {"$gte": min_reward, "$lte": max_reward}
-        }
+    query = {
+        "prizepool": {"$gte": min_reward, "$lte": max_reward}
+    }
 
-        contests = list(contests_collection.find(query))
-        return jsonify(serialize_mongo(contests))
+    if end_by:
+        try:
+            end_date = datetime.strptime(end_by, "%Y-%m-%d")
+            query["endBy"] = {"$lte": end_date}
+        except ValueError:
+            return jsonify({"error": "Invalid endBy date format"}), 400
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    contests = list(contests_collection.find(query))
+    return jsonify(serialize_mongo(contests))

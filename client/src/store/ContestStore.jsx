@@ -96,13 +96,21 @@ export default class ContestStore {
     async fetchContestsFiltered() {
         try {
             const params = {
-                minReward: this._minReward? this._minReward : 0,
-                maxReward: this._maxReward? this._maxReward : 9999999,
+                minReward: this._minReward ?? 0,
+                maxReward: this._maxReward ?? 9999999,
             };
 
-            const endpoint = (params.minReward !== 0 || params.maxReward !== 9999999)
-                ? "/contests/filter"
-                : "/contests";
+            if (this._endBy) {
+                params.endBy = this._endBy.toISOString().split('T')[0];
+            }
+
+            const hasFilters = (
+                params.minReward !== 0 ||
+                params.maxReward !== 9999999 ||
+                this._endBy
+            );
+
+            const endpoint = hasFilters ? "/contests/filter" : "/contests";
 
             const contests = await fetchData(endpoint, params);
             this.setContests(contests);
@@ -110,6 +118,7 @@ export default class ContestStore {
             console.error("Ошибка при отправке:", error);
         }
     }
+
 
     async fetchTypes() {
         try {
