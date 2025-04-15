@@ -5,7 +5,8 @@ import RewardBar from "../components/RewardsBar.jsx";
 import ContestsList from "../components/ContestsList.jsx";
 import {Context} from "../main.jsx";
 import { Link } from 'react-router-dom';
-import {CREATE_CONTEST_ROUTE} from "../utils/consts.js"; // Или NavLink, если нужно активное состояние
+import {CREATE_CONTEST_ROUTE} from "../utils/consts.js";
+import EndDateBar from "../components/EndDateBar.jsx"; // Или NavLink, если нужно активное состояние
 
 const Contests = () => {
     const { user } = useContext(Context);
@@ -23,6 +24,7 @@ const Contests = () => {
                     </Link>
                     <TypeBar />
                     <RewardBar />
+                    <EndDateBar />
                 </Col>
                 <Col md={10}>
                     <ContestsList />

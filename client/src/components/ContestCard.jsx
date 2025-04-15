@@ -25,6 +25,7 @@ const ContestCard = ({ contest }) => {
                 className="mt-3 shadow"
                 style={{
                     height: '230px',
+                    cursor: 'pointer'
                 }}
             >
                 <Card.Body>

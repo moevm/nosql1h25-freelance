@@ -1,8 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { observer } from "mobx-react-lite";
 import { Context } from "../main.jsx";
 import { Dropdown, Form } from "react-bootstrap";
 import { BsTags } from 'react-icons/bs';
+
 
 const TypeBar = () => {
     const { contest } = useContext(Context);
@@ -16,8 +17,16 @@ const TypeBar = () => {
         }
     };
 
+    useEffect(() => {
+        contest.fetchTypes();
+    }, []);
+
     return (
-        <Dropdown style={{ width: '100%' }}>
+        <Dropdown style={{width: '100%'}}>
+            <div className="mt-2 mb-2">
+                <BsTags color='#543787' />
+                <span color='#543787' className="mx-1">Тип конкурса</span>
+            </div>
             <Dropdown.Toggle
                 as="div"
                 id="dropdown-custom"
@@ -33,15 +42,12 @@ const TypeBar = () => {
                     userSelect: 'none'
                 }}
             >
-                <div style={{ marginRight: '0.5rem', display: 'flex', alignItems: 'center' }}>
-                    <BsTags color='#543787' />
-                </div>
-                <div style={{ flex: 1 }}>
-                    {selectedTypes.length === 0? "Выбор типов" : `Выбрано типов: ${selectedTypes.length}`}
+                <div style={{flex: 1}}>
+                    {selectedTypes.length === 0 ? "Все" : `Выбрано типов: ${selectedTypes.length}`}
                 </div>
             </Dropdown.Toggle>
 
-            <Dropdown.Menu style={{ width: '100%' }}>
+            <Dropdown.Menu style={{width: '100%', cursor: 'pointer'}}>
                 {contest?.types?.map((type) => (
                     <Dropdown.Item
                         key={type.id}
@@ -56,7 +62,9 @@ const TypeBar = () => {
                             label={type.name}
                             checked={selectedTypes.includes(type)}
                             onChange={() => handleTypeSelect(type)}
-                            style={{userSelect: 'none'}}
+                            style={{
+                                userSelect: 'none',
+                                cursor: 'pointer'}}
                         />
                     </Dropdown.Item>
                 ))}
