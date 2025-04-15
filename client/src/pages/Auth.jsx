@@ -101,18 +101,18 @@ const Auth = () => {
                             </Form.Select>
                         </Form.Group>
                     )}
-                    <Button variant="primary" type="submit" className="w-100 mb-3">
+                    <Button style ={ {backgroundColor: '#543787' } } variant="primary" type="submit" className="w-100 mb-3">
                         {isLogin ? 'Войти' : 'Зарегистрироваться'}
                     </Button>
                 </Form>
                 <Row>
                     {isLogin ? (
                         <div>
-                            Нет аккаунта? <NavLink to={REGISTRATION_ROUTE}>Зарегистрируйтесь!</NavLink>
+                            Нет аккаунта? <NavLink color='#543787' style={{color:'#543787'}} to={REGISTRATION_ROUTE}>Зарегистрируйтесь!</NavLink>
                         </div>
                     ) : (
                         <div>
-                            Уже есть аккаунт? <NavLink to={LOGIN_ROUTE}>Войдите!</NavLink>
+                            Уже есть аккаунт? <NavLink style={{color:'#543787'}} to={LOGIN_ROUTE}>Войдите!</NavLink>
                         </div>
                     )}
                 </Row>
