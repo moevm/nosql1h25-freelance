@@ -6,7 +6,7 @@ from app.routes.contest_types import contest_types_bp
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"]}},
          supports_credentials=True)
 
     app.register_blueprint(users_bp, url_prefix="/api")

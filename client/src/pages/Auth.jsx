@@ -12,8 +12,10 @@ const Auth = () => {
     const isLogin = location.pathname === LOGIN_ROUTE;
     const { user } = useContext(Context);
 
+    const [email, setEmail] = useState('');
     const [loginInput, setLoginInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
+    const [role, setRole] = useState(1); // 1 - Фрилансер, 2 - Организатор
     const [error, setError] = useState(null);
 
     const handleSubmit = async (event) => {
@@ -27,6 +29,13 @@ const Auth = () => {
                 password: passwordInput,
                 // Для регистрации можно добавить и другие данные (например, email) по необходимости
             };
+
+            // Для регистрации добавляем email и role
+            if (!isLogin) {
+                data.email = email;
+                data.role = parseInt(role, 10);
+            }
+
             const response = await sendData(endpoint, data);
 
             // Если это регистрация, можно сразу залогинить пользователя или перенаправить на страницу входа
@@ -51,6 +60,17 @@ const Auth = () => {
                 <h2 className="mb-4">{isLogin ? 'Авторизация' : 'Регистрация'}</h2>
                 {error && <Alert variant="danger">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
+                    {!isLogin && (
+                        <Form.Group controlId="formBasicEmail" className="mb-3">
+                            <Form.Control
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    )}
                     <Form.Group controlId="formBasicLogin" className="mb-3">
                         <Form.Control
                             type="text"
@@ -69,6 +89,18 @@ const Auth = () => {
                             required
                         />
                     </Form.Group>
+                    {!isLogin && (
+                        <Form.Group controlId="formBasicRole" className="mb-3">
+                            <Form.Select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                required
+                            >
+                                <option value="1">Фрилансер</option>
+                                <option value="2">Организатор</option>
+                            </Form.Select>
+                        </Form.Group>
+                    )}
                     <Button variant="primary" type="submit" className="w-100 mb-3">
                         {isLogin ? 'Войти' : 'Зарегистрироваться'}
                     </Button>
@@ -80,7 +112,7 @@ const Auth = () => {
                         </div>
                     ) : (
                         <div>
-                            Есть аккаунт? <NavLink to={LOGIN_ROUTE}>Войдите!</NavLink>
+                            Уже есть аккаунт? <NavLink to={LOGIN_ROUTE}>Войдите!</NavLink>
                         </div>
                     )}
                 </Row>

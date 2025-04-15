@@ -1,12 +1,19 @@
 import React, { useContext } from 'react';
 import { Context } from "../main.jsx";
-import { NavLink } from "react-router-dom";
-import { CONTESTS_ROUTE, ADMIN_ROUTE } from "../utils/consts.js";
+import { NavLink, useNavigate } from "react-router-dom";
+import { CONTESTS_ROUTE, ADMIN_ROUTE, LOGIN_ROUTE } from "../utils/consts.js";
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { observer } from "mobx-react-lite";
 
 const NavBar = () => {
     const { user } = useContext(Context);
+    const navigate = useNavigate();
+
+    const logOut = () => {
+        user.setUser({});
+        user.setIsAuth(false);
+        navigate(CONTESTS_ROUTE); // или просто "/"
+    };
 
     return (
         <Navbar variant="dark" expand="lg" className="mb-4" style={{ backgroundColor: '#543787' }}>
@@ -20,7 +27,8 @@ const NavBar = () => {
                                 <Nav.Link as={NavLink} to={ADMIN_ROUTE}>Админ-панель</Nav.Link>
                                 <Button
                                     variant="outline-light"
-                                    onClick={() => user.setIsAuth(false)}
+                                    onClick={logOut}
+                                    className="ms-2"
                                 >
                                     Выйти
                                 </Button>
@@ -28,7 +36,7 @@ const NavBar = () => {
                         ) : (
                             <Button
                                 variant="outline-light"
-                                onClick={() => user.setIsAuth(true)}
+                                onClick={() => navigate(LOGIN_ROUTE)}
                             >
                                 Войти
                             </Button>
