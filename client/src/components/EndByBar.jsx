@@ -4,7 +4,7 @@ import { Context } from '../main.jsx';
 import { Form } from 'react-bootstrap';
 import {BsCalendarEvent, BsTrophy} from 'react-icons/bs';
 
-const EndDateBar = () => {
+const EndByBar = () => {
     const { contest } = useContext(Context);
 
     const formatDateForInput = (date) => {
@@ -62,4 +62,4 @@ const EndDateBar = () => {
     );
 };
 
-export default observer(EndDateBar);
+export default observer(EndByBar);
