@@ -2,10 +2,12 @@ import React, { useEffect, useContext, useState } from 'react';
 import { Container, Form, Button, Dropdown } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
+import { useNavigate } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
 
 const CreateContest = () => {
-    const { contest } = useContext(Context);
+    const { contest, user } = useContext(Context);
+    const navigate = useNavigate();
 
     const [type, setType] = useState(null);
     const [annotation, setAnnotation] = useState('');
@@ -19,19 +21,25 @@ const CreateContest = () => {
     }, []);
 
     const handleSubmit = async () => {
+        if (!user.isAuth || !user.user?.id) {
+            alert('Для создания конкурса необходимо войти в систему');
+            navigate('/login');
+            return;
+        }
+
         if (!type || !annotation || !description || !prizepool || !endBy) {
             alert('Пожалуйста, заполните все поля');
             return;
         }
 
         const data = {
-            employerId: "1", // временно хардкод, нужно брать из авторизации
+            employerId: user.user.id,
             title: title,
             annotation,
             prizepool: parseInt(prizepool),
             description,
             endBy: new Date(endBy).toISOString(),
-            type: type.id,
+            type: String(type.id),
             status: 0
         };
 

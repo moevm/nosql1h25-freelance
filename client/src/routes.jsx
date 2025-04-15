@@ -4,13 +4,17 @@ import {
     LOGIN_ROUTE,
     CONTEST_ROUTE,
     CONTESTS_ROUTE,
-    REGISTRATION_ROUTE
+    REGISTRATION_ROUTE,
+    MY_SOLUTIONS_ROUTE,
+    MY_CONTESTS_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
 import Contests from "./pages/Contests.jsx";
 import Admin from "./pages/Admin.jsx";
 import ContestPage from "./pages/ContestPage.jsx";
 import CreateContest from "./pages/CreateContest.jsx";
+import MyContests from "./pages/MyContests.jsx";
+import MySolutions from "./pages/MySolutions.jsx";
 
 export const authRoutes = [
     {
@@ -20,6 +24,14 @@ export const authRoutes = [
     {
         path: CREATE_CONTEST_ROUTE,
         element: <CreateContest />
+    },
+    {
+        path: MY_SOLUTIONS_ROUTE,
+        element: <MySolutions />
+    },
+    {
+        path: MY_CONTESTS_ROUTE,
+        element: <MyContests />
     }
 ]
 
