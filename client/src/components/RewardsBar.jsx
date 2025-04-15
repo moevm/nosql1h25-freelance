@@ -1,22 +1,58 @@
-import React, {useContext} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Context} from "../main.jsx";
-import {ListGroup} from "react-bootstrap";
+import React, { useContext, useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Context } from '../main.jsx';
+import { Form } from 'react-bootstrap';
 
 const RewardsBar = () => {
-    const {contest} = useContext(Context);
+    const { contest } = useContext(Context);
+
+    const [minReward, setMinReward] = useState(contest.minReward);
+    const [maxReward, setMaxReward] = useState(contest.maxReward);
+
+    useEffect(() => {
+        contest.setReward({ min: minReward, max: maxReward });
+    }, [minReward, maxReward, contest]);
+
+    const handleMinRewardChange = (e) => {
+        setMinReward(e.target.value);
+    };
+
+    const handleMaxRewardChange = (e) => {
+        setMaxReward(e.target.value);
+    };
 
     return (
-        <ListGroup>
-            {contest.rewards.map((reward) => (
-                <ListGroup.Item
-                    active = { reward.id === contest.selectedReward.id }
-                    onClick={() => contest.setSelectedReward(reward)}
-                    key={reward.id}>
-                    {reward.name}
-                </ListGroup.Item>
-            ))}
-        </ListGroup>
+        <div style={{ width: '100%' }} className='mt-2'>
+            <Form>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Form.Group controlId="minReward" style={{ flex: 1 }}>
+                        <Form.Control
+                            type="number"
+                            value={minReward}
+                            onChange={handleMinRewardChange}
+                            min="0"
+                            placeholder="от 200"
+                            style={{
+                                fontSize: '0.8rem',
+                            }}
+                        />
+                    </Form.Group>
+
+                    <Form.Group controlId="maxReward" style={{ flex: 1 }}>
+                        <Form.Control
+                            type="number"
+                            value={maxReward}
+                            onChange={handleMaxRewardChange}
+                            min="0"
+                            placeholder="До 999999"
+                            style={{
+                                fontSize: '0.8rem',
+                            }}
+                        />
+                    </Form.Group>
+                </div>
+            </Form>
+        </div>
     );
 };
 

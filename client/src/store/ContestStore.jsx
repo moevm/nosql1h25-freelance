@@ -4,23 +4,11 @@ import { fetchData } from "../services/apiService";
 export default class ContestStore {
     constructor() {
         this._isAuth = false;
-        this._types = [
-            {id: 1, name: "Программирование"},
-            {id: 2, name: "Дизайн"},
-            {id: 3, name: "Иллюстрации"},
-            {id: 4, name: "Нейминг"},
-            {id: 5, name: "Моделирование"}
-        ];
-        this._contests = [
-
-        ];
+        this._types = [];
+        this._contests = [];
         this._selectedType = {}
-        this._rewards = [
-            {id: 1, name: "10000"},
-            {id: 2, name: "15000"},
-            {id: 3, name: "30000"},
-        ]
-        this._selectedReward = {}
+        this._minReward = 0;
+        this._maxReward = 9999999;
         makeAutoObservable(this);
     }
 
@@ -40,12 +28,25 @@ export default class ContestStore {
         this._selectedType = type;
     }
 
-    setRewards(rewards) {
-        this._rewards = rewards;
+    setMinReward(min) {
+        this._minReward = min;
     }
 
-    setSelectedReward(reward) {
-        this._selectedReward = reward;
+    setMaxReward(max) {
+        this._maxReward = max;
+    }
+
+    setReward({ min, max }) {
+        this.setMinReward(min);
+        this.setMaxReward(max);
+    }
+
+    get minReward() {
+        return this._minReward;
+    }
+
+    get maxReward() {
+        return this._maxReward;
     }
 
     get isAuth() {
@@ -64,12 +65,8 @@ export default class ContestStore {
         return this._selectedType;
     }
 
-    get rewards(){
-        return this._rewards;
-    }
-
-    get selectedReward() {
-        return this._selectedReward;
+    get reward(){
+        return this._reward;
     }
 
     async fetchContests() {
@@ -81,8 +78,18 @@ export default class ContestStore {
         }
     }
 
+    async fetchTypes() {
+        try {
+            const types = await fetchData("/contest-types");
+            this.setTypes(types);
+        } catch (error) {
+            console.error("Ошибка при загрузке типов конкурсов:", error);
+        }
+    }
+
     getTypeNameById(typeId) {
-        const type = this._types.find(t => t.id === typeId);
-        return type ? type.name : null;  // возвращает название типа или null, если не найден
+        if (!typeId) return null;
+        const type = this._types.find(t => t._id === typeId || t.id === typeId);
+        return type?.name || "Неизвестный тип";
     }
 }
