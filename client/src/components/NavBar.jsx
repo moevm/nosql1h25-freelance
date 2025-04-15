@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Context } from "../main.jsx";
 import { NavLink, useNavigate } from "react-router-dom";
-import { CONTESTS_ROUTE, ADMIN_ROUTE, LOGIN_ROUTE } from "../utils/consts.js";
+import { CONTESTS_ROUTE, ADMIN_ROUTE, LOGIN_ROUTE, MY_SOLUTIONS_ROUTE, MY_CONTESTS_ROUTE, CREATE_CONTEST_ROUTE } from "../utils/consts.js";
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { observer } from "mobx-react-lite";
 
@@ -24,12 +24,36 @@ const NavBar = () => {
                     <Nav className="ms-auto">
                         {user.isAuth ? (
                             <>
-                                <Nav.Link as={NavLink} to={ADMIN_ROUTE}>Админ-панель</Nav.Link>
-                                <Button
-                                    variant="outline-light"
-                                    onClick={logOut}
-                                    className="ms-2"
-                                >
+                                {/* Если пользователь Фрилансер (role: 1) */}
+                                {user.user && user.user.role === 1 && (
+                                    <Button
+                                        variant="outline-light"
+                                        className="me-2"
+                                        onClick={() => navigate(MY_SOLUTIONS_ROUTE)}
+                                    >
+                                        Мои решения
+                                    </Button>
+                                )}
+                                {/* Если пользователь Организатор (role: 2) */}
+                                {user.user && user.user.role === 2 && (
+                                    <>
+                                        <Button
+                                            variant="outline-light"
+                                            className="me-2"
+                                            onClick={() => navigate(MY_CONTESTS_ROUTE)}
+                                        >
+                                            Мои конкурсы
+                                        </Button>
+                                        <Button
+                                            variant="outline-light"
+                                            className="me-2"
+                                            onClick={() => navigate(CREATE_CONTEST_ROUTE)}
+                                        >
+                                            Добавить конкурс
+                                        </Button>
+                                    </>
+                                )}
+                                <Button variant="outline-light" onClick={logOut}>
                                     Выйти
                                 </Button>
                             </>

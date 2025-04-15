@@ -14,13 +14,13 @@ const Contests = () => {
         <Container>
             <Row>
                 <Col md={2}>
-                    <Link
-                        style={{ backgroundColor: '#543787' }}
-                        to={CREATE_CONTEST_ROUTE}
-                        className="btn btn-primary"
-                    >
-                        Добавить конкурс
-                    </Link>
+                    {/*<Link*/}
+                    {/*    style={{ backgroundColor: '#543787' }}*/}
+                    {/*    to={CREATE_CONTEST_ROUTE}*/}
+                    {/*    className="btn btn-primary"*/}
+                    {/*>*/}
+                    {/*    Добавить конкурс*/}
+                    {/*</Link>*/}
                     <TypeBar />
                     <RewardBar />
                 </Col>
