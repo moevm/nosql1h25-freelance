@@ -93,6 +93,24 @@ export default class ContestStore {
         }
     }
 
+    async fetchContestsFiltered() {
+        try {
+            const params = {
+                minReward: this._minReward? this._minReward : 0,
+                maxReward: this._maxReward? this._maxReward : 9999999,
+            };
+
+            const endpoint = (params.minReward !== 0 || params.maxReward !== 9999999)
+                ? "/contests/filter"
+                : "/contests";
+
+            const contests = await fetchData(endpoint, params);
+            this.setContests(contests);
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        }
+    }
+
     async fetchTypes() {
         try {
             const types = await fetchData("/contest-types");

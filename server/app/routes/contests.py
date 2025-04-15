@@ -19,3 +19,20 @@ def create_contest():
 def get_contests():
     contests = list(contests_collection.find({}))
     return jsonify(serialize_mongo(contests))
+
+# Маршрут для получения отсортированных конкурсов
+@contests_bp.route("/contests/filter", methods=["GET"])
+def get_filtered_contests():
+    try:
+        min_reward = int(request.args.get("minReward", 0))
+        max_reward = int(request.args.get("maxReward", 9999999))
+
+        query = {
+            "prizepool": {"$gte": min_reward, "$lte": max_reward}
+        }
+
+        contests = list(contests_collection.find(query))
+        return jsonify(serialize_mongo(contests))
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

@@ -23,6 +23,15 @@ const RewardsBar = () => {
         setMaxReward(e.target.value);
     };
 
+    useEffect(() => {
+        contest.setReward({ min: minReward, max: maxReward });
+        const timeout = setTimeout(() => {
+            contest.fetchContestsFiltered();
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [minReward, maxReward]);
+
     return (
 
         <div style={{width: '100%'}} className='mt-2'>
