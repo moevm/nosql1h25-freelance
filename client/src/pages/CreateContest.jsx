@@ -33,16 +33,12 @@ const CreateContest = () => {
 
     const handleDateChange = (date) => {
         const selectedDate = new Date(date);
-        selectedDate.setHours(23, 59, 59, 999);
-        const minValidDate = new Date();
-        minValidDate.setDate(minValidDate.getDate() + 3);
-        minValidDate.setHours(0, 0, 0, 0);
-        
-        if (selectedDate < minValidDate) {
+        const now = new Date();
+        if (selectedDate < now) {
             alert('Дата окончания должна быть минимум на 3 дня позже текущей даты');
             return;
         } else {
-            setEndBy(date);
+            setEndBy(selectedDate.toISOString().split('T')[0]);
         }
     }
 
@@ -63,13 +59,16 @@ const CreateContest = () => {
             formData.append('files[]', file);
         })
 
+        let date = new Date(endBy)
+        date.setUTCHours(23, 59, 59, 999);
+
         const data = {
             employerId: user.user.id,
             title: title,
             annotation,
             prizepool: parseInt(prizepool),
             description,
-            endBy: new Date(endBy).toISOString(),
+            endBy: date.toISOString(),
             type: String(type.id),
             status: 0
         };
