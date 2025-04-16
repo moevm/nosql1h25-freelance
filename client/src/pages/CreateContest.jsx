@@ -18,11 +18,14 @@ const CreateContest = () => {
     const [title, setTitle] = useState('');
     const [files, setFiles] = useState([]);
     const [imagesMap, setImagesMap] = useState({});
-    const [show, setShow] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
     const [mdDescription, setMdDescription] = useState('');
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleClosePreview = () => setShowPreview(false);
+    const handleShowPreview = () => setShowPreview(true);
+    const handleCloseHelp = () => setShowHelp(false);
+    const handleShowHelp = () => setShowHelp(true);
 
     useEffect(() => {
         contest.fetchTypes();
@@ -88,15 +91,14 @@ const CreateContest = () => {
         };
     }, [imagesMap]);
 
-    const regex = /(!\[[^\]]*\])\(([^)]+)\)/g;
-
-    const handleDescriptionChange = (value) => {
-        const updatedMarkdown = value.replace(regex, (match, p1, p2) => {
-            return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
+    useEffect(() => {
+        const updatedMarkdown = description.replace(regex, (match, p1, p2) => {
+          return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
         });
         setMdDescription(updatedMarkdown);
-        setDescription(value);
-    }
+      }, [description, imagesMap]);
+
+    const regex = /(!\[[^\]]*\])\(([^)]+)\)/g;
 
     return (
         <Container className="mt-4">
@@ -132,7 +134,7 @@ const CreateContest = () => {
                     rows={10}
                     placeholder="Полное описание"
                     value={description}
-                    onChange={e => handleDescriptionChange(e.target.value)}
+                    onChange={e => setDescription(e.target.value)}
                 />
                 <Form.Control
                     className="mb-3"
@@ -155,13 +157,12 @@ const CreateContest = () => {
                 />
             </Form>
             <Button className="me-3" onClick={handleSubmit}>Опубликовать</Button>
-            <Button onClick={handleShow}>Предпросмотр</Button>
+            <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
+            <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
 
-            <Modal show={show} onHide={handleClose} size='xl' centered scrollable>
+            <Modal show={showPreview} onHide={handleClosePreview} size='xl' centered scrollable>
                 <Modal.Header>
-                    <Modal.Title>
-                        {title}
-                    </Modal.Title>
+                    <Modal.Title>{title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ overflowY: 'auto' }}>
                     <Markdown>
@@ -169,7 +170,32 @@ const CreateContest = () => {
                     </Markdown>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='primary' onClick={handleClose}>Закрыть предпросмотр</Button>
+                    <Button variant='primary' onClick={handleClosePreview}>Закрыть предпросмотр</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showHelp} onHide={handleCloseHelp} size='lg' centered>
+                <Modal.Header>
+                    <Modal.Title>Справка</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                        Для создания конкурса распишите подробно всю информацию в поле "Полное описание" в формате Markdown.
+                        <br /><br />
+                        Справка:{" "}
+                        <a 
+                        href="https://www.markdownguide.org/cheat-sheet/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        >
+                        https://www.markdownguide.org/cheat-sheet/
+                        </a>
+                        <br /><br />
+                        Чтобы отобразить изображения загруженных файлов, укажите вместо ссылки название файла, как в этом примере - ![Image](image.png)
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='primary' onClick={handleCloseHelp}>Закрыть справку</Button>
                 </Modal.Footer>
             </Modal>
             
