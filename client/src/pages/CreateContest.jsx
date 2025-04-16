@@ -31,6 +31,21 @@ const CreateContest = () => {
         contest.fetchTypes();
     }, []);
 
+    const handleDateChange = (date) => {
+        const selectedDate = new Date(date);
+        selectedDate.setHours(23, 59, 59, 999);
+        const minValidDate = new Date();
+        minValidDate.setDate(minValidDate.getDate() + 3);
+        minValidDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < minValidDate) {
+            alert('Дата окончания должна быть минимум на 3 дня позже текущей даты');
+            return;
+        } else {
+            setEndBy(date);
+        }
+    }
+
     const handleSubmit = async () => {
         if (!user.isAuth || !user.user?.id) {
             alert('Для создания конкурса необходимо войти в систему');
@@ -147,7 +162,7 @@ const CreateContest = () => {
                     className="mb-3"
                     type="date"
                     value={endBy}
-                    onChange={e => setEndBy(e.target.value)}
+                    onChange={e => handleDateChange(e.target.value)}
                 />
                 <Form.Control
                     className="mb-3"
