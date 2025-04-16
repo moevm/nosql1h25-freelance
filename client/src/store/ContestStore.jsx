@@ -6,6 +6,7 @@ export default class ContestStore {
         this._isAuth = false;
         this._types = [];
         this._contests = [];
+        this._selectedContest = null;
         this._selectedType = {}
         this._minReward = 0;
         this._maxReward = 9999999;
@@ -22,6 +23,10 @@ export default class ContestStore {
 
     setContests(contest) {
         this._contests = contest;
+    }
+
+    setSelectedContest(contest) {
+        this.selectedContest = contest;
     }
 
     setSelectedType(type) {
@@ -84,6 +89,16 @@ export default class ContestStore {
             this.setTypes(types);
         } catch (error) {
             console.error("Ошибка при загрузке типов конкурсов:", error);
+        }
+    }
+
+    async fetchOneContest(id) {
+        try {
+            const contest = await fetchData(`/contests/${id}`);
+            return contest;
+        } catch (error) {
+            console.error("Ошибка при загрузке конкурса:", error);
+            return null;
         }
     }
 

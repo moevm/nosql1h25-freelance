@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {Card, Col} from "react-bootstrap";
 import {useNavigate} from 'react-router-dom';
 import {CONTEST_ROUTE} from "../utils/consts.js";
 import { BsStar, BsTrophy } from 'react-icons/bs';
+import { Context } from "../main.jsx";
 
-const ContestCard = ({ contest }) => {
-    const navigate = useNavigate()
-    //TODO isOpen
-    const isOpen = new Date(contest.endBy) > new Date();
+
+const ContestCard = ({ contest: item }) => {
+    const { contest } = useContext(Context);
+    const navigate = useNavigate();
+
+    const isOpen = new Date(item.endBy) > new Date();
     const statusText = isOpen ? 'Открыт' : 'Закрыт';
     const statusColor = isOpen ? 'bg-success' : 'bg-danger';
 
@@ -17,7 +20,9 @@ const ContestCard = ({ contest }) => {
             onClick={(e) => {
                 const selection = window.getSelection();
                 if (selection && selection.toString().length > 0) return;
-                navigate(CONTEST_ROUTE + '/' + contest.id);
+
+                contest.setSelectedContest(item);
+                navigate(CONTEST_ROUTE + '/' + item.number);
             }}
         >
             <Card
@@ -28,42 +33,37 @@ const ContestCard = ({ contest }) => {
                 }}
             >
                 <Card.Body>
-                    {/*Название*/}
                     <div className="d-flex justify-content-between align-items-center">
                         <Card.Title className="text-truncate" style={{
                             fontSize: '1.25rem',
                             fontWeight: 'bold',
                             color: 'black'
                         }}>
-                            {contest.title}
+                            {item.title}
                         </Card.Title>
                         <div className="d-flex justify-content-between align-items-center">
                             <BsStar color="gold" className="me-1"/>
-                            <span>{contest.rating || '4.8'}</span>
+                            <span>{item.rating || '4.8'}</span>
                         </div>
                     </div>
-                    {/* Описание */}
                     <div style={{height:'70px'}}>
                         <Card.Text className="mt-2" style={{fontSize: '0.9rem', color: '#333'}}>
-                            {contest.annotation}
+                            {item.annotation}
                         </Card.Text>
                     </div>
                 </Card.Body>
                 <Card.Body>
-                    {/* Компания и приз */}
                     <div className="d-flex justify-content-between align-items-center">
                         <span style={{color: '#543787'}}>
-                            {/* TODO Отображать создателя */}
                             {'TechSolutions Inc.'}
                         </span>
                         <div>
                             <BsTrophy color="green" className="me-1"/>
                             <span style={{fontSize: '0.9rem', fontWeight: 'bold', color: 'green'}}>
-                                {contest.prizepool} ₽.
+                                {item.prizepool} ₽.
                             </span>
                         </div>
                     </div>
-                    {/* Индикатор статуса */}
                     <div className="d-flex justify-content-between align-items-center mt-2">
                         <span
                             className={`badge ${statusColor}`}
@@ -72,11 +72,11 @@ const ContestCard = ({ contest }) => {
                             {statusText}
                         </span>
                         <span>
-                             {isOpen? "До" : "C"} {new Date(contest.endBy).toLocaleDateString('ru-RU', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric'
-                        })}
+                            {isOpen ? "До" : "C"} {new Date(item.endBy).toLocaleDateString('ru-RU', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            })}
                         </span>
                     </div>
                 </Card.Body>

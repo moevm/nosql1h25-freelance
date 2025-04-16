@@ -15,6 +15,7 @@ import ContestPage from "./pages/ContestPage.jsx";
 import CreateContest from "./pages/CreateContest.jsx";
 import MyContests from "./pages/MyContests.jsx";
 import MySolutions from "./pages/MySolutions.jsx";
+import CreateSolution from "./pages/CreateSolution.jsx";
 
 export const authRoutes = [
     {
@@ -32,6 +33,10 @@ export const authRoutes = [
     {
         path: MY_CONTESTS_ROUTE,
         element: <MyContests />
+    },
+    {
+        path: CONTEST_ROUTE + '/:number/create-solution',
+        element: <CreateSolution />
     }
 ]
 
@@ -49,7 +54,7 @@ export const publicRoutes = [
         element: <Auth />
     },
     {
-        path: CONTEST_ROUTE + '/:id',
+        path: CONTEST_ROUTE + '/:number',
         element: <ContestPage />
     }
 ]

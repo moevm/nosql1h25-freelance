@@ -20,6 +20,7 @@ class Solution(BaseModel):
 
 
 class Contest(BaseModel):
+    number: Optional[int] = None
     employerId: str
     title: str
     annotation: str
@@ -53,3 +54,7 @@ def validate_contest(data: dict) -> dict:
 
 def validate_user(data: dict) -> dict:
     return User(**data).dict()
+
+
+def validate_solution(data: dict) -> dict:
+    return Solution(**data).dict()
