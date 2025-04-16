@@ -8,8 +8,6 @@ import re
 import json
 
 contests_bp = Blueprint("contests", __name__)
-UPLOAD_FOLDER = "./static"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Маршрут для создания нового конкурса
 @contests_bp.route("/contests", methods=["POST"])
@@ -27,10 +25,14 @@ def create_contest():
     for file in files:
         if file.filename != '':
             filename = secure_filename(file.filename)
-            save_path = os.path.join(employer_folder, filename)
-            file.save(save_path)
-            file_paths.append(save_path)
-            file_url = url_for('static', filename=f'uploads/{data['employerId']}/{filename}', _external=True)
+            rel_path = os.path.join('uploads', employer_id, filename)
+            abs_path = os.path.join(current_app.static_folder, rel_path)
+
+            os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+            file.save(abs_path)
+
+            file_paths.append(f'/static/{rel_path}')
+            file_url = url_for('static', filename=f'uploads/{employer_id}/{filename}', _external=True)
             file_urls.append(file_url)
             filename_to_url[filename] = file_url
 
