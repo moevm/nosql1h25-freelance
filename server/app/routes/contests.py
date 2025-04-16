@@ -6,6 +6,8 @@ from werkzeug.utils import secure_filename
 import os
 import re
 import json
+from bson import ObjectId
+
 
 contests_bp = Blueprint("contests", __name__)
 
@@ -18,21 +20,21 @@ def create_contest():
     file_urls = []
     filename_to_url = {}
 
-    employer_id = data['employerId']
-    employer_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], employer_id)
+    _id = ObjectId()
+    employer_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(_id))
     os.makedirs(employer_folder, exist_ok=True)
 
     for file in files:
         if file.filename != '':
             filename = secure_filename(file.filename)
-            rel_path = os.path.join('uploads', employer_id, filename)
+            rel_path = os.path.join('uploads', str(_id), filename)
             abs_path = os.path.join(current_app.static_folder, rel_path)
 
             os.makedirs(os.path.dirname(abs_path), exist_ok=True)
             file.save(abs_path)
 
             file_paths.append(f'/static/{rel_path}')
-            file_url = url_for('static', filename=f'uploads/{employer_id}/{filename}', _external=True)
+            file_url = url_for('static', filename=f'uploads/{str(_id)}/{filename}', _external=True)
             file_urls.append(file_url)
             filename_to_url[filename] = file_url
 
@@ -54,6 +56,7 @@ def create_contest():
 
     data['files'] = file_paths
     contest = validate_contest(data)
+    contest['_id'] = _id
     res = contests_collection.insert_one(contest)
     return jsonify({"id": str(res.inserted_id)}), 201
 
