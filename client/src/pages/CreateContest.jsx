@@ -165,7 +165,7 @@ const CreateContest = () => {
                     <Modal.Title>{title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ overflowY: 'auto' }}>
-                    <Markdown>
+                    <Markdown options={{ disableParsingRawHTML: true }}>
                         {mdDescription}
                     </Markdown>
                 </Modal.Body>
