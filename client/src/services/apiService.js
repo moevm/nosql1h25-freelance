@@ -20,9 +20,15 @@ export const fetchData = async (endpoint, params = {}) => {
 };
 
 // функция для POST-запросов
-export const sendData = async (endpoint, data = {}) => {
+export const sendData = async (endpoint, data = {}, isFile = false) => {
     try {
-        const response = await api.post(endpoint, data);
+        const config = isFile 
+        ? { 
+            headers: { 'Content-Type': 'multipart/form-data' },
+            } 
+        : {};
+
+        const response = await api.post(endpoint, data, config);
         return response.data;
     } catch (error) {
         console.error(`Error sending data to ${endpoint}:`, error);

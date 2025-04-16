@@ -29,6 +29,7 @@ class Contest(BaseModel):
     endBy: datetime
     type: str
     status: int = 1
+    files: List[str] = []
     winnerId: Optional[str] = None
     solutions: List[Solution] = []
 
