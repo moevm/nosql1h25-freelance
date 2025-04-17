@@ -10,17 +10,12 @@ const CreateContest = () => {
     const { contest, user } = useContext(Context);
     const navigate = useNavigate();
 
-    const [type, setType] = useState(null);
-    const [annotation, setAnnotation] = useState('');
-    const [description, setDescription] = useState('');
-    const [prizepool, setPrizepool] = useState('');
-    const [endBy, setEndBy] = useState('');
-    const [title, setTitle] = useState('');
     const [files, setFiles] = useState([]);
     const [imagesMap, setImagesMap] = useState({});
     const [showPreview, setShowPreview] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [mdDescription, setMdDescription] = useState('');
+    const [validated, setValidated] = useState(false);
 
     const handleClosePreview = () => setShowPreview(false);
     const handleShowPreview = () => setShowPreview(true);
@@ -31,26 +26,18 @@ const CreateContest = () => {
         contest.fetchTypes();
     }, []);
 
-    const handleDateChange = (date) => {
-        const selectedDate = new Date(date);
-        const now = new Date();
-        if (selectedDate < now) {
-            alert('Дата окончания должна быть минимум на 3 дня позже текущей даты');
-            return;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        
+        if (contest.validateForm()) {
+            setValidated(true);
         } else {
-            setEndBy(selectedDate.toISOString().split('T')[0]);
+            return;
         }
-    }
 
-    const handleSubmit = async () => {
         if (!user.isAuth || !user.user?.id) {
             alert('Для создания конкурса необходимо войти в систему');
             navigate('/login');
-            return;
-        }
-
-        if (!type || !annotation || !description || !prizepool || !endBy) {
-            alert('Пожалуйста, заполните все поля');
             return;
         }
 
@@ -59,17 +46,17 @@ const CreateContest = () => {
             formData.append('files[]', file);
         })
 
-        let date = new Date(endBy)
+        let date = new Date(contest.form.endBy.value)
         date.setUTCHours(23, 59, 59, 999);
 
         const data = {
             employerId: user.user.id,
-            title: title,
-            annotation,
-            prizepool: parseInt(prizepool),
-            description,
+            title: contest.form.title.value,
+            annotation: contest.form.annotation.value,
+            prizepool: parseInt(contest.form.prizepool.value),
+            description: contest.form.description.value,
             endBy: date.toISOString(),
-            type: String(type.id),
+            type: String(contest.form.type.value),
             status: 0
         };
 
@@ -106,77 +93,113 @@ const CreateContest = () => {
     }, [imagesMap]);
 
     useEffect(() => {
-        const updatedMarkdown = description.replace(regex, (match, p1, p2) => {
+        const updatedMarkdown = contest.form.description.value.replace(regex, (match, p1, p2) => {
           return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
         });
         setMdDescription(updatedMarkdown);
-      }, [description, imagesMap]);
+      }, [contest.form.description.value, imagesMap]);
 
     const regex = /(!\[[^\]]*\])\(([^)]+)\)/g;
 
     return (
         <Container className="mt-4">
             <h1 className="mb-4">Добавить конкурс</h1>
-            <Form>
-                <Dropdown className="mb-3">
-                    <Dropdown.Toggle>
-                        {type ? type.name : "Выберите тип"}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                        {contest.types.map((t) => (
-                            <Dropdown.Item key={t.id} onClick={() => setType(t)}>
-                                {t.name}
-                            </Dropdown.Item>
-                        ))}
-                    </Dropdown.Menu>
-                </Dropdown>
-                <Form.Control
-                    className="mb-3"
-                    placeholder="Название"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                />
-                <Form.Control
-                    className="mb-3"
-                    placeholder="Краткое описание"
-                    value={annotation}
-                    onChange={e => setAnnotation(e.target.value)}
-                />
-                <Form.Control
-                    className="mb-3"
-                    as="textarea"
-                    rows={10}
-                    placeholder="Полное описание"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                />
-                <Form.Control
-                    className="mb-3"
-                    placeholder="Приз"
-                    type="number"
-                    value={prizepool}
-                    onChange={e => setPrizepool(e.target.value)}
-                />
-                <Form.Control
-                    className="mb-3"
-                    type="date"
-                    value={endBy}
-                    onChange={e => handleDateChange(e.target.value)}
-                />
+            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Dropdown>
+                        <Dropdown.Toggle variant={contest.form.type.error ? 'danger' : contest.form.type.value ? 'success' : 'primary'}>
+                            {contest.form.type.value ? contest.form.type.value : "Выберите тип"}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {contest.types.map((t) => (
+                                <Dropdown.Item key={t.id} onClick={() => contest.setFormField('type', t.name)}>
+                                    {t.name}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Название"
+                        value={contest.form.title.value}
+                        onChange={(e) => contest.setFormField('title', e.target.value)}
+                        isInvalid={!!contest.form.title.error}
+                        isValid={!!contest.form.title.value}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.title.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Краткое описание"
+                        value={contest.form.annotation.value}
+                        onChange={e => contest.setFormField('annotation', e.target.value)}
+                        isInvalid={!!contest.form.annotation.error}
+                        isValid={!!contest.form.annotation.value}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.annotation.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        as="textarea"
+                        rows={10}
+                        placeholder="Полное описание"
+                        value={contest.form.description.value}
+                        onChange={e => contest.setFormField('description', e.target.value)}
+                        isInvalid={!!contest.form.description.error}
+                        isValid={!!contest.form.description.value}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.description.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className='mb-3'>
+                    <Form.Control
+                        placeholder="Приз"
+                        type="number"
+                        value={contest.form.prizepool.value}
+                        onChange={e => contest.setFormField('prizepool', e.target.value)}
+                        isInvalid={!!contest.form.prizepool.error}
+                        isValid={!!contest.form.prizepool.value}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.prizepool.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="date"
+                        value={contest.form.endBy.value}
+                        onChange={e => contest.setFormField('endBy', e.target.value)}
+                        isInvalid={!!contest.form.endBy.error}
+                        isValid={!!contest.form.endBy.value}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.endBy.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
                 <Form.Control
                     className="mb-3"
                     type="file"
                     multiple
                     onChange={e => handleFilesChange(e.target.files)}
                 />
+                <Button className="me-3" type="submit">Опубликовать</Button>
+                <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
+                <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
             </Form>
-            <Button className="me-3" onClick={handleSubmit}>Опубликовать</Button>
-            <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
-            <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
+
+            
 
             <Modal show={showPreview} onHide={handleClosePreview} size='xl' centered scrollable>
                 <Modal.Header>
-                    <Modal.Title>{title}</Modal.Title>
+                    <Modal.Title>{contest.form.title.value}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ overflowY: 'auto' }}>
                     <Markdown options={{ disableParsingRawHTML: true }}>
