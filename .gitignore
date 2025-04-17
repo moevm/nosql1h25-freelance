@@ -25,3 +25,6 @@ dist-ssr
 /templates
 /server/app/__pycache__
 /server/app/routes/__pycache__
+
+# Static files
+/server/app/static
