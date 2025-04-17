@@ -2,7 +2,7 @@ import React from 'react';
 import {Card, Col} from "react-bootstrap";
 import {useNavigate} from 'react-router-dom';
 import {CONTEST_ROUTE} from "../utils/consts.js";
-import { BsStar, BsTrophy } from 'react-icons/bs';
+import { BsStarFill, BsTrophy } from 'react-icons/bs';
 
 const ContestCard = ({ contest }) => {
     const navigate = useNavigate()
@@ -39,8 +39,8 @@ const ContestCard = ({ contest }) => {
                             {contest.title}
                         </Card.Title>
                         <div className="d-flex justify-content-between align-items-center">
-                            <BsStar color="gold" className="me-1"/>
-                            <span>{contest.rating || '4.8'}</span>
+                            <BsStarFill color="gold" size={20} className="me-1"/>
+                            <span color="gold">{contest.rating || '4.8'}</span>
                         </div>
                     </div>
                     {/* Описание */}

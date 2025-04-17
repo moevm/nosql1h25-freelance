@@ -48,7 +48,6 @@ const RewardsBar = () => {
                     <Form.Group controlId="minReward" style={{flex: 1}}>
                         <Form.Control
                             type="number"
-                            value={minReward}
                             onChange={handleMinRewardChange}
                             min="0"
                             placeholder="от 200"
@@ -61,7 +60,6 @@ const RewardsBar = () => {
                     <Form.Group controlId="maxReward" style={{flex: 1}}>
                         <Form.Control
                             type="number"
-                            value={maxReward}
                             onChange={handleMaxRewardChange}
                             min="0"
                             placeholder="До 999999"
