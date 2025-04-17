@@ -15,7 +15,6 @@ const CreateContest = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [mdDescription, setMdDescription] = useState('');
-    const [validated, setValidated] = useState(false);
 
     const handleClosePreview = () => setShowPreview(false);
     const handleShowPreview = () => setShowPreview(true);
@@ -29,9 +28,7 @@ const CreateContest = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         
-        if (contest.validateForm()) {
-            setValidated(true);
-        } else {
+        if (!contest.validateForm()) {
             return;
         }
 
@@ -64,6 +61,8 @@ const CreateContest = () => {
 
         try {
             const res = await sendData('/contests', formData, true);
+            contest.resetForm();
+            navigate('/');
             alert("Конкурс успешно добавлен!");
             console.log('Ответ сервера:', res);
         } catch (error) {
@@ -99,14 +98,19 @@ const CreateContest = () => {
           return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
         });
         setMdDescription(updatedMarkdown);
-      }, [contest.form.description.value, imagesMap]);
+    }, [contest.form.description.value, imagesMap]);
 
+    useEffect(() => {
+        return () => {
+            contest.resetForm();
+        };
+    }, []);
     const regex = /(!\[[^\]]*\])\(([^)]+)\)/g;
 
     return (
         <Container className="mt-4">
             <h1 className="mb-4">Добавить конкурс</h1>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form noValidate onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Dropdown>
                         <Dropdown.Toggle variant={contest.form.type.error ? 'danger' : contest.form.type.value ? 'success' : 'primary'}>
@@ -126,9 +130,8 @@ const CreateContest = () => {
                         placeholder="Название"
                         value={contest.form.title.value}
                         onChange={(e) => contest.setFormField('title', e.target.value)}
-                        isInvalid={!!contest.form.title.error}
-                        isValid={!!contest.form.title.value}
-                        required
+                        isInvalid={contest.form.title.error.length > 0}
+                        isValid={contest.form.title.error === '' && !!contest.form.title.value}
                     />
                     <Form.Control.Feedback type="invalid">
                         {contest.form.title.error}
@@ -139,8 +142,8 @@ const CreateContest = () => {
                         placeholder="Краткое описание"
                         value={contest.form.annotation.value}
                         onChange={e => contest.setFormField('annotation', e.target.value)}
-                        isInvalid={!!contest.form.annotation.error}
-                        isValid={!!contest.form.annotation.value}
+                        isInvalid={contest.form.annotation.error.length > 0}
+                        isValid={contest.form.annotation.error === '' && !!contest.form.annotation.value}
                         required
                     />
                     <Form.Control.Feedback type="invalid">
@@ -154,8 +157,9 @@ const CreateContest = () => {
                         placeholder="Полное описание"
                         value={contest.form.description.value}
                         onChange={e => contest.setFormField('description', e.target.value)}
-                        isInvalid={!!contest.form.description.error}
-                        isValid={!!contest.form.description.value}
+                        isInvalid={contest.form.description.error.length > 0}
+                        isValid={contest.form.description.error === '' && !!contest.form.description.value}
+                        required
                     />
                     <Form.Control.Feedback type="invalid">
                         {contest.form.description.error}
@@ -167,8 +171,9 @@ const CreateContest = () => {
                         type="number"
                         value={contest.form.prizepool.value}
                         onChange={e => contest.setFormField('prizepool', e.target.value)}
-                        isInvalid={!!contest.form.prizepool.error}
-                        isValid={!!contest.form.prizepool.value}
+                        isInvalid={contest.form.prizepool.error.length > 0}
+                        isValid={contest.form.prizepool.error === '' && !!contest.form.prizepool.value}
+                        required
                     />
                     <Form.Control.Feedback type="invalid">
                         {contest.form.prizepool.error}
@@ -179,8 +184,9 @@ const CreateContest = () => {
                         type="date"
                         value={contest.form.endBy.value}
                         onChange={e => contest.setFormField('endBy', e.target.value)}
-                        isInvalid={!!contest.form.endBy.error}
-                        isValid={!!contest.form.endBy.value}
+                        isInvalid={contest.form.endBy.error.length > 0}
+                        isValid={contest.form.endBy.error === '' && !!contest.form.endBy.value}
+                        required
                     />
                     <Form.Control.Feedback type="invalid">
                         {contest.form.endBy.error}
@@ -191,7 +197,7 @@ const CreateContest = () => {
                         type="file"
                         multiple
                         onChange={e => handleFilesChange(e.target.files)}
-                        isInvalid={!!contest.form.files.error}
+                        isInvalid={contest.form.files.error.length > 0}
                     />
                     <Form.Control.Feedback type="invalid">
                         {contest.form.files.error}

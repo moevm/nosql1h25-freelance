@@ -1,43 +1,45 @@
 import { makeAutoObservable } from "mobx";
 import { fetchData } from "../services/apiService";
 
-export default class ContestStore {
-    form = {
-        type: {
-            value: null,
-            error: '',
-            rules: {},
-        },
-        title: {
-            value: '',
-            error: '',
-            rules: {min: 10, max: 100 },
-        },
-        annotation: {
-            value: '',
-            error: '',
-            rules: {min: 30, max: 200 },
-        },
-        description: {
-            value: '',
-            error: '',
-            rules: {min: 100, max: 20000 },
-        },
-        prizepool: {
-            value: '',
-            error: '',
-            rules: {min: 0, max: 9999999 },
-        },
-        endBy: {
-            value: '',
-            error: '',
-            rules: { minDays: 3 },
-        },
-        files: {
-            error: '',
-            rules: { max: 20 }
-        }
+const baseForm = {
+    type: {
+        value: null,
+        error: '',
+        rules: {},
+    },
+    title: {
+        value: '',
+        error: '',
+        rules: {min: 10, max: 100 },
+    },
+    annotation: {
+        value: '',
+        error: '',
+        rules: {min: 30, max: 200 },
+    },
+    description: {
+        value: '',
+        error: '',
+        rules: {min: 100, max: 20000 },
+    },
+    prizepool: {
+        value: '',
+        error: '',
+        rules: {min: 0, max: 9999999 },
+    },
+    endBy: {
+        value: '',
+        error: '',
+        rules: { minDays: 3 },
+    },
+    files: {
+        error: '',
+        rules: { max: 20 }
     }
+};
+
+export default class ContestStore {
+    form = baseForm;
 
     formErrors = {
         type: 'Тип конкурса обязателен',
@@ -62,6 +64,10 @@ export default class ContestStore {
     setFormField(field, value) {
         this.form[field].value = value;
         this.validateField(field);
+    }
+
+    resetForm() {
+        this.form = baseForm;
     }
 
     validateField(field) {
