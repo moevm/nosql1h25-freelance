@@ -34,7 +34,7 @@ const RewardsBar = () => {
         }, 500);
 
         return () => clearTimeout(timeout);
-    }, [minReward, maxReward]);
+    }, [minReward, maxReward, contest]);
 
     return (
 
