@@ -1,15 +1,14 @@
 from flask import Blueprint, request, jsonify, url_for, current_app
+from bson import ObjectId
 from app.database import contests_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_contest
 from werkzeug.utils import secure_filename
-import os
-import re
-import json
-from bson import ObjectId
+import os, re, json
 
 
 contests_bp = Blueprint("contests", __name__)
+
 
 # Маршрут для создания нового конкурса
 @contests_bp.route("/contests", methods=["POST"])
@@ -59,6 +58,7 @@ def create_contest():
     contest['_id'] = _id
     res = contests_collection.insert_one(contest)
     return jsonify({"id": str(res.inserted_id)}), 201
+
 
 # Маршрут для получения списка всех конкурсов
 @contests_bp.route("/contests", methods=["GET"])

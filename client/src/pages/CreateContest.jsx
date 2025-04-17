@@ -54,7 +54,7 @@ const CreateContest = () => {
             description: contest.form.description.value,
             endBy: date.toISOString(),
             type: String(contest.form.type.value),
-            status: 0
+            status: 1
         };
 
         formData.append('data', JSON.stringify(data));
