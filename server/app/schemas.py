@@ -20,9 +20,10 @@ class Review(BaseModel):
 
 
 class Solution(BaseModel):
-    contestId: str
-    freelancerId: str
+    contestId: str    # ObjectId(Contest._id)
+    freelancerId: str    # ObjectId(User._id)
     description: str
+    files: List[str] = []
     status: int = 1    # 1 - Новое, 2 - Просмотрено, 3 - Победитель, 4 - Необходимы правки, 5 - Правки внесены
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -30,7 +31,7 @@ class Solution(BaseModel):
 
 
 class Contest(BaseModel):
-    employerId: str
+    employerId: str    # ObjectId(User._id)
     title: str
     annotation: str
     prizepool: int
