@@ -24,7 +24,11 @@ const RewardsBar = () => {
     };
 
     useEffect(() => {
-        contest.setReward({ min: minReward, max: maxReward });
+        const min = minReward === '' ? 0 : Number(minReward);
+        const max = maxReward === '' ? 999999 : Number(maxReward);
+
+        contest.setReward({ min, max });
+
         const timeout = setTimeout(() => {
             contest.fetchContestsFiltered();
         }, 500);
