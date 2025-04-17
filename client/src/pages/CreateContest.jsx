@@ -73,10 +73,12 @@ const CreateContest = () => {
     };
 
     const handleFilesChange = useCallback((newFiles) => {
-        const validFiles = Array.from(newFiles).filter(file => 
-            file.type.startsWith('image/') && 
-            file.size < 5 * 1024 * 1024 // 5MB limit
+        const validFiles = Array.from(newFiles).filter(file =>
+            file.type.startsWith('image/') // && 
+            //file.size < 5 * 1024 * 1024 // 5MB limit
         );
+        contest.form.files.error = validFiles.length > contest.form.files.rules.max
+            ? contest.form.files.error = contest.formErrors.files : '';
         const newMap = {};
         validFiles.forEach((file, index) => {
             newMap[`${file.name}`] = URL.createObjectURL(file);
@@ -184,12 +186,17 @@ const CreateContest = () => {
                         {contest.form.endBy.error}
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Control
-                    className="mb-3"
-                    type="file"
-                    multiple
-                    onChange={e => handleFilesChange(e.target.files)}
-                />
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="file"
+                        multiple
+                        onChange={e => handleFilesChange(e.target.files)}
+                        isInvalid={!!contest.form.files.error}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {contest.form.files.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
                 <Button className="me-3" type="submit">Опубликовать</Button>
                 <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
                 <Button className="me-3" onClick={handleShowHelp}>Справка</Button>

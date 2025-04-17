@@ -11,28 +11,32 @@ export default class ContestStore {
         title: {
             value: '',
             error: '',
-            rules: {min: 10, max: 100},
+            rules: {min: 10, max: 100 },
         },
         annotation: {
             value: '',
             error: '',
-            rules: {min: 30, max: 200},
+            rules: {min: 30, max: 200 },
         },
         description: {
             value: '',
             error: '',
-            rules: {min: 100, max: 20000},
+            rules: {min: 100, max: 20000 },
         },
         prizepool: {
             value: '',
             error: '',
-            rules: {min: 0, max: 9999999},
+            rules: {min: 0, max: 9999999 },
         },
         endBy: {
             value: '',
             error: '',
-            rules: { minDays: 3},
+            rules: { minDays: 3 },
         },
+        files: {
+            error: '',
+            rules: { max: 20 }
+        }
     }
 
     formErrors = {
@@ -42,6 +46,7 @@ export default class ContestStore {
         description: `Полное описание от ${this.form.description.rules.min} до ${this.form.description.rules.max} символов`,
         prizepool: `Приз должен быть от ${this.form.prizepool.rules.min} до ${this.form.prizepool.rules.max}`,
         endBy: `Дата окончания минимум на ${this.form.endBy.rules.minDays} дня позже текущей`,
+        files: `Максимальное количество файлов - ${this.form.files.rules.max}`
     };
     
     constructor() {
