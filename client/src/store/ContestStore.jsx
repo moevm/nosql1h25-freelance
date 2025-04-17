@@ -22,6 +22,13 @@ export default class ContestStore {
         files: `Максимальное количество файлов - ${this.solutionForm.files.rules.max}`
     };
 
+    status = {
+        1: 'Активный',
+        2: 'На проверке',
+        3: 'Завершённый',
+        4: 'Отменённый',
+    };
+
     constructor() {
         this._isAuth = false;
         this._types = [];
@@ -130,6 +137,10 @@ export default class ContestStore {
 
     setSelectedType(type) {
         this._selectedType = type;
+    }
+
+    getStatus(number) {
+        return this.status[number];
     }
 
     setMinReward(min) {

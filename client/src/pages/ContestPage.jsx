@@ -1,8 +1,9 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Context } from '../main.jsx';
-import { Card, Badge, Button } from 'react-bootstrap';
+import { Container, Card, Badge, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
+import Markdown from 'markdown-to-jsx';
 
 const ContestPage = () => {
     const { contest, user } = useContext(Context);
@@ -39,24 +40,37 @@ const ContestPage = () => {
     const isFreelancer = user.user && user.user.role === 1;
 
     return (
-        <Card className="mb-4 shadow-sm">
-            <Card.Body>
-                <Card.Title className="mb-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        {currentContest.title}
-                    </div>
-                </Card.Title>
-            </Card.Body>
-            {isFreelancer && (
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}
-                >
-                    Добавить решение
-                </Button>
-            )}
-        </Card>
+        <Container>
+            <Card className="mb-4 shadow-sm">
+                <Card.Header>
+                    <Card.Title>
+                        <h1>{currentContest.title}</h1>
+                    </Card.Title>
+                    <h2>
+                        <Badge bg="secondary" className="">
+                            {currentContest.type}
+                        </Badge>
+                        <Badge className="ms-2" bg={currentContest.status === 1 ? 'success' : 'danger'}>
+                            {contest.getStatus(currentContest.status)}
+                        </Badge>
+                    </h2>
+                    <h4 className="mb-1">Дата окончания: {(new Date(currentContest.endBy)).toLocaleDateString('ru-RU', {})}<span className="ms-3">Приз: {currentContest.prizepool} руб.</span></h4>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Subtitle className="mb-1"><h2>Описание проекта</h2></Card.Subtitle>
+                        <Markdown options={{ disableParsingRawHTML: true }}>
+                            {currentContest.description}
+                        </Markdown>
+                </Card.Body>
+                {isFreelancer && 
+                    <Card.Footer>
+                        <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}>
+                            Добавить решение
+                        </Button>
+                    </Card.Footer>
+                }
+            </Card>
+        </Container>
     );
 };
 
