@@ -1,57 +1,63 @@
-import React from 'react';
-import { Card, Badge } from 'react-bootstrap';
+import React, { useEffect, useContext, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Context } from '../main.jsx';
+import { Card, Badge, Button } from 'react-bootstrap';
+import { observer } from 'mobx-react-lite';
 
 const ContestPage = () => {
-    const contest = {
-        title: 'Дизайн логотипа для стартапа',
-        type: 'Дизайн',
-        prize: '5000',
-        deadline: '15 марта 2025',
-        status: 'Открыт',
-        description: 'Создай уникальный логотип для нового IT-стартапа. Требуется минимализм и современный стиль.',
-        requirements: [
-            'Формат: PNG или SVG',
-            'Цвета: Не более трёх',
-            'Срок: До 15 марта 2025'
-        ]
-    };
+    const { contest, user } = useContext(Context);
+    const { number } = useParams();
+    const [currentContest, setCurrentContest] = useState(null);
+    const [error, setError] = useState(null);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (contest.currentContest && contest.currentContest.number == number) {
+            setCurrentContest(contest.currentContest);
+        } else {
+            const fetchContest = async () => {
+                const fetched = await contest.fetchOneContestByNumber(number);
+                if (fetched) {
+                    setCurrentContest(fetched);
+                } else {
+                    setError("Конкурс не найден.");
+                }
+            };
+            fetchContest();
+        }
+    }, [number, contest.currentContest]);
+
+    if (error) {
+        return <div>{error}</div>;
+    }
+
+    if (!currentContest) {
+        return <div>Загрузка...</div>;
+    }
+
+    const isFreelancer = user.user && user.user.role === 1;
 
     return (
         <Card className="mb-4 shadow-sm">
             <Card.Body>
-                <Card.Title className="mb-3">
-                    {contest.title}
-                    <Badge bg="secondary" className="ms-2">
-                        {contest.type}
-                    </Badge>
+                <Card.Title className="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        {currentContest.title}
+                    </div>
                 </Card.Title>
-
-                <div className="d-flex justify-content-between mb-3">
-                    <div>
-                        <strong>Приз:</strong> {contest.prize} руб.
-                    </div>
-                    <div>
-                        <strong>Дата окончания:</strong> {contest.deadline}
-                    </div>
-                    <Badge bg={contest.status === 'Открыт' ? 'success' : 'danger'}>
-                        {contest.status}
-                    </Badge>
-                </div>
-
-                <Card.Subtitle className="mb-2 text-muted">Описание проекта</Card.Subtitle>
-                <Card.Text className="mb-4">{contest.description}</Card.Text>
-
-                <Card.Subtitle className="mb-2">Требования:</Card.Subtitle>
-                <ul className="list-unstyled">
-                    {contest.requirements.map((req, index) => (
-                        <li key={index} className="mb-1">
-                            • {req}
-                        </li>
-                    ))}
-                </ul>
             </Card.Body>
+            {isFreelancer && (
+                <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}
+                >
+                    Добавить решение
+                </Button>
+            )}
         </Card>
     );
 };
 
-export default ContestPage;
+export default observer(ContestPage);

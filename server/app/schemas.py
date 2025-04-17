@@ -13,6 +13,7 @@ class User(BaseModel):
 
 
 class Review(BaseModel):
+    number: Optional[int] = None    # Порядковый номер для url страницы отзыва
     score: float
     commentary: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -22,6 +23,7 @@ class Review(BaseModel):
 class Solution(BaseModel):
     contestId: str    # ObjectId(Contest._id)
     freelancerId: str    # ObjectId(User._id)
+    number: Optional[int] = None    # Порядковый номер для url страницы решения
     description: str
     files: List[str] = []
     status: int = 1    # 1 - Новое, 2 - Просмотрено, 3 - Победитель, 4 - Необходимы правки, 5 - Правки внесены
@@ -32,6 +34,7 @@ class Solution(BaseModel):
 
 class Contest(BaseModel):
     employerId: str    # ObjectId(User._id)
+    number: Optional[int] = None    # Порядковый номер для url страницы конкурса
     title: str
     annotation: str
     prizepool: int
@@ -65,4 +68,4 @@ def validate_contest(data: dict) -> dict:
 
 
 def validate_contest_type(data: dict) -> dict:
-    return Contest(**data).dict()
+    return ContestType(**data).dict()
