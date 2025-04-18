@@ -27,6 +27,18 @@ def get_users():
     return jsonify(serialize_mongo(users))
 
 
+# Маршрут для получения пользователя по ID
+@users_bp.route("/users/<user_id>", methods=["GET"])
+def get_user(user_id):
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)}, {"password": 0})
+        if not user:
+            return jsonify({"message": "Пользователь не найден"}), 404
+        return jsonify(serialize_mongo(user)), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+
+
 # Маршрут для входа пользователя в систему
 @users_bp.route("/login", methods=["POST"])
 def login():

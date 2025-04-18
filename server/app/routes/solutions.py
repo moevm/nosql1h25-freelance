@@ -83,3 +83,51 @@ def get_solutions_by_contest(contest_id):
         return jsonify(serialize_mongo(solutions)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# Маршрут удаления решения по ID
+@solutions_bp.route("/solutions/<solution_id>", methods=["DELETE"])
+def delete_solution(solution_id):
+    try:
+        if not ObjectId.is_valid(solution_id):
+            return jsonify({"error": "Invalid solution ID"}), 400
+            
+        result = solutions_collection.delete_one({"_id": ObjectId(solution_id)})
+        
+        if result.deleted_count == 0:
+            return jsonify({"error": "Solution not found"}), 404
+            
+        return jsonify({"message": "Solution deleted successfully"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Маршрут для обновления статуса решения
+@solutions_bp.route("/solutions/<solution_id>", methods=["PUT"])
+def update_solution(solution_id):
+    try:
+        data = request.json
+
+        if not ObjectId.is_valid(solution_id):
+            return jsonify({"error": "Invalid solution ID"}), 400
+
+        # Проверяем статус (если он есть в запросе)
+        if 'status' in data:
+            if not isinstance(data['status'], int) or data['status'] not in range(1, 6):
+                return jsonify({"error": "Invalid status value"}), 400
+
+        result = solutions_collection.update_one(
+            {"_id": ObjectId(solution_id)},
+            {"$set": data}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({"error": "Solution not found or data not changed"}), 404
+
+        # Возвращаем обновленный документ
+        updated_solution = solutions_collection.find_one({"_id": ObjectId(solution_id)})
+        return jsonify(serialize_mongo(updated_solution)), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

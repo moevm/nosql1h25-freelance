@@ -72,8 +72,8 @@ const ContestPage = () => {
                 }
                 {isEmployer && 
                     <Card.Footer>
-                        <Button variant="primary" onClick={() => navigate(`/solutions/contest/${currentContest.number}`)}>
-                            Посмотреть решения
+                        <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/solutions`)}>
+                            Просмотреть решения
                         </Button>
                     </Card.Footer>
                 }
