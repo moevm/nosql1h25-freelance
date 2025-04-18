@@ -1,11 +1,46 @@
 import { makeAutoObservable } from "mobx";
-import { createBaseForm, createSolutionForm } from '../utils/formDefaults.js';
 import { fetchData } from "../services/apiService";
 
 
+const baseForm = {
+    type: {
+        value: null,
+        error: '',
+        rules: {},
+    },
+    title: {
+        value: '',
+        error: '',
+        rules: {min: 10, max: 100 },
+    },
+    annotation: {
+        value: '',
+        error: '',
+        rules: {min: 30, max: 200 },
+    },
+    description: {
+        value: '',
+        error: '',
+        rules: {min: 100, max: 20000 },
+    },
+    prizepool: {
+        value: '',
+        error: '',
+        rules: {min: 0, max: 9999999 },
+    },
+    endBy: {
+        value: '',
+        error: '',
+        rules: { minDays: 3 },
+    },
+    files: {
+        error: '',
+        rules: { max: 20 }
+    }
+};
+
 export default class ContestStore {
-    form = createBaseForm();
-    solutionForm = createSolutionForm();
+    form = baseForm;
 
     formErrors = {
         type: 'Тип конкурса обязателен',
@@ -15,11 +50,6 @@ export default class ContestStore {
         prizepool: `Приз должен быть от ${this.form.prizepool.rules.min} до ${this.form.prizepool.rules.max}`,
         endBy: `Дата окончания минимум на ${this.form.endBy.rules.minDays} дня позже текущей`,
         files: `Максимальное количество файлов - ${this.form.files.rules.max}`
-    };
-
-    solutionFormErrors = {
-        description: `Описание решения от ${this.solutionForm.description.rules.min} до ${this.solutionForm.description.rules.max} символов`,
-        files: `Максимальное количество файлов - ${this.solutionForm.files.rules.max}`
     };
 
     status = {
@@ -45,17 +75,8 @@ export default class ContestStore {
         this.validateField(field);
     }
 
-    setSolutionFormField(field, value) {
-        this.solutionForm[field].value = value;
-        this.validateSolutionField(field);
-    }
-
     resetForm() {
-        this.form = createBaseForm();
-    }
-
-    resetSolutionForm() {
-        this.solutionForm = createSolutionForm();
+        this.form = baseForm;
     }
 
     validateField(field) {
@@ -99,24 +120,9 @@ export default class ContestStore {
         }
     }
 
-    validateSolutionField(field) {
-        switch (field) {
-            case 'description':
-                this.solutionForm.description.error = !(this.solutionForm.description.value.length >= this.solutionForm.description.rules.min &&
-                    this.solutionForm.description.value.length <= this.solutionForm.description.rules.max)
-                    ? this.solutionFormErrors.description : '';
-                break;
-        }
-    }
-
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
-    }
-
-    validateSolutionForm() {
-        Object.keys(this.solutionForm).forEach(field => this.validateSolutionField(field));
-        return !Object.values(this.solutionForm).some(field => field.error !== '');
     }
 
     setIsAuth(bool) {
@@ -187,8 +193,6 @@ export default class ContestStore {
     get reward(){
         return this._reward;
     }
-
-
 
     async fetchContests() {
         try {

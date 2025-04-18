@@ -7,31 +7,28 @@ import { observer } from "mobx-react-lite";
 import Markdown from 'markdown-to-jsx';
 
 const CreateSolution = () => {
-    const { contest, user } = useContext(Context);
+    const { contest, solution, user } = useContext(Context);
     const { number } = useParams();
     const [error, setError] = useState(null);
-
     const navigate = useNavigate();
 
-    if (contest.currentContest && contest.currentContest.number == number) {
-        contest.setCurrentContest(contest.currentContest);
-    } else {
-        const fetchContest = async () => {
-            const fetched = await contest.fetchOneContestByNumber(number);
-            if (fetched) {
-                contest.setCurrentContest(fetched);
+    useEffect(() => {
+        const fetch = async () => {
+            if (contest.currentContest && contest.currentContest.number == number) {
+                contest.setCurrentContest(contest.currentContest);
             } else {
-                setError("Конкурс не найден.");
+                const fetched = await contest.fetchOneContestByNumber(number);
+                if (fetched) {
+                    contest.setCurrentContest(fetched);
+                } else {
+                    setError("Конкурс не найден.");
+                }
             }
         };
-        fetchContest();
-    }
+        fetch();
+    }, [number, contest]);
 
-    if (error) {
-        return <div>{error}</div>;
-    }
-
-    const contestId = contest.currentContest.id;
+    const contestId = contest.currentContest?.id;
 
     const [files, setFiles] = useState([]);
     const [imagesMap, setImagesMap] = useState({});
@@ -47,9 +44,9 @@ const CreateSolution = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        contest.validateSolutionField('description');
+        solution.validateField('description');
 
-        if (contest.solutionForm.description.error || contest.solutionForm.files.error) {
+        if (solution.form.description.error || solution.form.files.error) {
             return;
         }
 
@@ -67,14 +64,14 @@ const CreateSolution = () => {
         const data = {
             contestId,
             freelancerId: user.user.id,
-            description: contest.solutionForm.description.value
+            description: solution.form.description.value
         };
 
         formData.append('data', JSON.stringify(data));
 
         try {
             const res = await sendData('/solutions', formData, true);
-            contest.resetSolutionForm();
+            solution.resetForm();
             navigate('/');
             alert('Решение успешно отправлено!');
             console.log('Ответ сервера:', res);
@@ -85,13 +82,13 @@ const CreateSolution = () => {
     };
 
     const handleFilesChange = useCallback((newFiles) => {
-        const allowedTypes = contest.solutionForm.files.allowedTypes;
+        const allowedTypes = solution.form.files.allowedTypes;
         const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
-        
-        if (validFiles.length > contest.solutionForm.files.rules.max) {
-            contest.solutionForm.files.error = contest.solutionFormErrors.files;
+
+        if (validFiles.length > solution.form.files.rules.max) {
+            solution.form.files.error = solution.solutionFormErrors.files;
         } else {
-            contest.solutionForm.files.error = '';
+            solution.form.files.error = '';
         }
 
         const newMap = {};
@@ -104,7 +101,7 @@ const CreateSolution = () => {
         Object.values(imagesMap).forEach(URL.revokeObjectURL);
         setFiles(validFiles);
         setImagesMap(newMap);
-    }, [imagesMap]);
+    }, [imagesMap, solution]);
 
     useEffect(() => {
         return () => {
@@ -114,17 +111,19 @@ const CreateSolution = () => {
 
     const regex = /(!\[[^\]]*\])\(([^)]+)\)/g;
     useEffect(() => {
-        const updatedMarkdown = contest.solutionForm.description.value.replace(regex, (match, p1, p2) => {
+        const updatedMarkdown = solution.form.description.value.replace(regex, (match, p1, p2) => {
             return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
         });
         setMdDescription(updatedMarkdown);
-    }, [contest.solutionForm.description.value, imagesMap]);
+    }, [solution.form.description.value, imagesMap]);
 
     useEffect(() => {
-            return () => {
-                contest.resetSolutionForm();
-            };
-        }, []);
+        return () => {
+            solution.resetForm();
+        };
+    }, [solution]);
+
+    if (error) return <div>{error}</div>;
 
     return (
         <Container className="mt-4">
@@ -135,14 +134,14 @@ const CreateSolution = () => {
                         as="textarea"
                         rows={10}
                         placeholder="Описание решения"
-                        value={contest.solutionForm.description.value}
-                        onChange={e => contest.setSolutionFormField('description', e.target.value)}
-                        isInvalid={contest.solutionForm.description.error.length > 0}
-                        isValid={contest.solutionForm.description.error === '' && !!contest.solutionForm.description.value}
+                        value={solution.form.description.value}
+                        onChange={e => solution.setFormField('description', e.target.value)}
+                        isInvalid={solution.form.description.error.length > 0}
+                        isValid={solution.form.description.error === '' && !!solution.form.description.value}
                         required
                     />
                     <Form.Control.Feedback type="invalid">
-                        {contest.solutionForm.description.error}
+                        {solution.form.description.error}
                     </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="mb-3">
@@ -150,13 +149,13 @@ const CreateSolution = () => {
                         type="file"
                         multiple
                         onChange={e => handleFilesChange(e.target.files)}
-                        isInvalid={contest.solutionForm.files.error.length > 0}
+                        isInvalid={solution.form.files.error.length > 0}
                     />
                     <Form.Control.Feedback type="invalid">
-                        {contest.solutionForm.files.error}
+                        {solution.form.files.error}
                     </Form.Control.Feedback>
                     <Form.Text className="text-muted">
-                        Поддерживаемые форматы: .zip, .png, .jpg, .jpeg, .gif. Не более {contest.solutionForm.files.rules.max} файлов.
+                        Поддерживаемые форматы: .zip, .png, .jpg, .jpeg, .gif. Не более {solution.form.files.rules.max} файлов.
                     </Form.Text>
                 </Form.Group>
                 <Button className="me-3" type="submit">Отправить</Button>
@@ -184,8 +183,8 @@ const CreateSolution = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <div style={{ whiteSpace: 'pre-line' }}>
-                        Описание решения должно содержать от {contest.solutionForm.description.rules.min} до {contest.solutionForm.description.rules.max} символов.
-                        Файлы: zip-архивы и изображения (jpg, png, gif), не более {contest.solutionForm.files.rules.max} штук.
+                        Описание решения должно содержать от {solution.form.description.rules.min} до {solution.form.description.rules.max} символов.
+                        Файлы: zip-архивы и изображения (jpg, png, gif), не более {solution.form.files.rules.max} штук.
                         Используйте Markdown для оформления текста.
                         <br /><br />
                         Пример изображения: ![alt](image.jpg)
