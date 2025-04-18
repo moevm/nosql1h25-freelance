@@ -1,24 +1,66 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
 from app.database import solutions_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_solution
+from werkzeug.utils import secure_filename
+import os, re, json
 
 
-solutions_bp = Blueprint("users", __name__)
+solutions_bp = Blueprint("solutions", __name__)
 
 
 # Маршрут добавления нового решения
 @solutions_bp.route("/solutions", methods=["POST"])
 def create_solution():
-    data = request.get_json()
-
     try:
+        data = json.loads(request.form.get('data'))
+        files = request.files.getlist('files[]')
+
+        file_paths = []
+        file_urls = []
+        filename_to_url = {}
+
+        _id = ObjectId()
+
+        for file in files:
+            if file.filename:
+                filename = secure_filename(file.filename)
+                rel_path = os.path.join('solutions_uploads', str(_id), filename)
+                abs_path = os.path.join(current_app.static_folder, rel_path)
+
+                os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+                file.save(abs_path)
+
+                file_url = url_for('static', filename=f'solutions_uploads/{str(_id)}/{filename}', _external=True)
+                file_paths.append(f'/static/{rel_path}')
+                file_urls.append(file_url)
+                filename_to_url[filename] = file_url
+
+        if 'description' in data:
+            def replace_image_path(match):
+                alt_text = match.group(1)
+                image_filename = secure_filename(match.group(2))
+                if image_filename in filename_to_url:
+                    return f"![{alt_text}]({filename_to_url[image_filename]})"
+                return match.group(0)
+
+            data['description'] = re.sub(
+                r'!\[(.*?)\]\((.*?)\)',
+                replace_image_path,
+                data['description']
+            )
+
+        data['files'] = file_paths
+        data['_id'] = _id
+        last_solution = solutions_collection.find_one(sort=[("number", -1)])
+        next_number = 1 if last_solution is None else last_solution["number"] + 1
+        data["number"] = next_number
+
         solution = validate_solution(data)
         res = solutions_collection.insert_one(solution)
-        return jsonify({
-            "id": str(res.inserted_id)
-        }), 201
+        return jsonify({"id": str(res.inserted_id)}), 201
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 

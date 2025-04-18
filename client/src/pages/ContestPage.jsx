@@ -1,57 +1,85 @@
-import React from 'react';
-import { Card, Badge } from 'react-bootstrap';
+import React, { useEffect, useContext, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Context } from '../main.jsx';
+import { Container, Card, Badge, Button } from 'react-bootstrap';
+import { observer } from 'mobx-react-lite';
+import Markdown from 'markdown-to-jsx';
 
 const ContestPage = () => {
-    const contest = {
-        title: 'Дизайн логотипа для стартапа',
-        type: 'Дизайн',
-        prize: '5000',
-        deadline: '15 марта 2025',
-        status: 'Открыт',
-        description: 'Создай уникальный логотип для нового IT-стартапа. Требуется минимализм и современный стиль.',
-        requirements: [
-            'Формат: PNG или SVG',
-            'Цвета: Не более трёх',
-            'Срок: До 15 марта 2025'
-        ]
-    };
+    const { contest, user } = useContext(Context);
+    const { number } = useParams();
+    const [currentContest, setCurrentContest] = useState(null);
+    const [error, setError] = useState(null);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (contest.currentContest && contest.currentContest.number == number) {
+            setCurrentContest(contest.currentContest);
+        } else {
+            const fetchContest = async () => {
+                const fetched = await contest.fetchOneContestByNumber(number);
+                if (fetched) {
+                    setCurrentContest(fetched);
+                } else {
+                    setError("Конкурс не найден.");
+                }
+            };
+            fetchContest();
+        }
+    }, [number, contest.currentContest]);
+
+    if (error) {
+        return <div>{error}</div>;
+    }
+
+    if (!currentContest) {
+        return <div>Загрузка...</div>;
+    }
+
+    const isFreelancer = user.user && user.user.role === 1;
+    const isEmployer = user.user && user.user.role === 2;
 
     return (
-        <Card className="mb-4 shadow-sm">
-            <Card.Body>
-                <Card.Title className="mb-3">
-                    {contest.title}
-                    <Badge bg="secondary" className="ms-2">
-                        {contest.type}
-                    </Badge>
-                </Card.Title>
-
-                <div className="d-flex justify-content-between mb-3">
-                    <div>
-                        <strong>Приз:</strong> {contest.prize} руб.
-                    </div>
-                    <div>
-                        <strong>Дата окончания:</strong> {contest.deadline}
-                    </div>
-                    <Badge bg={contest.status === 'Открыт' ? 'success' : 'danger'}>
-                        {contest.status}
-                    </Badge>
-                </div>
-
-                <Card.Subtitle className="mb-2 text-muted">Описание проекта</Card.Subtitle>
-                <Card.Text className="mb-4">{contest.description}</Card.Text>
-
-                <Card.Subtitle className="mb-2">Требования:</Card.Subtitle>
-                <ul className="list-unstyled">
-                    {contest.requirements.map((req, index) => (
-                        <li key={index} className="mb-1">
-                            • {req}
-                        </li>
-                    ))}
-                </ul>
-            </Card.Body>
-        </Card>
+        <Container>
+            <Card className="mb-4 shadow-sm">
+                <Card.Header>
+                    <Card.Title>
+                        <h1>{currentContest.title}</h1>
+                    </Card.Title>
+                    <h2>
+                        <Badge bg="secondary" className="">
+                            {currentContest.type}
+                        </Badge>
+                        <Badge className="ms-2" bg={currentContest.status === 1 ? 'success' : 'danger'}>
+                            {contest.getStatus(currentContest.status)}
+                        </Badge>
+                    </h2>
+                    <h4 className="mb-1">Дата окончания: {(new Date(currentContest.endBy)).toLocaleDateString('ru-RU', {})}<span className="ms-3">Приз: {currentContest.prizepool} руб.</span></h4>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Subtitle className="mb-1"><h2>Описание проекта</h2></Card.Subtitle>
+                        <Markdown options={{ disableParsingRawHTML: true }}>
+                            {currentContest.description}
+                        </Markdown>
+                </Card.Body>
+                {isFreelancer && 
+                    <Card.Footer>
+                        <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}>
+                            Добавить решение
+                        </Button>
+                    </Card.Footer>
+                }
+                {isEmployer && 
+                    <Card.Footer>
+                        <Button variant="primary" onClick={() => navigate(`/solutions/contest/${currentContest.number}`)}>
+                            Посмотреть решения
+                        </Button>
+                    </Card.Footer>
+                }
+            </Card>
+        </Container>
     );
 };
 
-export default ContestPage;
+export default observer(ContestPage);

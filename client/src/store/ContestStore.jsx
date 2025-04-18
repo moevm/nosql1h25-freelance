@@ -1,45 +1,11 @@
 import { makeAutoObservable } from "mobx";
+import { createBaseForm, createSolutionForm } from '../utils/formDefaults.js';
 import { fetchData } from "../services/apiService";
 
-const baseForm = {
-    type: {
-        value: null,
-        error: '',
-        rules: {},
-    },
-    title: {
-        value: '',
-        error: '',
-        rules: {min: 10, max: 100 },
-    },
-    annotation: {
-        value: '',
-        error: '',
-        rules: {min: 30, max: 200 },
-    },
-    description: {
-        value: '',
-        error: '',
-        rules: {min: 100, max: 20000 },
-    },
-    prizepool: {
-        value: '',
-        error: '',
-        rules: {min: 0, max: 9999999 },
-    },
-    endBy: {
-        value: '',
-        error: '',
-        rules: { minDays: 3 },
-    },
-    files: {
-        error: '',
-        rules: { max: 20 }
-    }
-};
 
 export default class ContestStore {
-    form = baseForm;
+    form = createBaseForm();
+    solutionForm = createSolutionForm();
 
     formErrors = {
         type: 'Тип конкурса обязателен',
@@ -50,11 +16,24 @@ export default class ContestStore {
         endBy: `Дата окончания минимум на ${this.form.endBy.rules.minDays} дня позже текущей`,
         files: `Максимальное количество файлов - ${this.form.files.rules.max}`
     };
-    
+
+    solutionFormErrors = {
+        description: `Описание решения от ${this.solutionForm.description.rules.min} до ${this.solutionForm.description.rules.max} символов`,
+        files: `Максимальное количество файлов - ${this.solutionForm.files.rules.max}`
+    };
+
+    status = {
+        1: 'Активный',
+        2: 'На проверке',
+        3: 'Завершённый',
+        4: 'Отменённый',
+    };
+
     constructor() {
         this._isAuth = false;
         this._types = [];
         this._contests = [];
+        this._currentContest = null;
         this._selectedType = {}
         this._minReward = 0;
         this._maxReward = 9999999;
@@ -66,8 +45,17 @@ export default class ContestStore {
         this.validateField(field);
     }
 
+    setSolutionFormField(field, value) {
+        this.solutionForm[field].value = value;
+        this.validateSolutionField(field);
+    }
+
     resetForm() {
-        this.form = baseForm;
+        this.form = createBaseForm();
+    }
+
+    resetSolutionForm() {
+        this.solutionForm = createSolutionForm();
     }
 
     validateField(field) {
@@ -111,9 +99,24 @@ export default class ContestStore {
         }
     }
 
+    validateSolutionField(field) {
+        switch (field) {
+            case 'description':
+                this.solutionForm.description.error = !(this.solutionForm.description.value.length >= this.solutionForm.description.rules.min &&
+                    this.solutionForm.description.value.length <= this.solutionForm.description.rules.max)
+                    ? this.solutionFormErrors.description : '';
+                break;
+        }
+    }
+
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
+    }
+
+    validateSolutionForm() {
+        Object.keys(this.solutionForm).forEach(field => this.validateSolutionField(field));
+        return !Object.values(this.solutionForm).some(field => field.error !== '');
     }
 
     setIsAuth(bool) {
@@ -128,8 +131,16 @@ export default class ContestStore {
         this._contests = contest;
     }
 
+    setCurrentContest(contest) {
+        this._currentContest = contest;
+    }
+
     setSelectedType(type) {
         this._selectedType = type;
+    }
+
+    getStatus(number) {
+        return this.status[number];
     }
 
     setMinReward(min) {
@@ -165,6 +176,10 @@ export default class ContestStore {
         return this._contests;
     }
 
+    get currentContest() {
+        return this._currentContest;
+    }
+
     get selectedType() {
         return this._selectedType;
     }
@@ -173,12 +188,24 @@ export default class ContestStore {
         return this._reward;
     }
 
+
+
     async fetchContests() {
         try {
             const contests = await fetchData("/contests");
             this.setContests(contests);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        }
+    }
+
+    async fetchOneContestByNumber(number) {
+        try {
+            const contest = await fetchData(`/contests/number/${number}`);
+            return contest;
+        } catch (error) {
+            console.error("Ошибка при загрузке конкурса:", error);
+            return null;
         }
     }
 

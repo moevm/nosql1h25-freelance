@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react';
-import { Container, Form, Button, Dropdown, Modal } from 'react-bootstrap';
+import { Container, Form, Button, Dropdown, Modal, Card, Badge } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
 import { useNavigate } from 'react-router-dom';
@@ -208,16 +208,35 @@ const CreateContest = () => {
                 <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
             </Form>
 
-            
-
             <Modal show={showPreview} onHide={handleClosePreview} size='xl' centered scrollable>
-                <Modal.Header>
-                    <Modal.Title>{contest.form.title.value}</Modal.Title>
-                </Modal.Header>
                 <Modal.Body style={{ overflowY: 'auto' }}>
-                    <Markdown options={{ disableParsingRawHTML: true }}>
-                        {mdDescription}
-                    </Markdown>
+                    <Card className="mb-4 shadow-sm">
+                        <Card.Header>
+                            <Card.Title>
+                                <h1>{contest.form.title.value}</h1>
+                            </Card.Title>
+                            <h2>
+                                <Badge bg="secondary" className="">
+                                    {contest.form.type.value ? contest.form.type.value : 'Тип'}
+                                </Badge>
+                                <Badge className="ms-2" bg={'success'}>
+                                    {contest.getStatus(1)}
+                                </Badge>
+                            </h2>
+                            <h4 className="mb-1">Дата окончания: {(new Date(contest.form.endBy.value)).toLocaleDateString('ru-RU', {})}<span className="ms-3">Приз: {contest.form.prizepool.value} руб.</span></h4>
+                        </Card.Header>
+                        <Card.Body>
+                            <Card.Subtitle className="mb-1"><h2>Описание проекта</h2></Card.Subtitle>
+                                <Markdown options={{ disableParsingRawHTML: true }}>
+                                    {mdDescription}
+                                </Markdown>
+                        </Card.Body>
+                        <Card.Footer>
+                            <Button variant="primary">
+                                Добавить решение
+                            </Button>
+                        </Card.Footer>
+                    </Card>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='primary' onClick={handleClosePreview}>Закрыть предпросмотр</Button>
