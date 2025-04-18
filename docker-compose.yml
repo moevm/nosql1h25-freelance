@@ -8,9 +8,9 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mongo
+      - db
     environment:
-      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_URI=mongodb://db:27017/
       - DB_NAME=freelance_db
       - FLASK_APP=app.main
       - FLASK_ENV=development
@@ -24,7 +24,7 @@ services:
     depends_on:
       - server
 
-  mongo:
+  db:
     image: mongo:8.0.5
     restart: always
     ports:
