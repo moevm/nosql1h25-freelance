@@ -64,7 +64,13 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle  
                         </div>
                         
                         {/* Статус */}
-                        <Badge bg={status.color} style={{ fontSize: '0.85rem' }}>
+                        <Badge 
+                            style={{ 
+                                backgroundColor: status.color,
+                                color: status.textColor,
+                                fontSize: '0.85rem'
+                            }}
+                        >
                             {status.label}
                         </Badge>
                     </div>

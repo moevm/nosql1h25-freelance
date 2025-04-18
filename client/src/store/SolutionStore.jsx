@@ -25,11 +25,11 @@ export default class SolutionStore {
     };
 
     statusMap = {
-        1: { label: 'Новое', color: 'secondary' },
-        2: { label: 'Просмотрено', color: 'primary' },
-        3: { label: 'Победитель', color: 'success' },
-        4: { label: 'Необходимы правки', color: 'warning' },
-        5: { label: 'Правки внесены', color: 'info' },
+        1: { label: 'Новое', color: '#87cefa', textColor: '#fff' },       // Голубой
+        2: { label: 'Просмотрено', color: '#99ff99', textColor: '#fff' },  // Салатовый
+        3: { label: 'Победитель', color: '#008000', textColor: '#fff' },   // Зеленый
+        4: { label: 'Необходимы правки', color: '#f3a505', textColor: '#fff' }, // Желтый
+        5: { label: 'Правки внесены', color: '#87cefa', textColor: '#fff' },    // Синий
     };
 
     constructor() {
