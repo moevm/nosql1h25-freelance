@@ -132,8 +132,7 @@ export default class SolutionStore {
             }
     
             const response = await updateData(`/solutions/${solutionId}`, {
-                status: newStatus,
-                updatedAt: new Date().toISOString()
+                status: newStatus
             });
     
             // Обновляем локальное состояние
