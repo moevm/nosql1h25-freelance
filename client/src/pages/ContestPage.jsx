@@ -38,6 +38,7 @@ const ContestPage = () => {
     }
 
     const isFreelancer = user.user && user.user.role === 1;
+    const isEmployer = user.user && user.user.role === 2;
 
     return (
         <Container>
@@ -66,6 +67,13 @@ const ContestPage = () => {
                     <Card.Footer>
                         <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}>
                             Добавить решение
+                        </Button>
+                    </Card.Footer>
+                }
+                {isEmployer && 
+                    <Card.Footer>
+                        <Button variant="primary" onClick={() => navigate(`/solutions/contest/${currentContest.number}`)}>
+                            Посмотреть решения
                         </Button>
                     </Card.Footer>
                 }
