@@ -203,6 +203,16 @@ export default class ContestStore {
         }
     }
 
+    async fetchOneContestById(id) {
+        try {
+            const contest = await fetchData(`/contests/${id}`);
+            return contest;
+        } catch (error) {
+            console.error("Ошибка при загрузке конкурса по ID:", error);
+            return null;
+        }
+    }
+
     async fetchOneContestByNumber(number) {
         try {
             const contest = await fetchData(`/contests/number/${number}`);
@@ -224,7 +234,7 @@ export default class ContestStore {
 
     getTypeNameById(typeId) {
         if (!typeId) return null;
-        const type = this._types.find(t => t._id === typeId || t.id === typeId);
+        const type = this._types.find(t => t.id === typeId || t.id === typeId);
         return type?.name || "Неизвестный тип";
     }
 }

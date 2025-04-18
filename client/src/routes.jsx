@@ -8,6 +8,7 @@ import {
     MY_SOLUTIONS_ROUTE,
     MY_CONTESTS_ROUTE,
     CREATE_SOLUTION_ROUTE,
+    SOLUTION_ROUTE,
     SOLUTIONS_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
@@ -19,6 +20,7 @@ import CreateSolution from "./pages/CreateSolution.jsx";
 import MyContests from "./pages/MyContests.jsx";
 import MySolutions from "./pages/MySolutions.jsx";
 import Solutions from "./pages/Solutions.jsx";
+import SolutionPage from "./pages/SolutionPage.jsx";
 
 export const authRoutes = [
     {
@@ -42,8 +44,12 @@ export const authRoutes = [
         element: <MyContests />
     },
     {
-        path: SOLUTIONS_ROUTE + CONTEST_ROUTE + '/:number',
+        path: CONTEST_ROUTE + '/:number' + SOLUTIONS_ROUTE,
         element: <Solutions />
+    },
+    {
+        path: SOLUTION_ROUTE + '/:number',
+        element: <SolutionPage />
     }
 ]
 

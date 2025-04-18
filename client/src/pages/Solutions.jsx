@@ -91,6 +91,7 @@ const Solutions = () => {
                             contest={currentContest}
                             freelancer={user.getById(sol.freelancerId)}
                             showContestTitle={false}
+                            showFreelancerLogin={true}
                         />
                     ))}
                 </Row>

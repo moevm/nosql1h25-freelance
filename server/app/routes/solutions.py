@@ -83,3 +83,21 @@ def get_solutions_by_contest(contest_id):
         return jsonify(serialize_mongo(solutions)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# Маршрут удаления решения по ID
+@solutions_bp.route("/solutions/<solution_id>", methods=["DELETE"])
+def delete_solution(solution_id):
+    try:
+        if not ObjectId.is_valid(solution_id):
+            return jsonify({"error": "Invalid solution ID"}), 400
+            
+        result = solutions_collection.delete_one({"_id": ObjectId(solution_id)})
+        
+        if result.deleted_count == 0:
+            return jsonify({"error": "Solution not found"}), 404
+            
+        return jsonify({"message": "Solution deleted successfully"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Context } from "../main.jsx";
 import { SOLUTION_ROUTE } from "../utils/consts.js";
 
-const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle  }) => {
+const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, showFreelancerLogin  }) => {
     const { solution } = useContext(Context);
     const navigate = useNavigate();
 
@@ -35,6 +35,9 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle  
                 onClick={(e) => {
                     const selection = window.getSelection();
                     if (selection && selection.toString().length > 0) return;
+
+                    // Сохраняем решение в store перед переходом
+                    solution.setCurrentSolution(currentSolution);
                     navigate(SOLUTION_ROUTE + '/' + currentSolution.number);
                 }}
             >
@@ -47,14 +50,16 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle  
                     {/* Описание конкурса (условный рендеринг) */}
                     {showContestTitle && (
                         <div className="mt-1" style={{ fontSize: '0.9rem', color: '#555' }}>
-                            Конкурс: {contest?.title || currentSolution.contestId}
+                            <strong>Конкурс:</strong> {contest?.title || currentSolution.contestId}
                         </div>
                     )}
 
-                    {/* Фрилансер */}
-                    <div className="mt-2" style={{ fontSize: '0.9rem' }}>
-                        <strong>Фрилансер:</strong> {freelancer?.login || currentSolution.freelancerId}
-                    </div>
+                    {/* Фрилансер (условный рендеринг) */}
+                    {showFreelancerLogin && (
+                        <div className="mt-2" style={{ fontSize: '0.9rem' }}>
+                            <strong>Фрилансер:</strong> {freelancer?.login || currentSolution.freelancerId}
+                        </div>
+                    )}
 
                     {/* Блок с датой и статусом */}
                     <div className="mt-auto d-flex justify-content-between align-items-end">

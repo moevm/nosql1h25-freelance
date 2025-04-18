@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { fetchData } from "../services/apiService";
+import { fetchData, deleteData } from "../services/apiService";
 
 
 const baseForm = {
@@ -17,6 +17,7 @@ const baseForm = {
 
 export default class SolutionStore {
     solutions = [];
+    currentSolution = null;
     form = baseForm;
 
     formErrors = {
@@ -38,6 +39,10 @@ export default class SolutionStore {
 
     setSolutions(solutions) {
         this.solutions = solutions;
+    }
+
+    setCurrentSolution(solution) {
+        this.currentSolution = solution;
     }
 
     setFormField(field, value) {
@@ -76,6 +81,46 @@ export default class SolutionStore {
         } catch (error) {
             console.error("Ошибка при загрузке решений:", error);
             this.setSolutions([]);
+        }
+    }
+
+    async fetchSolutionsByFreelancerId(freelancerId) {
+        try {
+            const solutions = await fetchData(`/solutions/user/${freelancerId}`);
+            this.setSolutions(solutions);
+        } catch (error) {
+            console.error("Ошибка загрузки решений фрилансера:", error);
+            this.setSolutions([]);
+        }
+    }
+
+    async fetchSolutionByNumber(number) {
+        try {
+            const solution = await fetchData(`/solutions/number/${number}`);
+            this.setCurrentSolution(solution);
+            return solution;
+        } catch (error) {
+            console.error("Ошибка загрузки решения:", error);
+            return null;
+        }
+    }
+
+    // Добавляем метод для проверки существующего решения
+    getSolutionIfExists(number) {
+        if (this.currentSolution && this.currentSolution.number == number) {
+            return this.currentSolution;
+        }
+        return null;
+    }
+
+    async deleteSolutionById(solutionId) {
+        try {
+            await deleteData(`/solutions/${solutionId}`);
+            this.setCurrentSolution(null); // Очищаем текущее решение
+            return true;
+        } catch (error) {
+            console.error("Ошибка при удалении решения:", error);
+            throw error;
         }
     }
 }
