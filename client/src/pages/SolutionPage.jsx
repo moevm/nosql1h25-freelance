@@ -5,6 +5,7 @@ import { Container, Card, Badge, Button, Row, Col } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Markdown from 'markdown-to-jsx';
 import ConfirmationModal from '../components/ConfirmationModal';
+import ChangeSolutionStatusModal from '../components/ChangeSolutionStatusModal';
 
 const SolutionPage = () => {
     const { solution, contest, user } = useContext(Context);
@@ -15,6 +16,7 @@ const SolutionPage = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -87,6 +89,25 @@ const SolutionPage = () => {
         } catch (error) {
             console.error("Ошибка удаления:", error);
             // Показать сообщение об ошибке
+        }
+    };
+
+    const handleStatusChange = async (newStatus) => {
+        try {
+            // Проверяем, что статус изменился
+            if (currentSolution.status === newStatus) {
+                return;
+            }
+
+            const updatedSolution = await solution.updateSolutionStatus(
+                currentSolution.id, 
+                newStatus
+            );
+
+            // Обновляем текущее решение
+            setCurrentSolution(updatedSolution);
+        } catch (error) {
+            console.error('Ошибка изменения статуса:', error);
         }
     };
 
@@ -169,7 +190,7 @@ const SolutionPage = () => {
                                 <Button 
                                     variant="primary" 
                                     className="me-2"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/edit`)}
+                                    onClick={{/* () => navigate(`/solution/${currentSolution.number}/edit`)*/}}
                                 >
                                     Редактировать решение
                                 </Button>
@@ -196,14 +217,22 @@ const SolutionPage = () => {
                             <>
                                 <Button 
                                     variant="warning"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/change-status`)}
+                                    onClick={() => setShowStatusModal(true)}
                                 >
                                     Изменить статус
                                 </Button>
+
+                                <ChangeSolutionStatusModal
+                                    show={showStatusModal}
+                                    onHide={() => setShowStatusModal(false)}
+                                    currentStatus={currentSolution.status}
+                                    onSave={handleStatusChange}
+                                />
+
                                 <Button 
                                     variant="success" 
                                     className="me-2"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)}
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)} // Добавить routes
                                 >
                                     Оставить отзыв
                                 </Button>

@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { fetchData, deleteData } from "../services/apiService";
+import { fetchData, deleteData, updateData } from "../services/apiService";
 
 
 const baseForm = {
@@ -121,6 +121,40 @@ export default class SolutionStore {
         } catch (error) {
             console.error("Ошибка при удалении решения:", error);
             throw error;
+        }
+    }
+
+    async updateSolutionStatus(solutionId, newStatus) {
+        try {
+            // Проверка типа статуса
+            if (typeof newStatus !== 'number' || newStatus < 1 || newStatus > 5) {
+                throw new Error('Статус должен быть числом от 1 до 5');
+            }
+    
+            const response = await updateData(`/solutions/${solutionId}`, {
+                status: newStatus,
+                updatedAt: new Date().toISOString()
+            });
+    
+            // Обновляем локальное состояние
+            this._updateLocalSolution(response);
+            return response;
+        } catch (error) {
+            console.error('Ошибка обновления статуса:', error);
+            throw error;
+        }
+    }
+    
+    _updateLocalSolution(updatedSolution) {
+        // Обновляем в списке решений
+        const index = this.solutions.findIndex(s => s.id === updatedSolution.id);
+        if (index !== -1) {
+            this.solutions[index] = updatedSolution;
+        }
+    
+        // Обновляем текущее решение
+        if (this.currentSolution?.id === updatedSolution.id) {
+            this.currentSolution = updatedSolution;
         }
     }
 }
