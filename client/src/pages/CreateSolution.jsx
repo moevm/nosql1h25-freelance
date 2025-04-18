@@ -85,7 +85,7 @@ const CreateSolution = () => {
     };
 
     const handleFilesChange = useCallback((newFiles) => {
-        const allowedTypes = contest.solutionForm.files.rules.allowedTypes;
+        const allowedTypes = contest.solutionForm.files.allowedTypes;
         const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
         
         if (validFiles.length > contest.solutionForm.files.rules.max) {
@@ -109,7 +109,6 @@ const CreateSolution = () => {
     useEffect(() => {
         return () => {
             Object.values(imagesMap).forEach(URL.revokeObjectURL);
-            contest.resetSolutionForm();
         };
     }, [imagesMap]);
 
@@ -120,6 +119,12 @@ const CreateSolution = () => {
         });
         setMdDescription(updatedMarkdown);
     }, [contest.solutionForm.description.value, imagesMap]);
+
+    useEffect(() => {
+            return () => {
+                contest.resetSolutionForm();
+            };
+        }, []);
 
     return (
         <Container className="mt-4">
