@@ -6,7 +6,6 @@ import FiltersBar from "./FiltersBar.jsx";
 import { BsFilter } from 'react-icons/bs';
 
 const ContestListWithFilters = () => {
-    const { contest, user } = useContext(Context);
     const [open, setOpen] = useState(false);
 
     return (

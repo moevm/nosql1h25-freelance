@@ -262,6 +262,8 @@ export default class ContestStore {
             this.setContests(contests);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        } finally {
+            this.setLoading(false)
         }
     }
 

@@ -16,7 +16,7 @@ const ContestsList = observer(() => {
             // Плавное скрытие лоадера с минимальной задержкой
             const timer = setTimeout(() => {
                 setShowLoader(false);
-            }, 300); // Минимальная задержка 300 мс для плавности
+            }, 100); // Минимальная задержка 100 мс для плавности
             return () => clearTimeout(timer);
         }
     }, [contest.isLoading]);
