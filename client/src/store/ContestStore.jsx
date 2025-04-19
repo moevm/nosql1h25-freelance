@@ -68,6 +68,7 @@ export default class ContestStore {
         this._maxReward = 9999999;
         this._endBy = null;
         this._endAfter = null;
+        this._searchQuery = '';
         makeAutoObservable(this);
     }
 
@@ -146,6 +147,10 @@ export default class ContestStore {
         this._selectedTypes = types;
     }
 
+    setSearchQuery(query) {
+        this._searchQuery = query;
+    }
+
     getStatus(number) {
         return this.status[number];
     }
@@ -211,6 +216,10 @@ export default class ContestStore {
         return this._selectedTypes;
     }
 
+    get searchQuery() {
+        return this._searchQuery;
+    }
+
     get reward(){
         return this._reward;
     }
@@ -239,6 +248,10 @@ export default class ContestStore {
                 params.types = this._selectedTypes.map(t => t.id).join(',');
             }
 
+            if (this._searchQuery) {
+                params.search = this._searchQuery;
+            }
+
             if (this._endBy) {
                 params.endBy = this._endBy.toISOString().split('T')[0];
             }
@@ -251,11 +264,14 @@ export default class ContestStore {
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
                 this._selectedTypes?.length > 0 ||
+                this._searchQuery ||
                 this._endBy ||
                 this._endAfter
             );
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
+
+            console.log('Fetching contests with params:', params);
 
             const contests = await fetchData(endpoint, params);
             this.setContests(contests);

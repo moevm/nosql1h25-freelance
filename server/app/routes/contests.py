@@ -79,6 +79,8 @@ def get_filtered_contests():
     end_by = request.args.get("endBy", None)
     end_after = request.args.get("endAfter", None)
     types = request.args.get("types", None)
+    search = request.args.get("search", None)
+
 
     query = {
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
@@ -106,6 +108,13 @@ def get_filtered_contests():
     if types:
             type_ids = types.split(',')
             query["type"] = {"$in": type_ids}
+
+    if search:
+            regex = {"$regex": search, "$options": "i"}
+            query["$or"] = [
+                {"title": regex},
+                {"annotation": regex}
+            ]
 
     contests = list(contests_collection.find(query))
     return jsonify(serialize_mongo(contests))
