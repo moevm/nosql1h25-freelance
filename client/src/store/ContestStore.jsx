@@ -68,6 +68,7 @@ export default class ContestStore {
         this._minReward = 0;
         this._maxReward = 9999999;
         this._endBy = null;
+        this._endAfter = null;
         makeAutoObservable(this);
     }
 
@@ -173,6 +174,16 @@ export default class ContestStore {
         }
     }
 
+    setEndAfter(date) {
+        if (!date) {
+            this._endAfter = null;
+        } else if (typeof date === 'string') {
+            this._endAfter = new Date(date);
+        } else {
+            this._endAfter = date;
+        }
+    }
+
     get minReward() {
         return this._minReward;
     }
@@ -229,10 +240,15 @@ export default class ContestStore {
                 params.endBy = this._endBy.toISOString().split('T')[0];
             }
 
+            if (this._endAfter) {
+                params.endAfter = this._endAfter.toISOString().split('T')[0];
+            }
+
             const hasFilters = (
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
-                this._endBy
+                this._endBy ||
+                this._endAfter
             );
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
@@ -243,6 +259,8 @@ export default class ContestStore {
             console.error("Ошибка при отправке:", error);
         }
     }
+
+
     async fetchOneContestById(id) {
         try {
             const contest = await fetchData(`/contests/${id}`);
