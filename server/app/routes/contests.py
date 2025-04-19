@@ -77,17 +77,30 @@ def get_filtered_contests():
     min_reward = int(request.args.get("minReward", 0))
     max_reward = int(request.args.get("maxReward", 9999999))
     end_by = request.args.get("endBy", None)
+    end_after = request.args.get("endAfter", None)
 
     query = {
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
     }
 
+    end_by_conditions = {}
+
     if end_by:
         try:
             end_date = datetime.strptime(end_by, "%Y-%m-%d")
-            query["endBy"] = {"$lte": end_date}
+            end_by_conditions["$lte"] = end_date
         except ValueError:
             return jsonify({"error": "Invalid endBy date format"}), 400
+
+    if end_after:
+        try:
+            end_date = datetime.strptime(end_after, "%Y-%m-%d")
+            end_by_conditions["$gte"] = end_date
+        except ValueError:
+            return jsonify({"error": "Invalid endAfter date format"}), 400
+
+    if end_by_conditions:
+        query["endBy"] = end_by_conditions
 
     contests = list(contests_collection.find(query))
     return jsonify(serialize_mongo(contests))
