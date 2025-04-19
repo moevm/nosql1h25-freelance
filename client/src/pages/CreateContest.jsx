@@ -27,7 +27,7 @@ const CreateContest = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
         if (!contest.validateForm()) {
             return;
         }
@@ -53,7 +53,7 @@ const CreateContest = () => {
             prizepool: parseInt(contest.form.prizepool.value),
             description: contest.form.description.value,
             endBy: date.toISOString(),
-            type: String(contest.form.type.value),
+            type: String(contest.form.type.value), 
             status: 1
         };
 
@@ -73,7 +73,7 @@ const CreateContest = () => {
 
     const handleFilesChange = useCallback((newFiles) => {
         const validFiles = Array.from(newFiles).filter(file =>
-            file.type.startsWith('image/') // && 
+                file.type.startsWith('image/') // &&
             //file.size < 5 * 1024 * 1024 // 5MB limit
         );
         contest.form.files.error = validFiles.length > contest.form.files.rules.max
@@ -95,7 +95,7 @@ const CreateContest = () => {
 
     useEffect(() => {
         const updatedMarkdown = contest.form.description.value.replace(regex, (match, p1, p2) => {
-          return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
+            return imagesMap[p2] ? `${p1}(${imagesMap[p2]})` : `${p1}(${p2})`;
         });
         setMdDescription(updatedMarkdown);
     }, [contest.form.description.value, imagesMap]);
@@ -113,17 +113,24 @@ const CreateContest = () => {
             <Form noValidate onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Dropdown>
-                        <Dropdown.Toggle variant={contest.form.type.error ? 'danger' : contest.form.type.value ? 'success' : 'primary'}>
-                            {contest.form.type.value ? contest.form.type.value : "Выберите тип"}
+                        <Dropdown.Toggle
+                            variant={contest.form.type.error ? 'danger' : contest.form.type.value ? 'success' : 'primary'}
+                        >
+                            {contest.form.type.value ? contest.getTypeNameById(contest.form.type.value) : "Выберите тип"}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             {contest.types.map((t) => (
-                                <Dropdown.Item key={t.id} onClick={() => contest.setFormField('type', t.name)}>
+                                <Dropdown.Item key={t.id} onClick={() => contest.setFormField('type', t.id)}>
                                     {t.name}
                                 </Dropdown.Item>
                             ))}
                         </Dropdown.Menu>
                     </Dropdown>
+                    {contest.form.type.error && (
+                        <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                            {contest.form.type.error}
+                        </Form.Control.Feedback>
+                    )}
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Control
@@ -217,7 +224,7 @@ const CreateContest = () => {
                             </Card.Title>
                             <h2>
                                 <Badge bg="secondary" className="">
-                                    {contest.form.type.value ? contest.form.type.value : 'Тип'}
+                                    {contest.form.type.value ? contest.getTypeNameById(contest.form.type.value) : 'Тип'}
                                 </Badge>
                                 <Badge className="ms-2" bg={'success'}>
                                     {contest.getStatus(1)}
@@ -227,9 +234,9 @@ const CreateContest = () => {
                         </Card.Header>
                         <Card.Body>
                             <Card.Subtitle className="mb-1"><h2>Описание проекта</h2></Card.Subtitle>
-                                <Markdown options={{ disableParsingRawHTML: true }}>
-                                    {mdDescription}
-                                </Markdown>
+                            <Markdown options={{ disableParsingRawHTML: true }}>
+                                {mdDescription}
+                            </Markdown>
                         </Card.Body>
                         <Card.Footer>
                             <Button variant="primary">
@@ -252,12 +259,12 @@ const CreateContest = () => {
                         Для создания конкурса распишите подробно всю информацию в поле "Полное описание" в формате Markdown.
                         <br /><br />
                         Справка:{" "}
-                        <a 
-                        href="https://www.markdownguide.org/cheat-sheet/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                        <a
+                            href="https://www.markdownguide.org/cheat-sheet/"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
-                        https://www.markdownguide.org/cheat-sheet/
+                            https://www.markdownguide.org/cheat-sheet/
                         </a>
                         <br /><br />
                         Чтобы отобразить изображения загруженных файлов, укажите вместо ссылки название файла, как в этом примере - ![Image](image.png)
@@ -267,7 +274,7 @@ const CreateContest = () => {
                     <Button variant='primary' onClick={handleCloseHelp}>Закрыть справку</Button>
                 </Modal.Footer>
             </Modal>
-            
+
         </Container>
     );
 };
