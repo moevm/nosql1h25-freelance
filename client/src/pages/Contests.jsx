@@ -7,7 +7,8 @@ import {Context} from "../main.jsx";
 import { Link } from 'react-router-dom';
 import {CREATE_CONTEST_ROUTE} from "../utils/consts.js";
 import EndByBar from "../components/EndByBar.jsx";
-import EndAfterBar from "../components/EndAfterBar.jsx"; // Или NavLink, если нужно активное состояние
+import EndAfterBar from "../components/EndAfterBar.jsx";
+import SearchBar from "../components/SearchBar.jsx"; // Или NavLink, если нужно активное состояние
 
 const Contests = () => {
     const { user } = useContext(Context);
@@ -23,6 +24,7 @@ const Contests = () => {
                     {/*>*/}
                     {/*    Добавить конкурс*/}
                     {/*</Link>*/}
+                    <SearchBar />
                     <TypeBar />
                     <RewardBar />
                     <EndByBar />
