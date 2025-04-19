@@ -10,14 +10,7 @@ const NavBar = () => {
     const { user } = useContext(Context);
 
     return (
-        <Navbar
-            variant="dark"
-            expand="lg"
-            className="mb-4"
-            style={{
-                background: 'linear-gradient(90deg, #BA38FE 0%, #4EC1FF 100%)'
-            }}
-        >
+        <Navbar variant="dark" expand="lg" className="mb-4" style={{ backgroundColor: '#543787' }}>
             <Container>
                 <Navbar.Brand as={NavLink} to={CONTESTS_ROUTE}>
                     <div className="d-flex align-items-center">
