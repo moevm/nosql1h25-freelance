@@ -83,7 +83,6 @@ def get_filtered_contests():
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
     }
 
-    # Initialize endBy conditions
     end_by_conditions = {}
 
     if end_by:
