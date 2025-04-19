@@ -64,6 +64,7 @@ export default class ContestStore {
         this._contests = [];
         this._currentContest = null;
         this._selectedTypes = [];
+        this._selectedStatuses = [];
         this._minReward = 0;
         this._maxReward = 9999999;
         this._endBy = null;
@@ -147,6 +148,10 @@ export default class ContestStore {
         this._selectedTypes = types;
     }
 
+    setSelectedStatuses(statuses) {
+        this._selectedStatuses = statuses;
+    }
+
     setSearchQuery(query) {
         this._searchQuery = query;
     }
@@ -216,6 +221,10 @@ export default class ContestStore {
         return this._selectedTypes;
     }
 
+    get selectedStatuses() {
+        return this._selectedStatuses;
+    }
+
     get searchQuery() {
         return this._searchQuery;
     }
@@ -248,6 +257,10 @@ export default class ContestStore {
                 params.types = this._selectedTypes.map(t => t.id).join(',');
             }
 
+            if (this._selectedStatuses?.length > 0) {
+                params.statuses = this._selectedStatuses.join(',');
+            }
+
             if (this._searchQuery) {
                 params.search = this._searchQuery;
             }
@@ -264,6 +277,7 @@ export default class ContestStore {
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
                 this._selectedTypes?.length > 0 ||
+                this._selectedStatuses?.length > 0 ||
                 this._searchQuery ||
                 this._endBy ||
                 this._endAfter
