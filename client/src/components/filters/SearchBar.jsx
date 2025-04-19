@@ -26,7 +26,7 @@ const SearchBar = () => {
                         type="text"
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        placeholder="Поиск по названию или описанию..."
+                        placeholder="Поиск по названию, создателю или описанию..."
                         style={{
                             fontSize: '0.8rem',
                         }}

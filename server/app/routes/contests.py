@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
 from bson.errors import InvalidId
-from app.database import contests_collection
+from app.database import contests_collection, users_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_contest
 from datetime import datetime
@@ -81,8 +81,7 @@ def get_filtered_contests():
     types = request.args.get("types", None)
     search = request.args.get("search", None)
     statuses = request.args.get("statuses", None)
-
-
+    employer_id = request.args.get("employerId", None)
 
     query = {
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
@@ -119,11 +118,23 @@ def get_filtered_contests():
                 return jsonify({"error": "Invalid status format"}), 400
 
     if search:
-            regex = {"$regex": search, "$options": "i"}
-            query["$or"] = [
-                {"title": regex},
-                {"annotation": regex}
-            ]
+        regex = {"$regex": search, "$options": "i"}
+
+        matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
+        matching_user_ids = [str(user["_id"]) for user in matching_users]
+
+        search_conditions = [
+            {"title": regex},
+            {"annotation": regex},
+        ]
+
+        if matching_user_ids:
+            search_conditions.append({"employerId": {"$in": matching_user_ids}})
+
+        query["$or"] = search_conditions
+
+    if employer_id:
+        query["employerId"] = employer_id
 
     contests = list(contests_collection.find(query))
     return jsonify(serialize_mongo(contests))

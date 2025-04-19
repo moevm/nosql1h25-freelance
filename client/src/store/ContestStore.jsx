@@ -71,6 +71,7 @@ export default class ContestStore {
         this._endAfter = null;
         this._searchQuery = '';
         this.isLoading = false;
+        this._employerId = null;
         makeAutoObservable(this);
     }
 
@@ -131,6 +132,14 @@ export default class ContestStore {
 
     setLoading(bool) {
         this.isLoading = bool;
+    }
+
+    setEmployerId(id) {
+        this._employerId = id;
+    }
+
+    get employerId() {
+        return this._employerId;
     }
 
     setIsAuth(bool) {
@@ -283,6 +292,10 @@ export default class ContestStore {
                 params.endAfter = this._endAfter.toISOString().split('T')[0];
             }
 
+            if (this._employerId) {
+                params.employerId = this._employerId;
+            }
+
             const hasFilters = (
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
@@ -290,7 +303,8 @@ export default class ContestStore {
                 this._selectedStatuses?.length > 0 ||
                 this._searchQuery ||
                 this._endBy ||
-                this._endAfter
+                this._endAfter ||
+                this._employerId
             );
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";

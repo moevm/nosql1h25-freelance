@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Row, Col, Container, Button, Collapse, Card } from "react-bootstrap";
 import ContestsList from "../components/ContestsList.jsx";
 import { Context } from "../main.jsx";
@@ -6,8 +6,15 @@ import FiltersBar from "../components/FiltersBar.jsx";
 import { BsFilter } from 'react-icons/bs'; // Иконка фильтра
 
 const Contests = () => {
-    const { user } = useContext(Context);
+    const { contest, user } = useContext(Context);
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (user.user.id) {
+            contest.setEmployerId(null);
+            contest.setLoading(true);
+        }
+    }, [user]);
 
     return (
         <Container className="py-3">
