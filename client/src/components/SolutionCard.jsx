@@ -9,8 +9,7 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, 
     const navigate = useNavigate();
 
     const status = solution.getStatus(currentSolution.status);
-    
-    // Форматирование даты
+
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('ru-RU', {
             day: '2-digit',
@@ -21,7 +20,6 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, 
         });
     };
 
-    // Определяем, нужно ли писать "Создано" или "Обновлено"
     const isCreated = currentSolution.updatedAt === currentSolution.createdAt;
     const dateLabel = isCreated ? "Создано" : "Обновлено";
     const formattedDate = formatDate(isCreated ? currentSolution.createdAt : currentSolution.updatedAt);
@@ -83,6 +81,99 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, 
             </Card>
         </Col>
     );
+
+    return (<Col
+            xs={12}
+            className="my-2"
+            onClick={(e) => {
+                const selection = window.getSelection();
+                if (selection && selection.toString().length > 0) return;
+
+                solution.setCurrentSolution(currentSolution);
+                navigate(SOLUTION_ROUTE + '/' + currentSolution.number);
+            }}
+        >
+            <Card
+                border="light"
+                className="shadow-lg rounded-lg"
+                style={{
+                    cursor: 'pointer', minHeight: '200px',
+                }}
+            >
+                <Card.Body>
+                    {/* Название */}
+                    <div className="d-flex justify-content-between align-items-center">
+                        <Card.Title className="text-truncate" style={{
+                            fontSize: '1.5rem', fontWeight: 'bold', color: '#333',
+                        }}>
+                            {item.title}
+                        </Card.Title>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <BsStarFill color="gold" size={22} className="me-1"/>
+                            <span style={{fontSize: '1rem', color: '#666'}}>{item.rating || '4.8'}</span>
+                        </div>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <Card.Title className="text-truncate" style={{
+                            fontSize: '1.5rem', fontWeight: 'bold', color: '#333',
+                        }}>
+                            Решение
+                        </Card.Title>
+                    </div>
+                    
+                    {/* Описание */}
+                    <div style={{height: '80px'}}>
+                        <Card.Text className="mt-2" style={{fontSize: '1rem', color: '#555', lineHeight: '1.4'}}>
+                            {item.annotation}
+                        </Card.Text>
+                    </div>
+                </Card.Body>
+                <Card.Body>
+                    {/* Компания и приз */}
+                    <div className="d-flex justify-content-between align-items-center">
+                            <span style={{color: '#543787', fontWeight: '600'}}>
+                                {creator ? creator.login : 'Неизвестный создатель'}
+                            </span>
+                        <div>
+                            <BsTrophy color="green" size={20} className="me-1"/>
+                            <span style={{fontSize: '1rem', fontWeight: 'bold', color: 'green'}}>
+                                    {item.prizepool} ₽.
+                                </span>
+                        </div>
+                    </div>
+                    {/* Индикатор статуса */}
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                        <div className="d-flex align-items-center">
+                            <span
+                                className={`badge ${statusColor} me-2`}
+                                style={{fontSize: '0.9rem', fontWeight: '500'}}
+                            >
+                                {statusText}
+                            </span>
+    
+                            <span
+                                style={{
+                                    fontSize: '0.9rem',
+                                    color: '#543787',
+                                    fontWeight: '500',
+                                    background: '#f1f1f9',
+                                    padding: '4px 8px',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                {contestTypeName}
+                            </span>
+                        </div>
+                        <span style={{fontSize: '0.9rem', color: '#666'}}>
+                            {isOpen ? "До" : "C"} {new Date(item.endBy).toLocaleDateString('ru-RU', {
+                                day: '2-digit', month: 'long', year: 'numeric'
+                            })}
+                        </span>
+                    </div>
+    
+                </Card.Body>
+            </Card>
+        </Col>);
 };
 
 export default SolutionCard;
