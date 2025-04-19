@@ -67,6 +67,7 @@ export default class ContestStore {
         this._selectedType = {}
         this._minReward = 0;
         this._maxReward = 9999999;
+        this._endBy = null;
         makeAutoObservable(this);
     }
 
@@ -162,6 +163,16 @@ export default class ContestStore {
         this.setMaxReward(max);
     }
 
+    setEndBy(date) {
+        if (!date) {
+            this._endBy = null;
+        } else if (typeof date === 'string') {
+            this._endBy = new Date(date);
+        } else {
+            this._endBy = date;
+        }
+    }
+
     get minReward() {
         return this._minReward;
     }
@@ -194,6 +205,10 @@ export default class ContestStore {
         return this._reward;
     }
 
+    get endBy() {
+        return this._endBy;
+    }
+
     async fetchContests() {
         try {
             const contests = await fetchData("/contests");
@@ -203,6 +218,31 @@ export default class ContestStore {
         }
     }
 
+    async fetchContestsFiltered() {
+        try {
+            const params = {
+                minReward: this._minReward ?? 0,
+                maxReward: this._maxReward ?? 9999999,
+            };
+
+            if (this._endBy) {
+                params.endBy = this._endBy.toISOString().split('T')[0];
+            }
+
+            const hasFilters = (
+                params.minReward !== 0 ||
+                params.maxReward !== 9999999 ||
+                this._endBy
+            );
+
+            const endpoint = hasFilters ? "/contests/filter" : "/contests";
+
+            const contests = await fetchData(endpoint, params);
+            this.setContests(contests);
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        }
+    }
     async fetchOneContestById(id) {
         try {
             const contest = await fetchData(`/contests/${id}`);

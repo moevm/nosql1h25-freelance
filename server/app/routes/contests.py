@@ -4,6 +4,7 @@ from bson.errors import InvalidId
 from app.database import contests_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_contest
+from datetime import datetime
 from werkzeug.utils import secure_filename
 import os, re, json
 
@@ -69,6 +70,26 @@ def create_contest():
 @contests_bp.route("/contests", methods=["GET"])
 def get_contests():
     contests = list(contests_collection.find({}))
+    return jsonify(serialize_mongo(contests))
+
+@contests_bp.route("/contests/filter", methods=["GET"])
+def get_filtered_contests():
+    min_reward = int(request.args.get("minReward", 0))
+    max_reward = int(request.args.get("maxReward", 9999999))
+    end_by = request.args.get("endBy", None)
+
+    query = {
+        "prizepool": {"$gte": min_reward, "$lte": max_reward}
+    }
+
+    if end_by:
+        try:
+            end_date = datetime.strptime(end_by, "%Y-%m-%d")
+            query["endBy"] = {"$lte": end_date}
+        except ValueError:
+            return jsonify({"error": "Invalid endBy date format"}), 400
+
+    contests = list(contests_collection.find(query))
     return jsonify(serialize_mongo(contests))
 
 

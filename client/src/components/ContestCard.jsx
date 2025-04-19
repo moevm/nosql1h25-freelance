@@ -3,7 +3,7 @@ import {Card, Col} from "react-bootstrap";
 import {useNavigate} from 'react-router-dom';
 import { Context } from "../main.jsx";
 import { CONTEST_ROUTE } from "../utils/consts.js";
-import { BsStar, BsTrophy } from 'react-icons/bs';
+import { BsStar, BsTrophy, BsStarFill } from 'react-icons/bs';
 
 const ContestCard = ({ contest: item }) => {
     const { contest } = useContext(Context);
@@ -30,6 +30,7 @@ const ContestCard = ({ contest: item }) => {
                 className="mt-3 shadow"
                 style={{
                     height: '230px',
+                    cursor: 'pointer'
                 }}
             >
                 <Card.Body>
@@ -43,8 +44,9 @@ const ContestCard = ({ contest: item }) => {
                             {item.title}
                         </Card.Title>
                         <div className="d-flex justify-content-between align-items-center">
-                            <BsStar color="gold" className="me-1"/>
-                            <span>{item.rating || '4.8'}</span>
+                            <BsStarFill color="gold" size={20} className="me-1"/>
+                            <span color="gold">{item.rating || '4.8'}</span>
+
                         </div>
                     </div>
                     {/* Описание */}

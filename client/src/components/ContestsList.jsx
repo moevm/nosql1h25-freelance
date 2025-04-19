@@ -8,7 +8,7 @@ const ContestsList = observer(() => {
     const { contest } = useContext(Context);
 
     useEffect(() => {
-        contest.fetchContests(); // Загружаем проекты с сервера
+        contest.fetchContestsFiltered(); // Загружаем проекты с сервера
     }, [contest]);
 
     return (
