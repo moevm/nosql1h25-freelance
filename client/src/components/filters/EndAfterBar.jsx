@@ -31,7 +31,6 @@ const EndAfterBar = () => {
         } else {
             contest.setEndAfter(null);
         }
-        contest.fetchContestsFiltered();
     }, [endAfter, contest]);
 
     const handleEndDateChange = (e) => {

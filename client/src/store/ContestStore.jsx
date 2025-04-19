@@ -242,6 +242,10 @@ export default class ContestStore {
         return this._endBy;
     }
 
+    get endAfter() {
+        return this._endAfter;
+    }
+
     async fetchContests() {
         try {
             const contests = await fetchData("/contests");
