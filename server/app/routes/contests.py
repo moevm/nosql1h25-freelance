@@ -80,6 +80,8 @@ def get_filtered_contests():
     end_after = request.args.get("endAfter", None)
     types = request.args.get("types", None)
     search = request.args.get("search", None)
+    statuses = request.args.get("statuses", None)
+
 
 
     query = {
@@ -108,6 +110,13 @@ def get_filtered_contests():
     if types:
             type_ids = types.split(',')
             query["type"] = {"$in": type_ids}
+
+    if statuses:
+            try:
+                status_ids = [int(status) for status in statuses.split(',')]
+                query["status"] = {"$in": status_ids}
+            except ValueError:
+                return jsonify({"error": "Invalid status format"}), 400
 
     if search:
             regex = {"$regex": search, "$options": "i"}

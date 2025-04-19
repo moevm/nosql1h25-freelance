@@ -10,7 +10,7 @@ const ContestCard = ({ contest: item }) => {
     const navigate = useNavigate();
 
     //TODO isOpen
-    const isOpen = new Date(item.endBy) > new Date();
+    const isOpen = item.status === 1;
     const statusText = isOpen ? 'Открыт' : 'Закрыт';
     const statusColor = isOpen ? 'bg-success' : 'bg-danger';
 
