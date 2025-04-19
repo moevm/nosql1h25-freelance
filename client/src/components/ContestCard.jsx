@@ -11,12 +11,20 @@ const ContestCard = observer(({contest: item}) => {
     const navigate = useNavigate();
 
     const creator = user.getById(item.employerId);
-    const isOpen = item.status === 1;
-    const statusText = isOpen ? 'Открыт' : 'Закрыт';
-    const statusColor = isOpen ? 'bg-success' : 'bg-danger';
+    const isOpen = item.status;
+    const statusOptions = [
+        { value: 1, label: 'Активный', colorClass: 'bg-success' },
+        { value: 2, label: 'На проверке', colorClass: 'bg-warning' },
+        { value: 3, label: 'Завершённый', colorClass: 'bg-danger' },
+        { value: 4, label: 'Отменённый', colorClass: 'bg-secondary' }
+    ];
+
+    const statusOption = statusOptions.find(option => option.value === item.status);
+
+    const statusText = statusOption ? statusOption.label : 'Неизвестный статус';
+    const statusColor = statusOption ? statusOption.colorClass : 'bg-light';
 
     const contestTypeName = contest.getTypeNameById(item.type);
-    console.log('item.typeId:', item.type);
 
     return (<Col
         xs={12}

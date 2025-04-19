@@ -21,7 +21,9 @@ const StatusBar = () => {
 
     const statusOptions = [
         { value: 1, label: 'Активный' },
-        { value: 2, label: 'Завершённый' }
+        { value: 2, label: 'На проверке' },
+        { value: 3, label: 'Завершённый' },
+        { value: 4, label: 'Отменённый' }
     ];
 
     return (
