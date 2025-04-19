@@ -19,10 +19,6 @@ const TypeBar = () => {
         contest.setSelectedTypes(updatedTypes);
     };
 
-    useEffect(() => {
-        contest.fetchTypes();
-    }, []);
-
     return (
         <Dropdown style={{width: '100%'}}>
             <div className="mt-2 mb-2">

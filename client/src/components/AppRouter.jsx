@@ -10,8 +10,11 @@ const AppRouter = () => {
 
     useEffect(() => {
             user.fetchUsers();
-
     }, [user]);
+
+    useEffect(() => {
+        contest.fetchTypes();
+    }, []);
 
     useEffect(() => {
         if (!contest.contests || contest.contests.length === 0) {

@@ -360,6 +360,7 @@ export default class ContestStore {
         try {
             const types = await fetchData("/contest-types");
             this.setTypes(types);
+            console.log("Загрузка типов",types)
         } catch (error) {
             console.error("Ошибка при загрузке типов конкурсов:", error);
         }
