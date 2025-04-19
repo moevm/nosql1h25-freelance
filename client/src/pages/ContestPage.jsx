@@ -8,8 +8,8 @@ import Markdown from 'markdown-to-jsx';
 const ContestPage = () => {
     const { contest, user } = useContext(Context);
     const { number } = useParams();
-    const [currentContest, setCurrentContest] = useState(null);
-    const [error, setError] = useState(null);
+    const [ currentContest, setCurrentContest ] = useState(null);
+    const [ error, setError ] = useState(null);
 
     const navigate = useNavigate();
 
@@ -28,6 +28,10 @@ const ContestPage = () => {
             fetchContest();
         }
     }, [number, contest.currentContest]);
+
+    useEffect(() => {
+        contest.fetchTypes();
+    }, [])
 
     if (error) {
         return <div>{error}</div>;
@@ -49,7 +53,7 @@ const ContestPage = () => {
                     </Card.Title>
                     <h2>
                         <Badge bg="secondary" className="">
-                            {currentContest.type}
+                            {contest.getTypeNameById(currentContest.type)}
                         </Badge>
                         <Badge className="ms-2" bg={currentContest.status === 1 ? 'success' : 'danger'}>
                             {contest.getStatus(currentContest.status)}
