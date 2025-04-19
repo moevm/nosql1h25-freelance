@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context } from '../main.jsx';
+import { Context } from '../../main.jsx';
 import { Form } from 'react-bootstrap';
 import { BsSearch } from 'react-icons/bs';
 
@@ -8,19 +8,15 @@ const SearchBar = () => {
     const { contest } = useContext(Context);
     const [searchQuery, setSearchQuery] = useState(contest.searchQuery || '');
 
+    useEffect(() => {
+        setSearchQuery(contest.searchQuery);
+    }, [contest.searchQuery]);
+
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
         contest.setSearchQuery(query);
     };
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [searchQuery, contest]);
 
     return (
         <div style={{ width: '100%' }} className="mt-2">
@@ -34,7 +30,7 @@ const SearchBar = () => {
                         type="text"
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        placeholder="Поиск по названию или описанию..."
+                        placeholder="Поиск по названию, создателю или описанию..."
                         style={{
                             fontSize: '0.8rem',
                         }}

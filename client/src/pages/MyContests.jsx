@@ -1,12 +1,21 @@
-import React from 'react';
-import { Container } from 'react-bootstrap';
+import React, { useContext, useState, useEffect } from 'react';
+import { Context } from "../main.jsx";
+import ContestListWithFilters from "../components/ContestListWithFilters.jsx";
 
 const MyContests = () => {
+    const { contest, user } = useContext(Context);
+
+    useEffect(() => {
+        if (user.user.id) {
+            contest.setEmployerId(user.user.id);
+            // contest.setLoading(true);
+        }
+    }, [user]);
+
     return (
-        <Container className="mt-4">
-            <h1>Мои конкурсы</h1>
-            <p>Здесь будут отображаться конкурсы, созданные вами.</p>
-        </Container>
+        <>
+            <ContestListWithFilters />
+        </>
     );
 };
 

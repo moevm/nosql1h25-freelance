@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
-import { Context } from "../main.jsx";
+import { Context } from "../../main.jsx";
 import { Dropdown, Form } from "react-bootstrap";
 import { BsTags } from 'react-icons/bs';
 
@@ -18,18 +18,6 @@ const TypeBar = () => {
         setSelectedTypes(updatedTypes);
         contest.setSelectedTypes(updatedTypes);
     };
-
-    useEffect(() => {
-        contest.fetchTypes();
-    }, []);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [selectedTypes, contest]);
 
     return (
         <Dropdown style={{width: '100%'}}>

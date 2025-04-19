@@ -70,6 +70,9 @@ export default class ContestStore {
         this._endBy = null;
         this._endAfter = null;
         this._searchQuery = '';
+        this.isLoading = false;
+        this._employerId = null;
+        this._lastFilterParams = null;
         makeAutoObservable(this);
     }
 
@@ -126,6 +129,18 @@ export default class ContestStore {
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
+    }
+
+    setLoading(bool) {
+        this.isLoading = bool;
+    }
+
+    setEmployerId(id) {
+        this._employerId = id;
+    }
+
+    get employerId() {
+        return this._employerId;
     }
 
     setIsAuth(bool) {
@@ -237,20 +252,31 @@ export default class ContestStore {
         return this._endBy;
     }
 
+    get endAfter() {
+        return this._endAfter;
+    }
+
     async fetchContests() {
         try {
             const contests = await fetchData("/contests");
             this.setContests(contests);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        } finally {
+            this.setLoading(false)
         }
+    }
+
+    hasFiltersChanged(params) {
+        if (!this._lastFilterParams) return true;
+        return JSON.stringify(params) !== JSON.stringify(this._lastFilterParams);
     }
 
     async fetchContestsFiltered() {
         try {
             const params = {
-                minReward: this._minReward ?? 0,
-                maxReward: this._maxReward ?? 9999999,
+                minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
+                maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
             };
 
             if (this._selectedTypes?.length > 0) {
@@ -273,6 +299,10 @@ export default class ContestStore {
                 params.endAfter = this._endAfter.toISOString().split('T')[0];
             }
 
+            if (this._employerId) {
+                params.employerId = this._employerId;
+            }
+
             const hasFilters = (
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
@@ -280,8 +310,17 @@ export default class ContestStore {
                 this._selectedStatuses?.length > 0 ||
                 this._searchQuery ||
                 this._endBy ||
-                this._endAfter
+                this._endAfter ||
+                this._employerId
             );
+
+            if (!this.hasFiltersChanged(params) && this._contests.length > 0) {
+                console.log('Using cached contests');
+                this.setLoading(false);
+                return;
+            }
+
+            this.setLoading(true)
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
 
@@ -289,8 +328,11 @@ export default class ContestStore {
 
             const contests = await fetchData(endpoint, params);
             this.setContests(contests);
+            this._lastFilterParams = params;
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        }finally {
+            this.setLoading(false);
         }
     }
 
@@ -318,6 +360,7 @@ export default class ContestStore {
         try {
             const types = await fetchData("/contest-types");
             this.setTypes(types);
+            console.log("Загрузка типов",types)
         } catch (error) {
             console.error("Ошибка при загрузке типов конкурсов:", error);
         }

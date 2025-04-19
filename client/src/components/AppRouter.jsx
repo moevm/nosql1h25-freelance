@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { authRoutes, publicRoutes } from "../routes.jsx";
 import {CONTESTS_ROUTE} from "../utils/consts.js";
@@ -6,9 +6,23 @@ import {Context} from "../main.jsx";
 import { observer } from "mobx-react-lite";
 
 const AppRouter = () => {
-    const {user} = useContext(Context)
+    const {contest, user} = useContext(Context)
 
-    console.log(user)
+    useEffect(() => {
+            user.fetchUsers();
+    }, [user]);
+
+    useEffect(() => {
+        contest.fetchTypes();
+    }, []);
+
+    useEffect(() => {
+        if (!contest.contests || contest.contests.length === 0) {
+            contest.setLoading(true);
+        }
+    }, [contest]);
+
+    console.log("user", user)
     return (
         <Routes>
             {user.isAuth && authRoutes.map(({ path, element }) =>

@@ -1,29 +1,51 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { Context } from "../main.jsx";
-import {Container, Row} from "react-bootstrap";
+import { Container, Row, Spinner } from "react-bootstrap";
 import ContestCard from "./ContestCard.jsx";
 import { observer } from "mobx-react-lite";
 
 const ContestsList = observer(() => {
     const { contest } = useContext(Context);
 
+    const [showLoader, setShowLoader] = useState(false); // Изначально лоадер скрыт
+
     useEffect(() => {
-        contest.fetchContestsFiltered(); // Загружаем проекты с сервера
-    }, [contest]);
+        if (contest.isLoading) {
+            setShowLoader(true);
+        } else {
+            // Плавное скрытие лоадера с минимальной задержкой
+            const timer = setTimeout(() => {
+                setShowLoader(false);
+            }, 100); // Минимальная задержка 100 мс для плавности
+            return () => clearTimeout(timer);
+        }
+    }, [contest.isLoading]);
+
+    if (showLoader) {
+        return (
+            <div className="d-flex justify-content-center my-5">
+                <Spinner animation="border" style={{ color: '#543787' }} />
+            </div>
+        );
+    }
+
+    if (contest.contests.length === 0) {
+        return (
+            <div className="text-center my-5">
+                Нет конкурсов по выбранным фильтрам
+            </div>
+        );
+    }
 
     return (
-        <Row>
-            {contest.contests.length === 0 ? (
-                <div>Загрузка проектов...</div>
-            ) : (
-                contest.contests.map((contestItem) => (
-                    <ContestCard
-                        key={contestItem.id}
-                        contest={contestItem}
-                        type={contest.getTypeNameById(contestItem.type)}
-                    />
-                ))
-            )}
+        <Row className="d-flex justify-content-center">
+            {contest.contests.map((contestItem) => (
+                <ContestCard
+                    key={contestItem.id}
+                    contest={contestItem}
+                    type={contest.getTypeNameById(contestItem.type)}
+                />
+            ))}
         </Row>
     );
 });

@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context } from '../main.jsx';
+import { Context } from '../../main.jsx';
 import { Form } from 'react-bootstrap';
-import {BsCalendarEvent, BsTrophy} from 'react-icons/bs';
+import { BsCalendarEvent } from 'react-icons/bs';
 
-const EndByBar = () => {
+const EndAfterBar = () => {
     const { contest } = useContext(Context);
 
     const formatDateForInput = (date) => {
@@ -14,41 +14,40 @@ const EndByBar = () => {
         return d.toISOString().split('T')[0];
     };
 
-    const [endBy, setEndBy] = useState(formatDateForInput(contest.endBy));
+    const [endAfter, setEndAfter] = useState(formatDateForInput(contest.endAfter));
 
-    // Синхронизируем состояние с contest.endBy, если оно изменилось извне
+    // Синхронизируем состояние с contest.endAfter, если оно изменилось извне
     useEffect(() => {
-        setEndBy(formatDateForInput(contest.endBy));
-    }, [contest.endBy]);
+        setEndAfter(formatDateForInput(contest.endAfter));
+    }, [contest.endAfter]);
 
-    // При изменении endBy обновляем contest
+    // При изменении endAfter обновляем contest
     useEffect(() => {
-        if (endBy) {
-            const date = new Date(endBy);
+        if (endAfter) {
+            const date = new Date(endAfter);
             if (!isNaN(date.getTime())) {
-                contest.setEndBy(date);
+                contest.setEndAfter(date);
             }
         } else {
-            contest.setEndBy(null);
+            contest.setEndAfter(null);
         }
-        contest.fetchContestsFiltered();
-    }, [endBy, contest]);
+    }, [endAfter, contest]);
 
     const handleEndDateChange = (e) => {
-        setEndBy(e.target.value);
+        setEndAfter(e.target.value);
     };
 
     return (
         <div className="mt-2">
             <div className="mt-2 mb-2">
                 <BsCalendarEvent color="#543787"/>
-                <span color='#543787' className="mx-1">Дата окончания до</span>
+                <span color='#543787' className="mx-1">Дата окончания после</span>
             </div>
             <Form className="mt-2">
-                <Form.Group controlId="endDate">
+                <Form.Group controlId="endAfterDate">
                     <Form.Control
                         type="date"
-                        value={endBy}
+                        value={endAfter}
                         onChange={handleEndDateChange}
                         style={{
                             fontSize: '0.8rem',
@@ -62,4 +61,4 @@ const EndByBar = () => {
     );
 };
 
-export default observer(EndByBar);
+export default observer(EndAfterBar);
