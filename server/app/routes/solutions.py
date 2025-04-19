@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
 from app.database import solutions_collection
 from app.utils import serialize_mongo
-from app.schemas import validate_solution
+from app.schemas import validate_solution, validate_review
 from werkzeug.utils import secure_filename
 import os, re, json
 
@@ -131,3 +131,48 @@ def update_solution(solution_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Добавление ревью к решению
+@solutions_bp.route("/solutions/<solution_id>/reviews", methods=["POST"])
+def add_review(solution_id):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    data = request.get_json()  # ожидаем { score: float, commentary: str }
+    # получаем текущее решение
+    sol = solutions_collection.find_one({"_id": ObjectId(solution_id)})
+    if not sol:
+        return jsonify({"error": "Solution not found"}), 404
+
+    # вычисляем порядковый номер нового ревью
+    existing = sol.get("reviews", [])
+    next_number = len(existing) + 1
+
+    # валидируем ревью через Pydantic
+    review_dict = validate_review({
+        **data,
+        "number": next_number
+    })
+
+    # пушим в массив reviews
+    solutions_collection.update_one(
+        {"_id": ObjectId(solution_id)},
+        {"$push": {"reviews": review_dict}}
+    )
+
+    return jsonify(review_dict), 201
+
+# Получение всех ревью для решения
+@solutions_bp.route("/solutions/<solution_id>/reviews", methods=["GET"])
+def get_reviews(solution_id):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    sol = solutions_collection.find_one(
+        {"_id": ObjectId(solution_id)},
+        {"reviews": 1, "_id": 0}
+    )
+    if not sol:
+        return jsonify({"error": "Solution not found"}), 404
+
+    return jsonify(serialize_mongo(sol["reviews"])), 200
