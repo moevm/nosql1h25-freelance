@@ -26,24 +26,25 @@ const NavBar = () => {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
-                        {/* Кнопка "Админ панель" всегда отображается */}
-                        <NavLink
-                            to={ADMIN_ROUTE}
-                            className="nav-link"
-                            style={({ isActive }) => ({
-                                color: isActive ? '#fff' : '#E1D6F3', // Белый для активной, светло-фиолетовый для неактивной
-                                textDecoration: 'none',
-                                padding: '10px 15px',
-                                borderRadius: '5px',
-                                transition: 'background-color 0.3s, color 0.3s',
-                                backgroundColor: isActive ? '#7A3E9F' : 'transparent'
-                            })}
-                        >
-                            Админ панель
-                        </NavLink>
-
                         {user.isAuth ? (
                             <>
+                                {/* Если пользователь Админ (role: 3) */}
+                                {user.user && user.user.role === 3 && (
+                                    <NavLink
+                                        to={ADMIN_ROUTE}
+                                        className="nav-link"
+                                        style={({ isActive }) => ({
+                                            color: isActive ? '#fff' : '#E1D6F3', // Белый для активной, светло-фиолетовый для неактивной
+                                            textDecoration: 'none',
+                                            padding: '10px 15px',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s, color 0.3s',
+                                            backgroundColor: isActive ? '#7A3E9F' : 'transparent'
+                                        })}
+                                    >
+                                        Админ панель
+                                    </NavLink>
+                                )}
                                 {/* Если пользователь Фрилансер (role: 1) */}
                                 {user.user && user.user.role === 1 && (
                                     <NavLink
