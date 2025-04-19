@@ -18,13 +18,13 @@ const FiltersBar = () => {
 
         return () => clearTimeout(timeout);
     }, [
+        contest.endAfter,
         contest.searchQuery,
-        contest.selectedType,
+        contest.selectedTypes,
         contest.minReward,
         contest.maxReward,
-        contest.statuses,
+        contest.selectedStatuses,
         contest.endBy,
-        contest.endAfter,
         contest
     ]);
 

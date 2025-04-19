@@ -31,7 +31,6 @@ const EndByBar = () => {
         } else {
             contest.setEndBy(null);
         }
-        contest.fetchContestsFiltered();
     }, [endBy, contest]);
 
     const handleEndDateChange = (e) => {

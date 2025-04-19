@@ -14,14 +14,6 @@ const SearchBar = () => {
         contest.setSearchQuery(query);
     };
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [searchQuery, contest]);
-
     return (
         <div style={{ width: '100%' }} className="mt-2">
             <div className="mt-2 mb-2">

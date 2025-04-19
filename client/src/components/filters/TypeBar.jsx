@@ -23,14 +23,6 @@ const TypeBar = () => {
         contest.fetchTypes();
     }, []);
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [selectedTypes, contest]);
-
     return (
         <Dropdown style={{width: '100%'}}>
             <div className="mt-2 mb-2">

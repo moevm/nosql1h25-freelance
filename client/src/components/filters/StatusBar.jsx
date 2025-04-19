@@ -19,14 +19,6 @@ const StatusBar = () => {
         contest.setSelectedStatuses(updatedStatuses);
     };
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [selectedStatuses, contest]);
-
     const statusOptions = [
         { value: 1, label: 'Активный' },
         { value: 2, label: 'Завершённый' }

@@ -29,11 +29,7 @@ const RewardsBar = () => {
 
         contest.setReward({ min, max });
 
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
 
-        return () => clearTimeout(timeout);
     }, [minReward, maxReward, contest]);
 
     return (
