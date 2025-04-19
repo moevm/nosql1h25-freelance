@@ -6,6 +6,11 @@ import { observer } from "mobx-react-lite";
 
 const ContestsList = observer(() => {
     const { contest } = useContext(Context);
+
+    useEffect(() => {
+        contest.fetchContests();
+    }, []);
+    
     // const [showLoader, setShowLoader] = useState(true);
     //
     // useEffect(() => {
