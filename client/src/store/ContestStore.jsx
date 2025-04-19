@@ -70,6 +70,8 @@ export default class ContestStore {
         this._endBy = null;
         this._endAfter = null;
         this._searchQuery = '';
+        this.isLoading = false;
+        this._employerId = null;
         makeAutoObservable(this);
     }
 
@@ -126,6 +128,18 @@ export default class ContestStore {
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
+    }
+
+    setLoading(bool) {
+        this.isLoading = bool;
+    }
+
+    setEmployerId(id) {
+        this._employerId = id;
+    }
+
+    get employerId() {
+        return this._employerId;
     }
 
     setIsAuth(bool) {
@@ -237,6 +251,10 @@ export default class ContestStore {
         return this._endBy;
     }
 
+    get endAfter() {
+        return this._endAfter;
+    }
+
     async fetchContests() {
         try {
             const contests = await fetchData("/contests");
@@ -248,9 +266,10 @@ export default class ContestStore {
 
     async fetchContestsFiltered() {
         try {
+            this.setLoading(true)
             const params = {
-                minReward: this._minReward ?? 0,
-                maxReward: this._maxReward ?? 9999999,
+                minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
+                maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
             };
 
             if (this._selectedTypes?.length > 0) {
@@ -273,6 +292,10 @@ export default class ContestStore {
                 params.endAfter = this._endAfter.toISOString().split('T')[0];
             }
 
+            if (this._employerId) {
+                params.employerId = this._employerId;
+            }
+
             const hasFilters = (
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
@@ -280,7 +303,8 @@ export default class ContestStore {
                 this._selectedStatuses?.length > 0 ||
                 this._searchQuery ||
                 this._endBy ||
-                this._endAfter
+                this._endAfter ||
+                this._employerId
             );
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
@@ -291,6 +315,8 @@ export default class ContestStore {
             this.setContests(contests);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        }finally {
+            this.setLoading(false);
         }
     }
 

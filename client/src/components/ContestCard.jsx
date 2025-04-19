@@ -1,15 +1,16 @@
-import React, { useContext } from 'react';
-import {Card, Col} from "react-bootstrap";
-import {useNavigate} from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import { Card, Col } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
 import { Context } from "../main.jsx";
 import { CONTEST_ROUTE } from "../utils/consts.js";
-import { BsStar, BsTrophy, BsStarFill } from 'react-icons/bs';
+import { BsStarFill, BsTrophy } from 'react-icons/bs';
 
-const ContestCard = ({ contest: item }) => {
-    const { contest } = useContext(Context);
+const ContestCard = observer(({ contest: item }) => {
+    const { contest, user } = useContext(Context);
     const navigate = useNavigate();
 
-    //TODO isOpen
+    const creator = user.getById(item.employerId);
     const isOpen = item.status === 1;
     const statusText = isOpen ? 'Открыт' : 'Закрыт';
     const statusColor = isOpen ? 'bg-success' : 'bg-danger';
@@ -45,8 +46,7 @@ const ContestCard = ({ contest: item }) => {
                         </Card.Title>
                         <div className="d-flex justify-content-between align-items-center">
                             <BsStarFill color="gold" size={20} className="me-1"/>
-                            <span color="gold">{item.rating || '4.8'}</span>
-
+                            <span>{item.rating || '4.8'}</span>
                         </div>
                     </div>
                     {/* Описание */}
@@ -60,8 +60,7 @@ const ContestCard = ({ contest: item }) => {
                     {/* Компания и приз */}
                     <div className="d-flex justify-content-between align-items-center">
                         <span style={{color: '#543787'}}>
-                            {/* TODO Отображать создателя */}
-                            {'TechSolutions Inc.'}
+                            {creator ? creator.login : 'Неизвестный создатель'}
                         </span>
                         <div>
                             <BsTrophy color="green" className="me-1"/>
@@ -79,7 +78,7 @@ const ContestCard = ({ contest: item }) => {
                             {statusText}
                         </span>
                         <span>
-                             {isOpen? "До" : "C"} {new Date(item.endBy).toLocaleDateString('ru-RU', {
+                            {isOpen ? "До" : "C"} {new Date(item.endBy).toLocaleDateString('ru-RU', {
                             day: '2-digit',
                             month: 'long',
                             year: 'numeric'
@@ -90,6 +89,6 @@ const ContestCard = ({ contest: item }) => {
             </Card>
         </Col>
     );
-};
+});
 
 export default ContestCard;

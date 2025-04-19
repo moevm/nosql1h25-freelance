@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context } from '../main.jsx';
+import { Context } from '../../main.jsx';
 import { Form } from 'react-bootstrap';
 import {BsTrophy} from 'react-icons/bs';
 
@@ -29,11 +29,7 @@ const RewardsBar = () => {
 
         contest.setReward({ min, max });
 
-        const timeout = setTimeout(() => {
-            contest.fetchContestsFiltered();
-        }, 500);
 
-        return () => clearTimeout(timeout);
     }, [minReward, maxReward, contest]);
 
     return (
