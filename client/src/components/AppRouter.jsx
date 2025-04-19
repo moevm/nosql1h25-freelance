@@ -9,9 +9,8 @@ const AppRouter = () => {
     const {contest, user} = useContext(Context)
 
     useEffect(() => {
-        if (!user.users || user.users.length === 0) {
             user.fetchUsers();
-        }
+
     }, [user]);
 
     useEffect(() => {
