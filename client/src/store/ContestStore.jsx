@@ -70,6 +70,7 @@ export default class ContestStore {
         this._endBy = null;
         this._endAfter = null;
         this._searchQuery = '';
+        this.isLoading = false;
         makeAutoObservable(this);
     }
 
@@ -126,6 +127,10 @@ export default class ContestStore {
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
+    }
+
+    setLoading(bool) {
+        this.isLoading = bool;
     }
 
     setIsAuth(bool) {
@@ -248,9 +253,10 @@ export default class ContestStore {
 
     async fetchContestsFiltered() {
         try {
+            this.setLoading(true)
             const params = {
-                minReward: this._minReward ?? 0,
-                maxReward: this._maxReward ?? 9999999,
+                minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
+                maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
             };
 
             if (this._selectedTypes?.length > 0) {
@@ -291,6 +297,8 @@ export default class ContestStore {
             this.setContests(contests);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
+        }finally {
+            this.setLoading(false);
         }
     }
 

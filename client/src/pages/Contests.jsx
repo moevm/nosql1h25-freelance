@@ -1,38 +1,54 @@
-import React, {useContext} from 'react';
-import {Row, Col, Container} from "react-bootstrap";
-import TypeBar from "../components/TypeBar.jsx";
-import RewardBar from "../components/RewardsBar.jsx";
+import React, { useContext, useState } from 'react';
+import { Row, Col, Container, Button, Collapse, Card } from "react-bootstrap";
 import ContestsList from "../components/ContestsList.jsx";
-import {Context} from "../main.jsx";
-import { Link } from 'react-router-dom';
-import {CREATE_CONTEST_ROUTE} from "../utils/consts.js";
-import EndByBar from "../components/EndByBar.jsx";
-import EndAfterBar from "../components/EndAfterBar.jsx";
-import SearchBar from "../components/SearchBar.jsx";
-import StatusBar from "../components/StatusBar.jsx"; // Или NavLink, если нужно активное состояние
+import { Context } from "../main.jsx";
+import FiltersBar from "../components/FiltersBar.jsx";
+import { BsFilter } from 'react-icons/bs'; // Иконка фильтра
 
 const Contests = () => {
     const { user } = useContext(Context);
+    const [open, setOpen] = useState(false);
 
     return (
-        <Container>
+        <Container className="py-3">
+            <div className="d-flex mb-2">
+                <Button
+                    onClick={() => setOpen(!open)}
+                    aria-controls="filters-collapse"
+                    aria-expanded={open}
+                    style={{
+                        backgroundColor: '#543787',
+                        borderColor: '#543787',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: '500',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '13px',
+                        height: '32px',
+                        lineHeight: '1'
+                    }}
+                    size="sm"
+                >
+                    <BsFilter size={14} />
+                    {open ? 'Скрыть' : 'Фильтры'}
+                </Button>
+            </div>
+
+            <Collapse in={open}>
+                <div id="filters-collapse">
+                    <Card className="mb-3 shadow-sm border-0">
+                        <Card.Body className="py-3 px-3">
+                            <FiltersBar />
+                        </Card.Body>
+                    </Card>
+                </div>
+            </Collapse>
+
             <Row>
-                <Col md={2}>
-                    {/*<Link*/}
-                    {/*    style={{ backgroundColor: '#543787' }}*/}
-                    {/*    to={CREATE_CONTEST_ROUTE}*/}
-                    {/*    className="btn btn-primary"*/}
-                    {/*>*/}
-                    {/*    Добавить конкурс*/}
-                    {/*</Link>*/}
-                    <SearchBar />
-                    <TypeBar />
-                    <RewardBar />
-                    <EndByBar />
-                    <EndAfterBar />
-                    <StatusBar />
-                </Col>
-                <Col md={10}>
+                <Col>
                     <ContestsList />
                 </Col>
             </Row>

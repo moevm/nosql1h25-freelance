@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context } from '../main.jsx';
+import { Context } from '../../main.jsx';
 import { Form } from 'react-bootstrap';
 import {BsTrophy} from 'react-icons/bs';
 
