@@ -143,6 +143,7 @@ def get_filtered_contests():
     statuses = request.args.get("statuses", None)
     freelancer_id = request.args.get("freelancerId", None)
     contest_id = request.args.get("contestId", None)
+    search_for_my_solutions = request.args.get("searchForMySolutions", None)
 
     query = {}
 
@@ -175,17 +176,37 @@ def get_filtered_contests():
     if search:
         regex = {"$regex": search, "$options": "i"}
 
-        matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
-        matching_user_ids = [str(user["_id"]) for user in matching_users]
+        if search_for_my_solutions:
+            contest_query = {
+                "$or": [
+                    {"title": regex},
+                    {"annotation": regex}
+                ]
+            }
 
-        search_conditions = [
-            {"description": regex}
-        ]
+            matching_employers = list(users_collection.find({"login": regex}, {"_id": 1}))
+            matching_employer_ids = [str(employer["_id"]) for employer in matching_employers]
+            if matching_employer_ids:
+                contest_query["$or"].append({"employerId": {"$in": matching_employer_ids}})
 
-        if matching_user_ids:
-            search_conditions.append({"freelancerId": {"$in": matching_user_ids}})
+            matching_contests = list(contests_collection.find(contest_query, {"_id": 1}))
+            matching_contest_ids = [str(contest["_id"]) for contest in matching_contests]
 
-        query["$or"] = search_conditions
+            # Строим условия для поиска решений
+            search_conditions = [{"description": regex}]
+            if matching_contest_ids:
+                search_conditions.append({"contestId": {"$in": matching_contest_ids}})
+            query["$or"] = search_conditions
+
+        else:
+            matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
+            matching_user_ids = [str(user["_id"]) for user in matching_users]
+
+            search_conditions = [{"description": regex}]
+            if matching_user_ids:
+                search_conditions.append({"freelancerId": {"$in": matching_user_ids}})
+
+            query["$or"] = search_conditions
 
     if freelancer_id:
         query["freelancerId"] = freelancer_id

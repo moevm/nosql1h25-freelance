@@ -4,7 +4,7 @@ import { Form } from 'react-bootstrap';
 import { BsSearch } from 'react-icons/bs';
 import { Context } from '../../main.jsx';
 
-const SearchBar = () => {
+const SearchBar = ({ searchForMySolutions }) => {
     const { solution } = useContext(Context);
     const [searchQuery, setSearchQuery] = useState(solution.searchQuery || '');
 
@@ -15,8 +15,12 @@ const SearchBar = () => {
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
-        solution.setSearchQuery(query);
+        solution.setSearchQuery(query, searchForMySolutions);
     };
+
+    const placeholder = searchForMySolutions
+        ? 'Поиск по описанию, названию/описанию конкурса или заказчику'
+        : 'Поиск по описанию или фрилансеру...';
 
     return (
         <div style={{ width: '100%' }} className="mt-2">
@@ -30,7 +34,7 @@ const SearchBar = () => {
                         type="text"
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        placeholder="Поиск по описанию или фрилансеру..."
+                        placeholder={placeholder}
                         style={{
                             fontSize: '0.8rem',
                         }}

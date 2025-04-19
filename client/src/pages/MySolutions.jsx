@@ -18,6 +18,7 @@ const MySolutions = () => {
             <SolutionListWithFilters
                 showContestTitle={true}
                 showFreelancerLogin={false}
+                searchForMySolutions={true}
             />
         </>
     );

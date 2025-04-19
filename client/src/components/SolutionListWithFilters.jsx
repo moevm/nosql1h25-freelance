@@ -6,7 +6,7 @@ import { Context } from "../main.jsx";
 import SolutionsFiltersBar from './SolutionsFiltersBar.jsx';
 import SolutionsList from './SolutionsList.jsx';
 
-const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin }) => {
+const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin, searchForMySolutions }) => {
     const { solution } = useContext(Context);
     const [open, setOpen] = useState(false);
 
@@ -65,7 +65,9 @@ const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin }) => {
                 <div id="filters-collapse">
                     <Card className="mb-3 shadow-sm border-0">
                         <Card.Body className="py-3 px-3">
-                            <SolutionsFiltersBar />
+                            <SolutionsFiltersBar
+                                searchForMySolutions={searchForMySolutions}
+                            />
                         </Card.Body>
                     </Card>
                 </div>

@@ -7,7 +7,7 @@ import StatusBar from './solutions-filters/StatusBar.jsx';
 import AddedBeforeBar from './solutions-filters/AddedBeforeBar.jsx';
 import AddedAfterBar from './solutions-filters/AddedAfterBar.jsx';
 
-const SolutionsFiltersBar = () => {
+const SolutionsFiltersBar = ({ searchForMySolutions }) => {
     const {solution} = useContext(Context);
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -26,7 +26,9 @@ const SolutionsFiltersBar = () => {
     return (
         <Row className="g-3">
             <Col md={6}>
-                <SearchBar />
+                <SearchBar
+                    searchForMySolutions={searchForMySolutions}
+                />
             </Col>
             <Col md={6}>
                 <StatusBar />

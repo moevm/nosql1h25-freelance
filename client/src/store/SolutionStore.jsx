@@ -41,6 +41,7 @@ export default class SolutionStore {
         this._contestId = null;
         this.isLoading = false;
         this._lastFilterParams = null;
+        this._searchForMySolutions = null;
         makeAutoObservable(this);
     }
 
@@ -52,8 +53,9 @@ export default class SolutionStore {
         this._currentSolution = solution;
     }
 
-    setSearchQuery(query) {
+    setSearchQuery(query, searchForMySolutions) {
         this._searchQuery = query;
+        this._searchForMySolutions = searchForMySolutions;
     }
 
     setSelectedStatuses(statuses) {
@@ -170,6 +172,10 @@ export default class SolutionStore {
                 params.contestId = this._contestId;
             }
 
+            if (this._searchForMySolutions) {
+                params.searchForMySolutions = this._searchForMySolutions;
+            }
+
             const hasFilters = (
                 this._searchQuery ||
                 this._selectedStatuses?.length > 0 ||
@@ -202,6 +208,7 @@ export default class SolutionStore {
 
     resetFilters() {
         this._searchQuery = '';
+        this._searchForMySolutions = null;
         this._selectedStatuses = [];
         this._addedBefore = null;
         this._addedAfter = null;
