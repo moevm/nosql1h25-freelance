@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { fetchData, deleteData, updateData } from "../services/apiService";
 
-
 const baseForm = {
     description: {
         value: '',
@@ -16,8 +15,6 @@ const baseForm = {
 };
 
 export default class SolutionStore {
-    solutions = [];
-    currentSolution = null;
     form = baseForm;
 
     formErrors = {
@@ -34,15 +31,185 @@ export default class SolutionStore {
     };
 
     constructor() {
+        this._solutions = [];
+        this._currentSolution = null;
+        this._searchQuery = '';
+        this._selectedStatuses = [];
+        this._addedBefore = null;
+        this._addedAfter = null;
+        this._freelancerId = null;
+        this._contestId = null;
+        this.isLoading = false;
+        this._lastFilterParams = null;
         makeAutoObservable(this);
     }
 
     setSolutions(solutions) {
-        this.solutions = solutions;
+        this._solutions = solutions;
     }
 
     setCurrentSolution(solution) {
-        this.currentSolution = solution;
+        this._currentSolution = solution;
+    }
+
+    setSearchQuery(query) {
+        this._searchQuery = query;
+    }
+
+    setSelectedStatuses(statuses) {
+        this._selectedStatuses = statuses;
+    }
+
+    setAddedBefore(date) {
+        if (!date) {
+            this._addedBefore = null;
+            return;
+        }
+        this._addedBefore = new Date(date);
+    }
+
+    setAddedAfter(date) {
+        if (!date) {
+            this._addedAfter = null;
+            return;
+        }
+        this._addedAfter = new Date(date);
+    }
+
+    setFreelancerId(id) {
+        this._freelancerId = id;
+    }
+
+    setContestId(id) {
+        this._contestId = id;
+    }
+
+    setLoading(bool) {
+        this.isLoading = bool;
+    }
+
+    get solutions() {
+        return this._solutions;
+    }
+
+    get currentSolution() {
+        return this._currentSolution;
+    }
+
+    get searchQuery() {
+        return this._searchQuery;
+    }
+
+    get selectedStatuses() {
+        return this._selectedStatuses;
+    }
+
+    get addedBefore() {
+        return this._addedBefore;
+    }
+
+    get addedAfter() {
+        return this._addedAfter;
+    }
+
+    get freelancerId() {
+        return this._freelancerId;
+    }
+
+    get contestId() {
+        return this._contestId;
+    }
+
+    get addedBefore() {
+        return this._addedBefore;
+    }
+
+    get addedBefore() {
+        return this._addedBefore;
+    }
+
+    get statusOptions() {
+        return Object.entries(this.statusMap).map(([value, data]) => ({
+            value: parseInt(value),
+            label: data.label,
+            color: data.color,
+            textColor: data.textColor
+        }));
+    }
+
+    hasFiltersChanged(params) {
+        if (!this._lastFilterParams) return true;
+        return JSON.stringify(params) !== JSON.stringify(this._lastFilterParams);
+    }
+
+    async fetchSolutionsFiltered() {
+        try {
+            const params = {};
+
+            if (this._searchQuery) {
+                params.search = this._searchQuery;
+            }
+
+            if (this._selectedStatuses?.length > 0) {
+                params.statuses = this._selectedStatuses.join(',');
+            }
+
+            if (this._addedBefore) {
+                params.addedBefore = this._addedBefore.toISOString().split('T')[0];
+            }
+
+            if (this._addedAfter) {
+                params.addedAfter = this._addedAfter.toISOString().split('T')[0];
+            }
+
+            if (this._freelancerId) {
+                params.freelancerId = this._freelancerId;
+            }
+
+            if (this._contestId) {
+                params.contestId = this._contestId;
+            }
+
+            const hasFilters = (
+                this._searchQuery ||
+                this._selectedStatuses?.length > 0 ||
+                this._addedBefore ||
+                this._addedAfter ||
+                this._freelancerId ||
+                this._contestId
+            );
+
+            if (!this.hasFiltersChanged(params) && this._solutions.length > 0) {
+                console.log('Using cached solutions');
+                this.setLoading(false);
+                return;
+            }
+
+            this.setLoading(true)
+            const endpoint = hasFilters ? "/solutions/filter" : `/solutions/contest/${this._contestId}`;
+
+            console.log('Fetching solutions with params:', params);
+
+            const solutions = await fetchData(endpoint, params);
+            this.setSolutions(solutions);
+            this._lastFilterParams = params;
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    resetFilters() {
+        this._searchQuery = '';
+        this._selectedStatuses = [];
+        this._addedBefore = null;
+        this._addedAfter = null;
+        this.fetchSolutionsFiltered();
+    }
+
+    getStatus(number) {
+        return this.statusMap[number] || { label: 'Неизвестно', color: 'dark' };
     }
 
     setFormField(field, value) {
@@ -70,66 +237,11 @@ export default class SolutionStore {
         return !Object.values(this.form).some(field => field.error !== '');
     }
 
-    getStatus(number) {
-        return this.statusMap[number] || { label: 'Неизвестно', color: 'dark' };
-    }
-
-    get statusOptions() {
-        return Object.entries(this.statusMap).map(([value, data]) => ({
-            value: parseInt(value),
-            label: data.label,
-            color: data.color,
-            textColor: data.textColor
-        }));
-    }
-
-    async fetchSolutionsByContestId(contestId) {
-        try {
-            const solutions = await fetchData(`/solutions/contest/${contestId}`);
-            this.setSolutions(solutions);
-        } catch (error) {
-            console.error("Ошибка при загрузке решений:", error);
-            this.setSolutions([]);
-        }
-    }
-
-    async fetchSolutionsByFreelancerId(freelancerId) {
-        try {
-            const solutions = await fetchData(`/solutions/user/${freelancerId}`);
-            this.setSolutions(solutions);
-        } catch (error) {
-            console.error("Ошибка загрузки решений фрилансера:", error);
-            this.setSolutions([]);
-        }
-    }
-
-    async fetchSolutionByNumber(number) {
-        try {
-            const solution = await fetchData(`/solutions/number/${number}`);
-            this.setCurrentSolution(solution);
-            return solution;
-        } catch (error) {
-            console.error("Ошибка загрузки решения:", error);
-            return null;
-        }
-    }
-
     getSolutionIfExists(number) {
         if (this.currentSolution && this.currentSolution.number == number) {
             return this.currentSolution;
         }
         return null;
-    }
-
-    async deleteSolutionById(solutionId) {
-        try {
-            await deleteData(`/solutions/${solutionId}`);
-            this.setCurrentSolution(null);
-            return true;
-        } catch (error) {
-            console.error("Ошибка при удалении решения:", error);
-            throw error;
-        }
     }
 
     _updateLocalSolution(updatedSolution) {
@@ -158,17 +270,26 @@ export default class SolutionStore {
             throw error;
         }
     }
-    
-    _updateLocalSolution(updatedSolution) {
-        // Обновляем в списке решений
-        const index = this.solutions.findIndex(s => s.id === updatedSolution.id);
-        if (index !== -1) {
-            this.solutions[index] = updatedSolution;
+
+    async fetchSolutionByNumber(number) {
+        try {
+            const solution = await fetchData(`/solutions/number/${number}`);
+            this.setCurrentSolution(solution);
+            return solution;
+        } catch (error) {
+            console.error("Ошибка загрузки решения:", error);
+            return null;
         }
-    
-        // Обновляем текущее решение
-        if (this.currentSolution?.id === updatedSolution.id) {
-            this.currentSolution = updatedSolution;
+    }
+
+    async deleteSolutionById(solutionId) {
+        try {
+            await deleteData(`/solutions/${solutionId}`);
+            this.setCurrentSolution(null);
+            return true;
+        } catch (error) {
+            console.error("Ошибка при удалении решения:", error);
+            throw error;
         }
     }
 }

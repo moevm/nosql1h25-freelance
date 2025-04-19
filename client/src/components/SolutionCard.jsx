@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Context } from "../main.jsx";
 import { SOLUTION_ROUTE } from "../utils/consts.js";
 
-const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, showFreelancerLogin  }) => {
+const SolutionCard = ({ currentSolution, contestTitle, freelancer, showContestTitle, showFreelancerLogin  }) => {
     const { solution } = useContext(Context);
     const navigate = useNavigate();
 
@@ -57,18 +57,20 @@ const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, 
                     {showContestTitle && (
                         <div style={{height: '80px'}}>
                             <Card.Text className="mt-2" style={{fontSize: '1rem', color: '#555', lineHeight: '1.4'}}>
-                                <strong>Конкурс:</strong> {contest?.title || "Неизвестный конкурс"}
+                                <strong>Конкурс:</strong> {contestTitle || "Неизвестный конкурс"}
                             </Card.Text>
                         </div>
                     )}
                 </Card.Body>
                 <Card.Body>
                     {/* Фрилансер (условный рендеринг) */}
-                    <div className="d-flex justify-content-between align-items-center">
-                        <span style={{color: '#543787', fontWeight: '600'}}>
-                            {freelancer?.login || "Неизвестный фрилансер"}
-                        </span>
-                    </div>
+                    {showFreelancerLogin && (
+                        <div className="d-flex justify-content-between align-items-center">
+                            <span style={{color: '#543787', fontWeight: '600'}}>
+                                {freelancer?.login || "Неизвестный фрилансер"}
+                            </span>
+                        </div>
+                    )}
 
                     {/* Статус и дата */}
                     <div className="d-flex justify-content-between align-items-center mt-2">

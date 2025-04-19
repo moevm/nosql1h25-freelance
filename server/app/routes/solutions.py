@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
-from app.database import solutions_collection
+from app.database import solutions_collection, users_collection, contests_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_solution
 from werkzeug.utils import secure_filename
+from datetime import datetime
 import os, re, json
 
 
@@ -131,3 +132,73 @@ def update_solution(solution_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# Маршрут для получения отфильтрованных решений
+@solutions_bp.route("/solutions/filter", methods=["GET"])
+def get_filtered_contests():
+    addedBefore = request.args.get("addedBefore", None)
+    addedAfter = request.args.get("addedAfter", None)
+    search = request.args.get("search", None)
+    statuses = request.args.get("statuses", None)
+    freelancer_id = request.args.get("freelancerId", None)
+    contest_id = request.args.get("contestId", None)
+
+    query = {}
+
+    updated_at_conditions = {}
+
+    if addedBefore:
+        try:
+            added_before_date = datetime.strptime(addedBefore, "%Y-%m-%d")
+            updated_at_conditions["$lte"] = added_before_date
+        except ValueError:
+            return jsonify({"error": "Invalid addedBefore date format"}), 400
+
+    if addedAfter:
+        try:
+            added_after_date = datetime.strptime(addedAfter, "%Y-%m-%d")
+            updated_at_conditions["$gte"] = added_after_date
+        except ValueError:
+            return jsonify({"error": "Invalid addedAfter date format"}), 400
+
+    if updated_at_conditions:
+        query["updatedAt"] = updated_at_conditions
+
+    if statuses:
+            try:
+                status_ids = [int(status) for status in statuses.split(',')]
+                query["status"] = {"$in": status_ids}
+            except ValueError:
+                return jsonify({"error": "Invalid status format"}), 400
+
+    if search:
+        regex = {"$regex": search, "$options": "i"}
+
+        matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
+        matching_user_ids = [str(user["_id"]) for user in matching_users]
+
+        search_conditions = [
+            {"description": regex}
+        ]
+
+        if matching_user_ids:
+            search_conditions.append({"freelancerId": {"$in": matching_user_ids}})
+
+        query["$or"] = search_conditions
+
+    if freelancer_id:
+        query["freelancerId"] = freelancer_id
+
+    if contest_id:
+        query["contestId"] = contest_id
+
+    solutions = list(solutions_collection.find(query))
+
+    contest_ids = {solution["contestId"] for solution in solutions}
+    contests = contests_collection.find({"_id": {"$in": [ObjectId(cid) for cid in contest_ids]}})
+    contest_titles = {str(contest["_id"]): contest["title"] for contest in contests}
+    for solution in solutions:
+        solution["contestTitle"] = contest_titles.get(solution["contestId"], "Неизвестный конкурс")
+
+    return jsonify(serialize_mongo(solutions))

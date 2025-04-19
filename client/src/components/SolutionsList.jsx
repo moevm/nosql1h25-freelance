@@ -5,7 +5,7 @@ import { Context } from "../main.jsx";
 import SolutionCard from './SolutionCard.jsx';
 
 const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
-    const { contest, solution } = useContext(Context);
+    const { solution, user } = useContext(Context);
     const [showLoader, setShowLoader] = useState(false);
 
     useEffect(() => {
@@ -27,7 +27,7 @@ const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
         );
     }
 
-    if (solution.contests.length === 0) {
+    if (solution.solutions.length === 0) {
         return (
             <div className="text-center my-5">
                 Нет решений по выбранным фильтрам
@@ -37,11 +37,11 @@ const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
 
     return (
         <Row className="d-flex justify-content-center">
-            {solution.contests.map((solutionItem) => (
+            {solution.solutions.map((solutionItem) => (
                 <SolutionCard
                     key={solutionItem.number}
                     currentSolution={solutionItem}
-                    contest={contest.fetchOneContestById(solutionItem.contestId)}
+                    contestTitle={solutionItem.contestTitle}
                     freelancer={user.getById(solutionItem.freelancerId)}
                     showContestTitle={showContestTitle}
                     showFreelancerLogin={showFreelancerLogin}
