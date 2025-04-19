@@ -74,6 +74,15 @@ export default class SolutionStore {
         return this.statusMap[number] || { label: 'Неизвестно', color: 'dark' };
     }
 
+    get statusOptions() {
+        return Object.entries(this.statusMap).map(([value, data]) => ({
+            value: parseInt(value),
+            label: data.label,
+            color: data.color,
+            textColor: data.textColor
+        }));
+    }
+
     async fetchSolutionsByContestId(contestId) {
         try {
             const solutions = await fetchData(`/solutions/contest/${contestId}`);
@@ -105,7 +114,6 @@ export default class SolutionStore {
         }
     }
 
-    // Добавляем метод для проверки существующего решения
     getSolutionIfExists(number) {
         if (this.currentSolution && this.currentSolution.number == number) {
             return this.currentSolution;
@@ -116,7 +124,7 @@ export default class SolutionStore {
     async deleteSolutionById(solutionId) {
         try {
             await deleteData(`/solutions/${solutionId}`);
-            this.setCurrentSolution(null); // Очищаем текущее решение
+            this.setCurrentSolution(null);
             return true;
         } catch (error) {
             console.error("Ошибка при удалении решения:", error);
@@ -124,18 +132,25 @@ export default class SolutionStore {
         }
     }
 
+    _updateLocalSolution(updatedSolution) {
+        const index = this.solutions.findIndex(s => s.id === updatedSolution.id);
+        if (index !== -1) {
+            this.solutions[index] = updatedSolution;
+        }
+        if (this.currentSolution?.id === updatedSolution.id) {
+            this.currentSolution = updatedSolution;
+        }
+    }
+
     async updateSolutionStatus(solutionId, newStatus) {
         try {
-            // Проверка типа статуса
-            if (typeof newStatus !== 'number' || newStatus < 1 || newStatus > 5) {
-                throw new Error('Статус должен быть числом от 1 до 5');
+            const validStatuses = Object.keys(this.statusMap).map(Number);
+            const minStatus = Math.min(...validStatuses);
+            const maxStatus = Math.max(...validStatuses);
+            if (typeof newStatus !== 'number' || !validStatuses.includes(newStatus)) {
+                throw new Error(`Статус должен быть числом от ${minStatus} до ${maxStatus}`);
             }
-    
-            const response = await updateData(`/solutions/${solutionId}`, {
-                status: newStatus
-            });
-    
-            // Обновляем локальное состояние
+            const response = await updateData(`/solutions/${solutionId}`, {status: newStatus});
             this._updateLocalSolution(response);
             return response;
         } catch (error) {

@@ -23,24 +23,17 @@ const SolutionPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Проверяем, есть ли решение уже в store
                 const existingSolution = solution.getSolutionIfExists(number);
-                if (existingSolution) {
-                    console.log("Используем существующее решение из store");
-                }
 
-                // 2. Загружаем решение (если нет в store)
                 const sol = existingSolution || await solution.fetchSolutionByNumber(number);
                 if (!sol) {
                     throw new Error("Решение не найдено");
                 }
                 setCurrentSolution(sol);
 
-                // 3. Загружаем конкурс
                 const cont = await contest.fetchOneContestById(sol.contestId);
                 setCurrentContest(cont);
 
-                // 4. Загружаем фрилансера
                 await user.fetchUserById(sol.freelancerId);
                 setFreelancer(user.getById(sol.freelancerId));
 
@@ -84,17 +77,14 @@ const SolutionPage = () => {
     const handleDelete = async () => {
         try {
             await solution.deleteSolutionById(currentSolution.id);
-            navigate('/'); // Переход на главную после удаления
-            // Можно добавить уведомление об успешном удалении
+            navigate('/');
         } catch (error) {
             console.error("Ошибка удаления:", error);
-            // Показать сообщение об ошибке
         }
     };
 
     const handleStatusChange = async (newStatus) => {
         try {
-            // Проверяем, что статус изменился
             if (currentSolution.status === newStatus) {
                 return;
             }
@@ -104,7 +94,6 @@ const SolutionPage = () => {
                 newStatus
             );
 
-            // Обновляем текущее решение
             setCurrentSolution(updatedSolution);
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
@@ -115,6 +104,7 @@ const SolutionPage = () => {
         <Container>
             <Card className="mb-4 shadow-sm">
                 <Card.Header>
+                    {/* Заголовок и статус */}
                     <Card.Title>
                         <h1>Решение конкурса «{currentContest.title}»</h1>
                     </Card.Title>
@@ -147,40 +137,22 @@ const SolutionPage = () => {
                         )}
                     </div>
 
-                    {/* Информация о фрилансере */}
+                    {/* Фрилансер */}
                     <Card.Subtitle className="mb-3">
                         <strong>Фрилансер:</strong> {freelancer?.login || 'Неизвестно'}
                     </Card.Subtitle>
 
-                    {/* Описание решения */}
+                    {/* Описание */}
                     <Card.Subtitle className="mb-2">
                         <h3>Описание решения</h3>
                     </Card.Subtitle>
                     <Markdown options={{ disableParsingRawHTML: true }}>
                         {currentSolution.description}
                     </Markdown>
-
-                    {/* Файлы (если есть)
-                    {currentSolution.files.length > 0 && (
-                        <div className="mt-4">
-                            <h4>Прикрепленные файлы:</h4>
-                            <Row>
-                                {currentSolution.files.map((file, index) => (
-                                    <Col md={4} key={index}>
-                                        <Card className="mb-2 p-2">
-                                            <a href={file.url} target="_blank" rel="noreferrer">
-                                                {file.name || `Файл ${index + 1}`}
-                                            </a>
-                                        </Card>
-                                    </Col>
-                                ))}
-                            </Row>
-                        </div>
-                    )} */}
                 </Card.Body>
 
                 <Card.Footer className="d-flex justify-content-between">
-                    <Button 
+                    <Button
                         variant="secondary" 
                         onClick={() => navigate(`/contest/${currentContest.number}`)}
                     >
