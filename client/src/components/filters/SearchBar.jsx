@@ -8,6 +8,10 @@ const SearchBar = () => {
     const { contest } = useContext(Context);
     const [searchQuery, setSearchQuery] = useState(contest.searchQuery || '');
 
+    useEffect(() => {
+        setSearchQuery(contest.searchQuery);
+    }, [contest.searchQuery]);
+
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
