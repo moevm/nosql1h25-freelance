@@ -6,11 +6,8 @@ import {Context} from "../main.jsx";
 import { observer } from "mobx-react-lite";
 
 const AppRouter = () => {
-    const {contest, user} = useContext(Context)
+    const {user} = useContext(Context)
 
-    useEffect(() => {
-        contest.fetchContests();
-    }, []);
     useEffect(() => {
         user.fetchUsers();
     }, []);
