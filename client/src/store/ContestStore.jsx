@@ -72,6 +72,7 @@ export default class ContestStore {
         this._searchQuery = '';
         this.isLoading = false;
         this._employerId = null;
+        this._lastFilterParams = null;
         makeAutoObservable(this);
     }
 
@@ -264,9 +265,14 @@ export default class ContestStore {
         }
     }
 
+    hasFiltersChanged(params) {
+        if (!this._lastFilterParams) return true;
+        return JSON.stringify(params) !== JSON.stringify(this._lastFilterParams);
+    }
+
     async fetchContestsFiltered() {
         try {
-            this.setLoading(true)
+            // this.setLoading(true)
             const params = {
                 minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
                 maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
@@ -307,12 +313,18 @@ export default class ContestStore {
                 this._employerId
             );
 
+            if (!this.hasFiltersChanged(params) && this._contests.length > 0) {
+                console.log('Using cached contests');
+                return;
+            }
+
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
 
             console.log('Fetching contests with params:', params);
 
             const contests = await fetchData(endpoint, params);
             this.setContests(contests);
+            this._lastFilterParams = params;
         } catch (error) {
             console.error("Ошибка при отправке:", error);
         }finally {

@@ -6,28 +6,27 @@ import { observer } from "mobx-react-lite";
 
 const ContestsList = observer(() => {
     const { contest } = useContext(Context);
-    
-    const [showLoader, setShowLoader] = useState(true);
 
-    useEffect(() => {
-        if (!contest.isLoading) {
-            const timer = setTimeout(() => {
-                setShowLoader(false);
-            }, 100); // минимум 100 мс показывать загрузку
-            return () => clearTimeout(timer);
-        } else {
-            setShowLoader(true);
-        }
-    }, [contest.isLoading]);
-
-    //TODO Сделайте, пожалуйста, адекватную анимацию
-    if (showLoader) {
-        return (
-            <div className="d-flex justify-content-center my-5">
-                <Spinner animation="border" style={{ color: '#543787' }} />
-            </div>
-        );
-    }
+    // const [showLoader, setShowLoader] = useState(true);
+    //
+    // useEffect(() => {
+    //     if (!contest.isLoading) {
+    //         const timer = setTimeout(() => {
+    //             setShowLoader(false);
+    //         }, 50); // минимум 50 мс показывать загрузку
+    //         return () => clearTimeout(timer);
+    //     } else {
+    //         setShowLoader(true);
+    //     }
+    // }, [contest.isLoading]);
+    //
+    // if (showLoader) {
+    //     return (
+    //         <div className="d-flex justify-content-center my-5">
+    //             <Spinner animation="border" style={{ color: '#543787' }} />
+    //         </div>
+    //     );
+    // }
 
     if (contest.contests.length === 0) {
         return (
@@ -38,7 +37,7 @@ const ContestsList = observer(() => {
     }
 
     return (
-        <Row>
+        <Row className="d-flex justify-content-center">
             {contest.contests.map((contestItem) => (
                 <ContestCard
                     key={contestItem.id}

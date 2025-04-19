@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Card, Col } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
@@ -17,7 +17,8 @@ const ContestCard = observer(({ contest: item }) => {
 
     return (
         <Col
-            md={4}
+            xs={12}
+            className="my-2"
             onClick={(e) => {
                 const selection = window.getSelection();
                 if (selection && selection.toString().length > 0) return;
@@ -28,30 +29,30 @@ const ContestCard = observer(({ contest: item }) => {
         >
             <Card
                 border="light"
-                className="mt-3 shadow"
+                className="shadow-lg rounded-lg"
                 style={{
-                    height: '230px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    minHeight: '270px',
                 }}
             >
                 <Card.Body>
-                    {/*Название*/}
+                    {/* Название */}
                     <div className="d-flex justify-content-between align-items-center">
                         <Card.Title className="text-truncate" style={{
-                            fontSize: '1.25rem',
+                            fontSize: '1.5rem',
                             fontWeight: 'bold',
-                            color: 'black'
+                            color: '#333',
                         }}>
                             {item.title}
                         </Card.Title>
                         <div className="d-flex justify-content-between align-items-center">
-                            <BsStarFill color="gold" size={20} className="me-1"/>
-                            <span>{item.rating || '4.8'}</span>
+                            <BsStarFill color="gold" size={22} className="me-1"/>
+                            <span style={{fontSize: '1rem', color: '#666'}}>{item.rating || '4.8'}</span>
                         </div>
                     </div>
                     {/* Описание */}
-                    <div style={{height:'70px'}}>
-                        <Card.Text className="mt-2" style={{fontSize: '0.9rem', color: '#333'}}>
+                    <div style={{height:'80px'}}>
+                        <Card.Text className="mt-2" style={{fontSize: '1rem', color: '#555', lineHeight: '1.4'}}>
                             {item.annotation}
                         </Card.Text>
                     </div>
@@ -59,12 +60,12 @@ const ContestCard = observer(({ contest: item }) => {
                 <Card.Body>
                     {/* Компания и приз */}
                     <div className="d-flex justify-content-between align-items-center">
-                        <span style={{color: '#543787'}}>
+                        <span style={{color: '#543787', fontWeight: '600'}}>
                             {creator ? creator.login : 'Неизвестный создатель'}
                         </span>
                         <div>
-                            <BsTrophy color="green" className="me-1"/>
-                            <span style={{fontSize: '0.9rem', fontWeight: 'bold', color: 'green'}}>
+                            <BsTrophy color="green" size={20} className="me-1"/>
+                            <span style={{fontSize: '1rem', fontWeight: 'bold', color: 'green'}}>
                                 {item.prizepool} ₽.
                             </span>
                         </div>
@@ -73,7 +74,7 @@ const ContestCard = observer(({ contest: item }) => {
                     <div className="d-flex justify-content-between align-items-center mt-2">
                         <span
                             className={`badge ${statusColor}`}
-                            style={{fontSize: '0.8rem'}}
+                            style={{fontSize: '0.9rem', fontWeight: '500'}}
                         >
                             {statusText}
                         </span>
