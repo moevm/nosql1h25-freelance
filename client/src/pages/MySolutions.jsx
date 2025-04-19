@@ -8,7 +8,7 @@ const MySolutions = () => {
     const { solution, user, contest } = useContext(Context);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [contestsMap, setContestsMap] = useState({}); // Для хранения загруженных конкурсов
+    const [contestsMap, setContestsMap] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {

@@ -25,9 +25,6 @@ const SolutionPage = () => {
             try {
                 // 1. Проверяем, есть ли решение уже в store
                 const existingSolution = solution.getSolutionIfExists(number);
-                if (existingSolution) {
-                    console.log("Используем существующее решение из store");
-                }
 
                 // 2. Загружаем решение (если нет в store)
                 const sol = existingSolution || await solution.fetchSolutionByNumber(number);
