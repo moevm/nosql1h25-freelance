@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../../main.jsx';
 import { Dropdown, Form } from 'react-bootstrap';
@@ -6,7 +6,7 @@ import { BsFlag } from 'react-icons/bs';
 
 const StatusBar = () => {
     const { contest } = useContext(Context);
-    const [selectedStatuses, setSelectedStatuses] = useState(contest.selectedStatuses || []);
+    const selectedStatuses = contest.selectedStatuses || [];
 
     const handleStatusSelect = (status) => {
         let updatedStatuses;
@@ -15,7 +15,6 @@ const StatusBar = () => {
         } else {
             updatedStatuses = [...selectedStatuses, status.value];
         }
-        setSelectedStatuses(updatedStatuses);
         contest.setSelectedStatuses(updatedStatuses);
     };
 
@@ -30,7 +29,7 @@ const StatusBar = () => {
         <Dropdown style={{ width: '100%' }}>
             <div className="mt-2 mb-2">
                 <BsFlag color="#543787" />
-                <span color="#543787" className="mx-1">Статус конкурса</span>
+                <span className="mx-1" style={{ color: '#543787' }}>Статус конкурса</span>
             </div>
             <Dropdown.Toggle
                 as="div"

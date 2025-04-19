@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { sendData } from '../services/apiService.js';
+import { observer } from "mobx-react-lite";
 
 const ContestTypeModal = ({ show, onHide, onSuccess }) => {
     const [name, setName] = useState("");
@@ -48,4 +49,4 @@ const ContestTypeModal = ({ show, onHide, onSuccess }) => {
     );
 };
 
-export default ContestTypeModal;
+export default observer(ContestTypeModal);

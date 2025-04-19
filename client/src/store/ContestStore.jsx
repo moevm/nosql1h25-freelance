@@ -371,4 +371,15 @@ export default class ContestStore {
         const type = this._types.find(t => t.id === typeId || t.id === typeId);
         return type?.name || "Неизвестный тип";
     }
+
+    resetFilters() {
+        this._selectedTypes = [];
+        this._selectedStatuses = [];
+        this._minReward = 0;
+        this._maxReward = 9999999;
+        this._endBy = null;
+        this._endAfter = null;
+        this._searchQuery = '';
+        this.fetchContestsFiltered();
+    }
 }
