@@ -272,7 +272,6 @@ export default class ContestStore {
 
     async fetchContestsFiltered() {
         try {
-            // this.setLoading(true)
             const params = {
                 minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
                 maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
@@ -315,8 +314,11 @@ export default class ContestStore {
 
             if (!this.hasFiltersChanged(params) && this._contests.length > 0) {
                 console.log('Using cached contests');
+                this.setLoading(false);
                 return;
             }
+
+            this.setLoading(true)
 
             const endpoint = hasFilters ? "/contests/filter" : "/contests";
 

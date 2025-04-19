@@ -9,13 +9,6 @@ const ContestListWithFilters = () => {
     const { contest, user } = useContext(Context);
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        if (user.user.id) {
-            contest.setEmployerId(null);
-            contest.setLoading(true);
-        }
-    }, [user]);
-
     return (
         <Container className="py-3">
             <div className="d-flex mb-2">
