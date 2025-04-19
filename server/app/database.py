@@ -9,4 +9,5 @@ db = client[DB_NAME]
 
 users_collection = db["users"]
 contests_collection = db["contests"]
+solutions_collection = db["solutions"]
 contest_types_collection = db["contest_types"]

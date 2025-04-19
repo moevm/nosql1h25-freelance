@@ -1,13 +1,20 @@
 import React, { useContext } from 'react';
 import { Context } from "../main.jsx";
-import { NavLink } from "react-router-dom";
-import { CONTESTS_ROUTE, ADMIN_ROUTE } from "../utils/consts.js";
+import { NavLink, useNavigate } from "react-router-dom";
+import { CONTESTS_ROUTE, ADMIN_ROUTE, LOGIN_ROUTE, MY_SOLUTIONS_ROUTE, MY_CONTESTS_ROUTE, CREATE_CONTEST_ROUTE } from "../utils/consts.js";
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { observer } from "mobx-react-lite";
 import logo from '../../assets/logo.svg';
 
 const NavBar = () => {
     const { user } = useContext(Context);
+    const navigate = useNavigate();
+
+    const logOut = () => {
+        user.setUser({});
+        user.setIsAuth(false);
+        navigate(CONTESTS_ROUTE); // или просто "/"
+    };
 
     return (
         <Navbar variant="dark" expand="lg" className="mb-4" style={{ backgroundColor: '#543787' }}>
@@ -25,20 +32,54 @@ const NavBar = () => {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
+                        {/* Кнопка "Админ панель" всегда отображается */}
+                        <Button
+                            variant="outline-light"
+                            className="me-2"
+                            onClick={() => navigate(ADMIN_ROUTE)}
+                        >
+                            Админ панель
+                        </Button>
+
                         {user.isAuth ? (
                             <>
-                                <Nav.Link as={NavLink} to={ADMIN_ROUTE}>Админ-панель</Nav.Link>
-                                <Button
-                                    variant="outline-light"
-                                    onClick={() => user.setIsAuth(false)}
-                                >
+                                {/* Если пользователь Фрилансер (role: 1) */}
+                                {user.user && user.user.role === 1 && (
+                                    <Button
+                                        variant="outline-light"
+                                        className="me-2"
+                                        onClick={() => navigate(MY_SOLUTIONS_ROUTE)}
+                                    >
+                                        Мои решения
+                                    </Button>
+                                )}
+                                {/* Если пользователь Организатор (role: 2) */}
+                                {user.user && user.user.role === 2 && (
+                                    <>
+                                        <Button
+                                            variant="outline-light"
+                                            className="me-2"
+                                            onClick={() => navigate(MY_CONTESTS_ROUTE)}
+                                        >
+                                            Мои конкурсы
+                                        </Button>
+                                        <Button
+                                            variant="outline-light"
+                                            className="me-2"
+                                            onClick={() => navigate(CREATE_CONTEST_ROUTE)}
+                                        >
+                                            Добавить конкурс
+                                        </Button>
+                                    </>
+                                )}
+                                <Button variant="outline-light" onClick={logOut}>
                                     Выйти
                                 </Button>
                             </>
                         ) : (
                             <Button
                                 variant="outline-light"
-                                onClick={() => user.setIsAuth(true)}
+                                onClick={() => navigate(LOGIN_ROUTE)}
                             >
                                 Войти
                             </Button>
