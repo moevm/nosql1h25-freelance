@@ -118,17 +118,20 @@ const SolutionPage = () => {
                     <Card.Title>
                         <h1>Решение конкурса «{currentContest.title}»</h1>
                     </Card.Title>
-                    <div className="d-flex align-items-center mt-2">
-                        <Badge 
-                            style={{ 
-                                backgroundColor: solution.getStatus(currentSolution.status).color,
-                                color: solution.getStatus(currentSolution.status).textColor,
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            {solution.getStatus(currentSolution.status).label}
-                        </Badge>
-                    </div>
+                    <div className="d-flex align-items-center">
+                            <span
+                                style={{
+                                    fontSize: '0.9rem',
+                                    color: solution.getStatus(currentSolution.status).textColor,
+                                    fontWeight: '500',
+                                    background: solution.getStatus(currentSolution.status).color,
+                                    padding: '4px 8px',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                {solution.getStatus(currentSolution.status).label}
+                            </span>
+                        </div>
                 </Card.Header>
 
                 <Card.Body>
