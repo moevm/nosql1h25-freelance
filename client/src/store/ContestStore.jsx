@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { fetchData } from "../services/apiService";
 
-
 const baseForm = {
     type: {
         value: null,
@@ -64,7 +63,7 @@ export default class ContestStore {
         this._types = [];
         this._contests = [];
         this._currentContest = null;
-        this._selectedType = {}
+        this._selectedTypes = [];
         this._minReward = 0;
         this._maxReward = 9999999;
         this._endBy = null;
@@ -100,8 +99,8 @@ export default class ContestStore {
                 break;
             case 'prizepool':
                 const value = parseInt(this.form.prizepool.value);
-                this.form.prizepool.error = !(value >= this.form.prizepool.rules.min && 
-                    value <= this.form.prizepool.rules.max) 
+                this.form.prizepool.error = !(value >= this.form.prizepool.rules.min &&
+                    value <= this.form.prizepool.rules.max)
                     ? this.formErrors.prizepool : '';
                 break;
             case 'endBy':
@@ -143,8 +142,8 @@ export default class ContestStore {
         this._currentContest = contest;
     }
 
-    setSelectedType(type) {
-        this._selectedType = type;
+    setSelectedTypes(types) {
+        this._selectedTypes = types;
     }
 
     getStatus(number) {
@@ -208,8 +207,8 @@ export default class ContestStore {
         return this._currentContest;
     }
 
-    get selectedType() {
-        return this._selectedType;
+    get selectedTypes() {
+        return this._selectedTypes;
     }
 
     get reward(){
@@ -236,6 +235,10 @@ export default class ContestStore {
                 maxReward: this._maxReward ?? 9999999,
             };
 
+            if (this._selectedTypes?.length > 0) {
+                params.types = this._selectedTypes.map(t => t.id).join(',');
+            }
+
             if (this._endBy) {
                 params.endBy = this._endBy.toISOString().split('T')[0];
             }
@@ -247,6 +250,7 @@ export default class ContestStore {
             const hasFilters = (
                 params.minReward !== 0 ||
                 params.maxReward !== 9999999 ||
+                this._selectedTypes?.length > 0 ||
                 this._endBy ||
                 this._endAfter
             );
@@ -259,7 +263,6 @@ export default class ContestStore {
             console.error("Ошибка при отправке:", error);
         }
     }
-
 
     async fetchOneContestById(id) {
         try {

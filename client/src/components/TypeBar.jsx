@@ -1,25 +1,35 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { Context } from "../main.jsx";
 import { Dropdown, Form } from "react-bootstrap";
 import { BsTags } from 'react-icons/bs';
 
-
 const TypeBar = () => {
     const { contest } = useContext(Context);
-    const [selectedTypes, setSelectedTypes] = useState([]);
+    const [selectedTypes, setSelectedTypes] = useState(contest.selectedTypes || []);
 
     const handleTypeSelect = (type) => {
-        if (selectedTypes.includes(type)) {
-            setSelectedTypes(selectedTypes.filter(t => t !== type));
+        let updatedTypes;
+        if (selectedTypes.some(t => t.id === type.id)) {
+            updatedTypes = selectedTypes.filter(t => t.id !== type.id);
         } else {
-            setSelectedTypes([...selectedTypes, type]);
+            updatedTypes = [...selectedTypes, type];
         }
+        setSelectedTypes(updatedTypes);
+        contest.setSelectedTypes(updatedTypes);
     };
 
     useEffect(() => {
         contest.fetchTypes();
     }, []);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            contest.fetchContestsFiltered();
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [selectedTypes, contest]);
 
     return (
         <Dropdown style={{width: '100%'}}>
@@ -58,13 +68,13 @@ const TypeBar = () => {
                         }}
                     >
                         <Form.Check
-                            type="checkbox"
-                            label={type.name}
-                            checked={selectedTypes.includes(type)}
-                            onChange={() => handleTypeSelect(type)}
-                            style={{
-                                userSelect: 'none',
-                                cursor: 'pointer'}}
+                                    type="checkbox"
+                                    label={type.name}
+                                    checked={selectedTypes.some(t => t.id === type.id)}
+                                    onChange={() => handleTypeSelect(type)}
+                                    style={{
+                                        userSelect: 'none',
+                                        cursor: 'pointer'}}
                         />
                     </Dropdown.Item>
                 ))}
