@@ -150,6 +150,13 @@ const SolutionPage = () => {
                         {isOwner && (
                             <>
                                 <Button
+                                    variant="info"
+                                    className="me-2"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
                                     variant="primary"
                                     className="me-2"
                                     onClick={() => navigate(`/solution/${currentSolution.number}/edit`)}

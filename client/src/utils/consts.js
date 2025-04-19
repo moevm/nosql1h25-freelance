@@ -10,3 +10,4 @@ export const MY_SOLUTIONS_ROUTE = '/my-solutions';
 export const MY_CONTESTS_ROUTE = '/my-contests';
 export const SOLUTIONS_ROUTE = '/solutions';
 export const CREATE_REVIEW_ROUTE = '/solution/:number/create-review';
+export const SOLUTION_REVIEWS_ROUTE = '/solution/:number/reviews';
