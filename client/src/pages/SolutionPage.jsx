@@ -73,8 +73,8 @@ const SolutionPage = () => {
 
     const handleDelete = async () => {
         try {
-            await solution.deleteSolutionById(currentSolution.id);
             navigate('/');
+            await solution.deleteSolutionById(currentSolution.id);
         } catch (error) {
             console.error("Ошибка удаления:", error);
         }
