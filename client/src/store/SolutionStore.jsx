@@ -51,7 +51,7 @@ export default class SolutionStore {
         this._addedAfter = null;
         this._freelancerId = null;
         this._contestId = null;
-        this.isLoading = false;
+        this.isLoading = true;
         this._lastFilterParams = null;
         this._searchForMySolutions = null;
         makeAutoObservable(this);
