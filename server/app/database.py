@@ -103,4 +103,63 @@ def initialize_data():
             },
         ])
 
+    freelancer = users_collection.find_one({'login': 'freelancer'})
+    contest_prog = contests_collection.find_one({'title': 'CodeMasters 2025'})
+    contest_design = contests_collection.find_one({'title': 'Pixel Wars 2024: Битва визуальных вселенных'})
+
+    if solutions_collection.count_documents({}) == 0:
+            solutions_collection.insert_many([
+                {
+                    'contestId': str(contest_prog['_id']),
+                    'freelancerId': str(freelancer['_id']),
+                    'number': 1,
+                    'description': (
+                        "Мое решение использует гибридный алгоритм, сочетающий квантовые вычисления и нейронные сети. "
+                        "Особенности реализации:\n\n"
+                        "- Оптимизация через квантовые гейты 4-го порядка\n"
+                        "- Использование TensorFlow для динамического обучения\n"
+                        "- Интеграция с GitHub Copilot для автоматической генерации тестов\n\n"
+                        "Производительность: 98% accuracy на тестовом датасете"
+                    ),
+                    'status': 1,
+                    'files': [],
+                    'reviews': [
+                        {
+                            'score': 4.5,
+                            'commentary': (
+                                "Инновационный подход, но есть вопросы:\n"
+                                "1. Нет юнит-тестов для квантовой части\n"
+                                "2. Слишком сложная архитектура\n"
+                                "3. Проблемы с документацией"
+                            ),
+                        }
+                    ]
+                },
+                {
+                    'contestId': str(contest_design['_id']),
+                    'freelancerId': str(freelancer['_id']),
+                    'number': 2,
+                    'description': (
+                        "Концепция логотипа для нейросети-художника:\n\n"
+                        "- Динамическая геометрия с элементами фракталов\n"
+                        "- Цветовая палитра: градиент от #003366 до #00CCCC\n"
+                        "- Адаптивная версия для темной/светлой темы\n"
+                        "- SVG-анимация при наведении"
+                    ),
+                    'status': 1,
+                    'files': [],
+                    'reviews': [
+                        {
+                            'score': 4.9,
+                            'commentary': (
+                                "Блестяще! Особенно впечатлило:\n"
+                                "✓ Универсальность для разных платформ\n"
+                                "✓ Продуманная анимация\n"
+                                "→ Добавьте варианты для монохромной печати"
+                            ),
+                        }
+                    ]
+                }
+            ])
+
 initialize_data()
