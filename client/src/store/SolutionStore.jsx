@@ -285,6 +285,13 @@ export default class SolutionStore {
         }
     }
 
+    getSolutionIfExists(number) {
+        if (this.currentSolution && this.currentSolution.number == number) {
+            return this.currentSolution;
+        }
+        return null;
+    }
+
     async fetchSolutionByNumber(number) {
         try {
             const solution = await fetchData(`/solutions/number/${number}`);
