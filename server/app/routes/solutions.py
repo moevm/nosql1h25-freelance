@@ -187,6 +187,10 @@ def get_filtered_contests():
 
     if search:
         regex = {"$regex": search, "$options": "i"}
+        search_conditions = []
+
+        search_conditions.append({"title": regex})
+        search_conditions.append({"annotation": regex})
 
         if search_for_my_solutions:
             contest_query = {
@@ -204,20 +208,15 @@ def get_filtered_contests():
             matching_contests = list(contests_collection.find(contest_query, {"_id": 1}))
             matching_contest_ids = [str(contest["_id"]) for contest in matching_contests]
 
-            search_conditions = [{"description": regex}]
             if matching_contest_ids:
                 search_conditions.append({"contestId": {"$in": matching_contest_ids}})
-            query["$or"] = search_conditions
-
         else:
             matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
             matching_user_ids = [str(user["_id"]) for user in matching_users]
-
-            search_conditions = [{"description": regex}]
             if matching_user_ids:
                 search_conditions.append({"freelancerId": {"$in": matching_user_ids}})
 
-            query["$or"] = search_conditions
+        query["$or"] = search_conditions
 
     if freelancer_id:
         query["freelancerId"] = freelancer_id
