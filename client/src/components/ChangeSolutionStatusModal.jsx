@@ -1,20 +1,21 @@
-import React, { useState, useContext } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
-import { Context } from "../main.jsx";
+import React, { useState } from 'react';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 const ChangeSolutionStatusModal = ({ 
-    show,
+    show, 
     onHide,
     currentStatus,
-    onSave
+    onSave 
 }) => {
-    const { solution } = useContext(Context);
     const [selectedStatus, setSelectedStatus] = useState(currentStatus);
 
-    const statusOptions = Object.entries(solution.statusMap).map(([value, data]) => ({
-        value: parseInt(value),
-        label: data.label
-    }));
+    const statusOptions = [
+        { value: 1, label: 'Новое' },
+        { value: 2, label: 'Просмотрено' },
+        { value: 3, label: 'Победитель' },
+        { value: 4, label: 'Необходимы правки' },
+        { value: 5, label: 'Правки внесены' }
+    ];
 
     const handleSave = () => {
         onSave(selectedStatus);

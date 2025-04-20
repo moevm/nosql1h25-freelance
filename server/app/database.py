@@ -135,7 +135,6 @@ def initialize_data():
                 ]
             }
         ])
-        
-
+     
 
 initialize_data()
