@@ -259,12 +259,12 @@ export default class SolutionStore {
     }
 
     _updateLocalSolution(updatedSolution) {
-        const index = this.solutions.findIndex(s => s.id === updatedSolution.id);
+        const index = this._solutions.findIndex(s => s.id === updatedSolution.id);
         if (index !== -1) {
-            this.solutions[index] = updatedSolution;
+            this._solutions[index] = { ...updatedSolution };
         }
-        if (this.currentSolution?.id === updatedSolution.id) {
-            this.currentSolution = updatedSolution;
+        if (this._currentSolution?.id === updatedSolution.id) {
+            this._currentSolution = { ...updatedSolution };
         }
     }
 

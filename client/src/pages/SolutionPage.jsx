@@ -84,6 +84,7 @@ const SolutionPage = () => {
     const handleStatusChange = async (newStatus) => {
         try {
             if (currentSolution.status === newStatus) {
+                console.log('Статус не изменился:', newStatus);
                 return;
             }
 
@@ -91,8 +92,6 @@ const SolutionPage = () => {
                 currentSolution.id,
                 newStatus
             );
-
-            setCurrentSolution(updatedSolution);
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
         }
@@ -131,7 +130,8 @@ const SolutionPage = () => {
                                 <h1>{currentSolution.title || "Без названия"}</h1>
                             </Card.Title>
                             <h5 className="text-muted mb-2">
-                                Конкурс «{currentContest.title}» от {user.getById(currentContest.employerId)?.login || "Неизвестно"}
+                                Конкурс «{currentContest.title}»
+                                от {user.getById(currentContest.employerId)?.login || "Неизвестно"}
                             </h5>
                             <div className="d-inline-block">
                                 <span
@@ -140,20 +140,21 @@ const SolutionPage = () => {
                                         fontSize: '1.4rem',
                                         fontWeight: '700',
                                         lineHeight: '1',
-                                        color: solution.getStatus(currentSolution.status).textColor,
-                                        backgroundColor: solution.getStatus(currentSolution.status).color,
+                                        color: solution.getStatus(solution.currentSolution.status).textColor, // Заменяем currentSolution.status на solution.currentSolution.status
+                                        backgroundColor: solution.getStatus(solution.currentSolution.status).color,
                                         padding: '0.35em 0.65em',
                                         borderRadius: '0.375rem',
                                         whiteSpace: 'nowrap'
                                     }}
                                 >
-                                    {solution.getStatus(currentSolution.status).label}
+                                    {solution.getStatus(solution.currentSolution.status).label}
                                 </span>
                             </div>
                         </div>
 
                         {/* Правая часть: Фрилансер */}
-                        <div className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
+                        <div
+                            className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
                             <h5 className="text-muted">
                                 {freelancer?.login || "Неизвестный фрилансер"}
                             </h5>
@@ -269,7 +270,7 @@ const SolutionPage = () => {
                                 <ChangeSolutionStatusModal
                                     show={showStatusModal}
                                     onHide={() => setShowStatusModal(false)}
-                                    currentStatus={currentSolution.status}
+                                    currentStatus={solution.currentSolution.status}
                                     onSave={handleStatusChange}
                                 />
 
