@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
 from app.database import solutions_collection
-from app.utils import serialize_mongo
+from app.utils import serialize_mongo, serialize_mongo_doc
 from app.schemas import validate_solution, validate_review
 from werkzeug.utils import secure_filename
 import os, re, json
@@ -184,3 +184,47 @@ def get_solution_by_number(number):
     if not sol:
         return jsonify({"error": "Solution not found"}), 404
     return jsonify(serialize_mongo(sol)), 200
+
+# Редактирование ревью по номеру внутри решения
+@solutions_bp.route("/solutions/<solution_id>/reviews/<int:review_number>", methods=["PUT"])
+def update_review(solution_id, review_number):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    data = request.get_json()
+    # валидация через Pydantic, но без overwriting number/createdAt
+    review_dict = validate_review({
+        **data,
+        "number": review_number
+    })
+
+    result = solutions_collection.update_one(
+        {"_id": ObjectId(solution_id), "reviews.number": review_number},
+        {"$set": {
+            "reviews.$.score": review_dict["score"],
+            "reviews.$.commentary": review_dict["commentary"],
+            "reviews.$.updatedAt": review_dict["updatedAt"]
+        }}
+    )
+    if result.modified_count == 0:
+        return jsonify({"error": "Review not found"}), 404
+
+    # вернуть обновлённое ревью
+    sol = solutions_collection.find_one({"_id": ObjectId(solution_id)}, {"reviews": 1})
+    updated = next((r for r in sol["reviews"] if r["number"] == review_number), None)
+    return jsonify(serialize_mongo_doc(updated)), 200
+
+# Удаление ревью по номеру внутри решения
+@solutions_bp.route("/solutions/<solution_id>/reviews/<int:review_number>", methods=["DELETE"])
+def delete_review(solution_id, review_number):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    result = solutions_collection.update_one(
+        {"_id": ObjectId(solution_id)},
+        {"$pull": {"reviews": {"number": review_number}}}
+    )
+    if result.modified_count == 0:
+        return jsonify({"error": "Review not found"}), 404
+
+    return jsonify({"message": "Review deleted"}), 200
