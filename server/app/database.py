@@ -105,6 +105,7 @@ def initialize_data():
             },
         ])
 
+
         contest = contests_collection.find_one({'number': 2})
         freelancer = users_collection.find_one({'login': 'freelancer'})
         
@@ -136,6 +137,5 @@ def initialize_data():
             }
         ])
         
-
 
 initialize_data()
