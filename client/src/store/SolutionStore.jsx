@@ -2,6 +2,16 @@ import { makeAutoObservable } from "mobx";
 import { fetchData, deleteData, updateData } from "../services/apiService";
 
 const baseForm = {
+    title: {
+        value: '',
+        error: '',
+        rules: {min: 10, max: 100 },
+    },
+    annotation: {
+        value: '',
+        error: '',
+        rules: {min: 30, max: 200 },
+    },
     description: {
         value: '',
         error: '',
@@ -18,7 +28,9 @@ export default class SolutionStore {
     form = baseForm;
 
     formErrors = {
-        description: `Описание решения от ${this.form.description.rules.min} до ${this.form.description.rules.max} символов`,
+        title: `Название должно быть от ${this.form.title.rules.min} до ${this.form.title.rules.max} символов`,
+        annotation: `Аннотация должна быть от ${this.form.annotation.rules.min} до ${this.form.annotation.rules.max} символов`,
+        description: `Описание должно быть от ${this.form.description.rules.min} до ${this.form.description.rules.max} символов`,
         files: `Максимальное количество файлов - ${this.form.files.rules.max}`
     };
 
@@ -222,6 +234,16 @@ export default class SolutionStore {
 
     validateField(field) {
         switch (field) {
+            case 'title':
+                this.form.title.error = !(this.form.title.value.length >= this.form.title.rules.min &&
+                    this.form.title.value.length <= this.form.title.rules.max)
+                    ? this.formErrors.title : '';
+                break;
+            case 'annotation':
+                this.form.annotation.error = !(this.form.annotation.value.length >= this.form.annotation.rules.min &&
+                    this.form.annotation.value.length <= this.form.annotation.rules.max)
+                    ? this.formErrors.annotation : '';
+                break;
             case 'description':
                 this.form.description.error = !(
                     this.form.description.value.length >= this.form.description.rules.min &&
@@ -234,13 +256,6 @@ export default class SolutionStore {
     validateForm() {
         Object.keys(this.form).forEach(field => this.validateField(field));
         return !Object.values(this.form).some(field => field.error !== '');
-    }
-
-    getSolutionIfExists(number) {
-        if (this.currentSolution && this.currentSolution.number == number) {
-            return this.currentSolution;
-        }
-        return null;
     }
 
     _updateLocalSolution(updatedSolution) {

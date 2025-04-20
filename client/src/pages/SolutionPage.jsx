@@ -14,7 +14,6 @@ const SolutionPage = () => {
     const [currentContest, setCurrentContest] = useState(null);
     const [freelancer, setFreelancer] = useState(null);
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -23,16 +22,22 @@ const SolutionPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const existingSolution = solution.getSolutionIfExists(number);
-
-                const sol = existingSolution || await solution.fetchSolutionByNumber(number);
-                if (!sol) {
-                    throw new Error("Решение не найдено");
+                let sol;
+    
+                if (solution.currentSolution && solution.currentSolution.number == number) {
+                    sol = solution.currentSolution;
+                } else {
+                    sol = await solution.fetchSolutionByNumber(number);
+                    if (!sol) {
+                        setError("Решение не найдено.");
+                        return;
+                    }
                 }
+
                 setCurrentSolution(sol);
 
-                const cont = await contest.fetchOneContestById(sol.contestId);
-                setCurrentContest(cont);
+                const fetchedContest = await contest.fetchOneContestById(sol.contestId);
+                setCurrentContest(fetchedContest);
 
                 await user.fetchUserById(sol.freelancerId);
                 setFreelancer(user.getById(sol.freelancerId));
@@ -40,24 +45,17 @@ const SolutionPage = () => {
             } catch (err) {
                 console.error(err);
                 setError(err.message);
-            } finally {
-                setLoading(false);
             }
         };
-
         fetchData();
     }, [number]);
-
-    if (loading) {
-        return <Container>Загрузка...</Container>;
-    }
 
     if (error) {
         return <Container>{error}</Container>;
     }
 
     if (!currentSolution || !currentContest) {
-        return <Container>Данные не загружены</Container>;
+        return <Container>Загрузка...</Container>;
     }
 
     const isOwner = user.user?.id === currentSolution.freelancerId;
@@ -100,51 +98,72 @@ const SolutionPage = () => {
         }
     };
 
+    const employerLogin = (user.getById(currentContest.employerId)).login;
+
     return (
         <Container>
             <Card className="mb-4 shadow-sm">
-                <Card.Header>
-                    {/* Заголовок и статус */}
-                    <Card.Title>
-                        <h1>Решение конкурса «{currentContest.title}»</h1>
-                    </Card.Title>
-                    <div className="d-flex align-items-center">
-                            <span
-                                style={{
-                                    fontSize: '0.9rem',
-                                    color: solution.getStatus(currentSolution.status).textColor,
-                                    fontWeight: '500',
-                                    background: solution.getStatus(currentSolution.status).color,
-                                    padding: '4px 8px',
-                                    borderRadius: '8px'
-                                }}
-                            >
-                                {solution.getStatus(currentSolution.status).label}
-                            </span>
+                <Card.Header className="position-relative">
+                    <div className="d-flex justify-content-between align-items-start flex-wrap">
+                        {/* Левая часть: Заголовок и конкурс */}
+                        <div>
+                            <Card.Title className="mb-2">
+                                <h1>{currentSolution.title}</h1>
+                            </Card.Title>
+                            <h5 className="text-muted mb-2">
+                                Конкурс «{currentContest.title}» от {user.getById(currentContest.employerId)?.login || 'Неизвестно'}
+                            </h5>
+                            <div className="d-inline-block">
+                                <span
+                                    style={{
+                                        display: 'inline-block',
+                                        fontSize: '1.4rem',
+                                        fontWeight: '700',
+                                        lineHeight: '1',
+                                        color: solution.getStatus(currentSolution.status).textColor,
+                                        backgroundColor: solution.getStatus(currentSolution.status).color,
+                                        padding: '0.35em 0.65em',
+                                        borderRadius: '0.375rem',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {solution.getStatus(currentSolution.status).label}
+                                </span>
+                            </div>
                         </div>
+
+                        {/* Правая часть: Фрилансер */}
+                        <div className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
+                            <h5 className="text-muted">
+                                {freelancer?.login || 'Неизвестно'}
+                            </h5>
+                        </div>
+                    </div>
+
+                    {/* Даты в правом нижнем углу */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '0.5rem',
+                            right: '1rem',
+                            textAlign: 'right'
+                        }}
+                    >
+                        <h5 className="mb-1">
+                            <strong>Создано:</strong> {formatDate(currentSolution.createdAt)}
+                        </h5>
+                        {!isCreated && (
+                            <h5 className="mb-1">
+                                <strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}
+                            </h5>
+                        )}
+                    </div>
                 </Card.Header>
 
                 <Card.Body>
-                    {/* Даты */}
-                    <div className="mb-4">
-                        <div>
-                            <strong>Создано:</strong> {formatDate(currentSolution.createdAt)}
-                        </div>
-                        {!isCreated && (
-                            <div>
-                                <strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Фрилансер */}
-                    <Card.Subtitle className="mb-3">
-                        <strong>Фрилансер:</strong> {freelancer?.login || 'Неизвестно'}
-                    </Card.Subtitle>
-
                     {/* Описание */}
                     <Card.Subtitle className="mb-2">
-                        <h3>Описание решения</h3>
+                        <h2>Описание:</h2>
                     </Card.Subtitle>
                     <Markdown options={{ disableParsingRawHTML: true }}>
                         {currentSolution.description}

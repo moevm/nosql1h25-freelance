@@ -44,9 +44,7 @@ const CreateSolution = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        solution.validateField('description');
-
-        if (solution.form.description.error || solution.form.files.error) {
+        if (!solution.validateForm()) {
             return;
         }
 
@@ -64,6 +62,8 @@ const CreateSolution = () => {
         const data = {
             contestId,
             freelancerId: user.user.id,
+            title: solution.form.title.value,
+            annotation: solution.form.annotation.value,
             description: solution.form.description.value
         };
 
@@ -127,13 +127,38 @@ const CreateSolution = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Отправить решение</h1>
+            <h1 className="mb-4">Создание решения</h1>
             <Form noValidate onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Название"
+                        value={solution.form.title.value}
+                        onChange={(e) => solution.setFormField('title', e.target.value)}
+                        isInvalid={solution.form.title.error.length > 0}
+                        isValid={solution.form.title.error === '' && !!solution.form.title.value}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {solution.form.title.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Аннотация"
+                        value={solution.form.annotation.value}
+                        onChange={e => solution.setFormField('annotation', e.target.value)}
+                        isInvalid={solution.form.annotation.error.length > 0}
+                        isValid={solution.form.annotation.error === '' && !!solution.form.annotation.value}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {solution.form.annotation.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Control
                         as="textarea"
                         rows={10}
-                        placeholder="Описание решения"
+                        placeholder="Описание"
                         value={solution.form.description.value}
                         onChange={e => solution.setFormField('description', e.target.value)}
                         isInvalid={solution.form.description.error.length > 0}
@@ -183,16 +208,19 @@ const CreateSolution = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <div style={{ whiteSpace: 'pre-line' }}>
-                        Описание решения должно содержать от {solution.form.description.rules.min} до {solution.form.description.rules.max} символов.
-                        Файлы: zip-архивы и изображения (jpg, png, gif), не более {solution.form.files.rules.max} штук.
-                        Используйте Markdown для оформления текста.
-                        <br /><br />
-                        Пример изображения: ![alt](image.jpg)
-                        <br /><br />
-                        Подробнее о Markdown:{" "}
-                        <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">
+                        Название должно содержать от {solution.form.title.rules.min} до {solution.form.title.rules.max} символов.<br />
+                        Аннотация должна содержать от {solution.form.annotation.rules.min} до {solution.form.annotation.rules.max} символов.<br />
+                        Описание должно содержать от {solution.form.description.rules.min} до {solution.form.description.rules.max} символов.<br />
+                        Файлы: zip-архивы и изображения (.zip, .png, .jpg, .jpeg, .gif.), не более {solution.form.files.rules.max} штук.<br />
+                        <br />
+                        Используйте Markdown для оформления описания.<br />
+                        Подробнее:{" "}
+                            <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">
                             https://www.markdownguide.org/cheat-sheet/
-                        </a>
+                            </a><br />
+                        <br />
+                        Пример вставки изображения в Markdown-описание:<br />
+                        ![alt](image.jpg)<br />
                     </div>
                 </Modal.Body>
                 <Modal.Footer>

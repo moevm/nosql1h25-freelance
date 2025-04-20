@@ -70,7 +70,7 @@ const ContestPage = () => {
                 {isFreelancer && 
                     <Card.Footer>
                         <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/create-solution`)}>
-                            Добавить решение
+                            Создать решение
                         </Button>
                     </Card.Footer>
                 }
