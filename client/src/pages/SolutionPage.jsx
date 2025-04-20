@@ -23,27 +23,16 @@ const SolutionPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Проверяем, есть ли решение уже в store
                 const existingSolution = solution.getSolutionIfExists(number);
-                if (existingSolution) {
-                    console.log("Используем существующее решение из store");
-                }
-
-                // 2. Загружаем решение (если нет в store)
                 const sol = existingSolution || await solution.fetchSolutionByNumber(number);
-                if (!sol) {
-                    throw new Error("Решение не найдено");
-                }
+                if (!sol) throw new Error("Решение не найдено");
                 setCurrentSolution(sol);
 
-                // 3. Загружаем конкурс
                 const cont = await contest.fetchOneContestById(sol.contestId);
                 setCurrentContest(cont);
 
-                // 4. Загружаем фрилансера
                 await user.fetchUserById(sol.freelancerId);
                 setFreelancer(user.getById(sol.freelancerId));
-
             } catch (err) {
                 console.error(err);
                 setError(err.message);
@@ -55,17 +44,9 @@ const SolutionPage = () => {
         fetchData();
     }, [number]);
 
-    if (loading) {
-        return <Container>Загрузка...</Container>;
-    }
-
-    if (error) {
-        return <Container>{error}</Container>;
-    }
-
-    if (!currentSolution || !currentContest) {
-        return <Container>Данные не загружены</Container>;
-    }
+    if (loading) return <Container>Загрузка...</Container>;
+    if (error) return <Container>{error}</Container>;
+    if (!currentSolution || !currentContest) return <Container>Данные не загружены</Container>;
 
     const isOwner = user.user?.id === currentSolution.freelancerId;
     const isEmployer = user.user?.role === 2;
@@ -84,27 +65,16 @@ const SolutionPage = () => {
     const handleDelete = async () => {
         try {
             await solution.deleteSolutionById(currentSolution.id);
-            navigate('/'); // Переход на главную после удаления
-            // Можно добавить уведомление об успешном удалении
+            navigate('/');
         } catch (error) {
             console.error("Ошибка удаления:", error);
-            // Показать сообщение об ошибке
         }
     };
 
     const handleStatusChange = async (newStatus) => {
         try {
-            // Проверяем, что статус изменился
-            if (currentSolution.status === newStatus) {
-                return;
-            }
-
-            const updatedSolution = await solution.updateSolutionStatus(
-                currentSolution.id, 
-                newStatus
-            );
-
-            // Обновляем текущее решение
+            if (currentSolution.status === newStatus) return;
+            const updatedSolution = await solution.updateSolutionStatus(currentSolution.id, newStatus);
             setCurrentSolution(updatedSolution);
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
@@ -119,8 +89,8 @@ const SolutionPage = () => {
                         <h1>Решение конкурса «{currentContest.title}»</h1>
                     </Card.Title>
                     <div className="d-flex align-items-center mt-2">
-                        <Badge 
-                            style={{ 
+                        <Badge
+                            style={{
                                 backgroundColor: solution.getStatus(currentSolution.status).color,
                                 color: solution.getStatus(currentSolution.status).textColor,
                                 fontSize: '0.85rem'
@@ -132,24 +102,17 @@ const SolutionPage = () => {
                 </Card.Header>
 
                 <Card.Body>
-                    {/* Даты */}
                     <div className="mb-4">
-                        <div>
-                            <strong>Создано:</strong> {formatDate(currentSolution.createdAt)}
-                        </div>
+                        <div><strong>Создано:</strong> {formatDate(currentSolution.createdAt)}</div>
                         {!isCreated && (
-                            <div>
-                                <strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}
-                            </div>
+                            <div><strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}</div>
                         )}
                     </div>
 
-                    {/* Информация о фрилансере */}
                     <Card.Subtitle className="mb-3">
                         <strong>Фрилансер:</strong> {freelancer?.login || 'Неизвестно'}
                     </Card.Subtitle>
 
-                    {/* Описание решения */}
                     <Card.Subtitle className="mb-2">
                         <h3>Описание решения</h3>
                     </Card.Subtitle>
@@ -157,8 +120,7 @@ const SolutionPage = () => {
                         {currentSolution.description}
                     </Markdown>
 
-                    {/* Файлы (если есть)
-                    {currentSolution.files.length > 0 && (
+                    {currentSolution.files && currentSolution.files.length > 0 && (
                         <div className="mt-4">
                             <h4>Прикрепленные файлы:</h4>
                             <Row>
@@ -173,12 +135,12 @@ const SolutionPage = () => {
                                 ))}
                             </Row>
                         </div>
-                    )} */}
+                    )}
                 </Card.Body>
 
                 <Card.Footer className="d-flex justify-content-between">
-                    <Button 
-                        variant="secondary" 
+                    <Button
+                        variant="secondary"
                         onClick={() => navigate(`/contest/${currentContest.number}`)}
                     >
                         Перейти к конкурсу
@@ -187,14 +149,21 @@ const SolutionPage = () => {
                     <div>
                         {isOwner && (
                             <>
-                                <Button 
-                                    variant="primary" 
+                                <Button
+                                    variant="info"
                                     className="me-2"
-                                    onClick={{/* () => navigate(`/solution/${currentSolution.number}/edit`)*/}}
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    className="me-2"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/edit`)}
                                 >
                                     Редактировать решение
                                 </Button>
-                                <Button 
+                                <Button
                                     variant="danger"
                                     onClick={() => setShowDeleteModal(true)}
                                 >
@@ -215,7 +184,14 @@ const SolutionPage = () => {
 
                         {isEmployer && (
                             <>
-                                <Button 
+                                <Button
+                                    variant="info"
+                                    className="me-2"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
                                     variant="warning"
                                     onClick={() => setShowStatusModal(true)}
                                 >
@@ -229,10 +205,10 @@ const SolutionPage = () => {
                                     onSave={handleStatusChange}
                                 />
 
-                                <Button 
-                                    variant="success" 
+                                <Button
+                                    variant="success"
                                     className="me-2"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)} // Добавить routes
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)}
                                 >
                                     Оставить отзыв
                                 </Button>
