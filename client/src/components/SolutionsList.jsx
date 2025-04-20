@@ -40,7 +40,7 @@ const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
             {solution.solutions.map((solutionItem) => (
                 <SolutionCard
                     key={solutionItem.number}
-                    currentSolution={solutionItem}
+                    solution={solutionItem}
                     contestTitle={solutionItem.contestTitle}
                     freelancer={user.getById(solutionItem.freelancerId)}
                     showContestTitle={showContestTitle}

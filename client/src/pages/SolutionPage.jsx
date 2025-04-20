@@ -98,14 +98,12 @@ const SolutionPage = () => {
         }
     };
 
-    const employerLogin = (user.getById(currentContest.employerId)).login;
-
     return (
         <Container>
             <Card className="mb-4 shadow-sm">
                 <Card.Header className="position-relative">
                     <div className="d-flex justify-content-between align-items-start flex-wrap">
-                        {/* Левая часть: Заголовок и конкурс */}
+                        {/* Левая часть: Заголовок, конкурс и статус */}
                         <div>
                             <Card.Title className="mb-2">
                                 <h1>{currentSolution.title}</h1>
@@ -135,7 +133,7 @@ const SolutionPage = () => {
                         {/* Правая часть: Фрилансер */}
                         <div className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
                             <h5 className="text-muted">
-                                {freelancer?.login || 'Неизвестно'}
+                                {freelancer?.login || "Неизвестный фрилансер"}
                             </h5>
                         </div>
                     </div>
