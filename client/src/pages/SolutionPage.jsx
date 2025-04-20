@@ -83,7 +83,7 @@ const SolutionPage = () => {
 
     const handleStatusChange = async (newStatus) => {
         try {
-            if (currentSolution.status === newStatus) {
+            if (solution.currentSolution.status === newStatus) {
                 console.log('Статус не изменился:', newStatus);
                 return;
             }
@@ -92,6 +92,7 @@ const SolutionPage = () => {
                 currentSolution.id,
                 newStatus
             );
+            setCurrentSolution(updatedSolution); 
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
         }
