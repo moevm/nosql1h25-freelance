@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Context } from '../main.jsx';
-import { Container, Card, Badge, Button, Row, Col } from 'react-bootstrap';
+import { Container, Card, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Markdown from 'markdown-to-jsx';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -128,10 +128,10 @@ const SolutionPage = () => {
                         {/* Левая часть: Заголовок, конкурс и статус */}
                         <div>
                             <Card.Title className="mb-2">
-                                <h1>{currentSolution.title || "Неизвестное название"}</h1>
+                                <h1>{currentSolution.title || "Без названия"}</h1>
                             </Card.Title>
                             <h5 className="text-muted mb-2">
-                                Конкурс «{currentContest.title}» от {user.getById(currentContest.employerId)?.login || 'Неизвестно'}
+                                Конкурс «{currentContest.title}» от {user.getById(currentContest.employerId)?.login || "Неизвестно"}
                             </h5>
                             <div className="d-inline-block">
                                 <span
@@ -191,37 +191,39 @@ const SolutionPage = () => {
                 </Card.Body>
 
                 <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">
-                    {isOwner && (
-                        <div className="d-flex flex-wrap gap-2">
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={handleGoToContest}
-                            >
-                                Перейти к конкурсу
-                            </Button>
+                    <div className="d-flex flex-wrap gap-2">
+                        {isOwner && (
+                            <>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleGoToContest}
+                                >
+                                    Перейти к конкурсу
+                                </Button>
 
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={handleGoToMySolutions}
-                            >
-                                Перейти к моим решениям
-                            </Button>
-                        </div>
-                    )}
-
-                    {isEmployer && (
-                        <>
-                            <Button 
-                                variant="secondary"
-                                size="sm"
-                                onClick={handleGoToSolutions}
-                            >
-                                Вернуться к списку решений
-                            </Button>
-                        </>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleGoToMySolutions}
+                                >
+                                    Перейти к моим решениям
+                                </Button>
+                            </>
                         )}
+
+                        {isEmployer && (
+                            <>
+                                <Button 
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleGoToSolutions}
+                                >
+                                    Вернуться к списку решений
+                                </Button>
+                            </>
+                        )}
+                    </div>
 
                     <div className="d-flex flex-wrap gap-2">
                         {isOwner && (
