@@ -116,7 +116,6 @@ const SolutionPage = () => {
 
     return (
         <Container>
-            <h1 className="mb-3" style={{ fontWeight: '600' }}>Решение</h1>
             <Card className="mb-4 shadow-sm">
                 <Card.Header className="position-relative">
                     <div className="d-flex justify-content-between align-items-start flex-wrap">
