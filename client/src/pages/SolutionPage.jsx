@@ -98,9 +98,31 @@ const SolutionPage = () => {
         }
     };
 
+    const handleGoToContest = () => {
+        if (currentContest?.number) {
+            navigate(`/contest/${currentContest.number}`);
+        }
+    };
+    
+    const handleGoToMySolutions = () => {
+        navigate(`/my-solutions`);
+    };
+
+    const handleGoToSolutions = () => {
+        navigate(`/contest/${currentContest.number}/solutions`);
+    };
+
+    const handleEditSolution = () => {
+        if (false) {
+            navigate(`/solution/${currentSolution.number}/edit`);
+        }
+    };
+
     return (
         <Container>
+            <h1 className="mb-3" style={{ fontWeight: '600' }}>Решение</h1>
             <Card className="mb-4 shadow-sm">
+
                 <Card.Header className="position-relative">
                     <div className="d-flex justify-content-between align-items-start flex-wrap">
                         {/* Левая часть: Заголовок, конкурс и статус */}
@@ -168,26 +190,53 @@ const SolutionPage = () => {
                     </Markdown>
                 </Card.Body>
 
-                <Card.Footer className="d-flex justify-content-between">
-                    <Button
-                        variant="secondary" 
-                        onClick={() => navigate(`/contest/${currentContest.number}`)}
-                    >
-                        Перейти к конкурсу
-                    </Button>
+                <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">
+                    {isOwner && (
+                        <div className="d-flex flex-wrap gap-2">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleGoToContest}
+                            >
+                                Перейти к конкурсу
+                            </Button>
 
-                    <div>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={handleGoToMySolutions}
+                            >
+                                Перейти к моим решениям
+                            </Button>
+                        </div>
+                    )}
+
+                    {isEmployer && (
+                        <>
+                            <Button 
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleGoToSolutions}
+                            >
+                                Вернуться к списку решений
+                            </Button>
+                        </>
+                        )}
+
+                    <div className="d-flex flex-wrap gap-2">
                         {isOwner && (
                             <>
                                 <Button 
-                                    variant="primary" 
-                                    className="me-2"
-                                    onClick={{/* () => navigate(`/solution/${currentSolution.number}/edit`)*/}}
+                                    variant="success" 
+                                    size="sm"
+                                    onClick={handleEditSolution}
                                 >
                                     Редактировать решение
                                 </Button>
+
                                 <Button 
                                     variant="danger"
+                                    size="sm"
                                     onClick={() => setShowDeleteModal(true)}
                                 >
                                     Удалить решение
@@ -208,9 +257,9 @@ const SolutionPage = () => {
                         {isEmployer && (
                             <>
                                 <Button 
-                                    variant="warning"
+                                    variant="info"
+                                    size="sm"
                                     onClick={() => setShowStatusModal(true)}
-                                    className='me-2'
                                 >
                                     Изменить статус
                                 </Button>
@@ -223,9 +272,9 @@ const SolutionPage = () => {
                                 />
 
                                 <Button 
-                                    variant="success" 
-                                    className="me-2"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)} // Добавить routes
+                                    variant="success"
+                                    size="sm"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)}
                                 >
                                     Оставить отзыв
                                 </Button>

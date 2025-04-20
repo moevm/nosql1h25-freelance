@@ -99,7 +99,7 @@ const SolutionListWithFilters = ({ title, showContestTitle, showFreelancerLogin,
                     <Card className="mb-3 shadow-sm border-0">
                         <Card.Body className="py-3 px-3">
                             <SolutionsFiltersBar
-                                searchForMySolutions={isMySolutions}
+                                isMySolutions={isMySolutions}
                             />
                         </Card.Body>
                     </Card>
