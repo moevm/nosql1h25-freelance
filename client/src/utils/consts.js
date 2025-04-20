@@ -11,3 +11,4 @@ export const MY_CONTESTS_ROUTE = '/my-contests';
 export const SOLUTIONS_ROUTE = '/solutions';
 export const CREATE_REVIEW_ROUTE = '/solution/:number/create-review';
 export const SOLUTION_REVIEWS_ROUTE = '/solution/:number/reviews';
+export const REVIEW_ROUTE = '/solution/:number/review/:reviewNumber';

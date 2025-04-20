@@ -185,6 +185,13 @@ const SolutionPage = () => {
                         {isEmployer && (
                             <>
                                 <Button
+                                    variant="info"
+                                    className="me-2"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
                                     variant="warning"
                                     onClick={() => setShowStatusModal(true)}
                                 >

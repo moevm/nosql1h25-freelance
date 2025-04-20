@@ -1,5 +1,3 @@
-// freelance/client/src/pages/SolutionReviews.jsx
-
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Row, Col, Spinner, Alert } from 'react-bootstrap';
@@ -25,7 +23,10 @@ const SolutionReviews = () => {
                 const sol = solution.getSolutionIfExists(number)
                     || await solution.fetchSolutionByNumber(number);
                 if (!sol) throw new Error('Решение не найдено');
-                if (!user.isAuth || user.user.id !== sol.freelancerId) {
+
+                const isOwner    = user.user?.id === sol.freelancerId;
+                const isEmployer = user.user?.role === 2;
+                if (!user.isAuth || (!isOwner && !isEmployer)) {
                     throw new Error('Доступ запрещён');
                 }
 
@@ -66,7 +67,7 @@ const SolutionReviews = () => {
                         <Col key={r.number}>
                             <Card
                                 className="h-100 shadow-sm"
-                                onClick={() => navigate(`/solution/${number}`)}
+                                onClick={() => navigate(`/solution/${number}/review/${r.number}`)}
                                 style={{ cursor: 'pointer' }}
                             >
                                 <Card.Body>
