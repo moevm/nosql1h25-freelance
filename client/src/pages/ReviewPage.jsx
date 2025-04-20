@@ -21,6 +21,12 @@ const ReviewPage = () => {
     const [saving, setSaving]             = useState(false);
 
     useEffect(() => {
+        if (error === 'Отзыв не найден') {
+            navigate(`/solution/${number}/reviews`, { replace: true });
+        }
+    }, [error, navigate, number]);
+
+    useEffect(() => {
         (async () => {
             try {
                 // 1) Подгрузить решение
@@ -78,7 +84,7 @@ const ReviewPage = () => {
         if (!window.confirm('Удалить этот отзыв?')) return;
         try {
             await deleteData(`/solutions/${review.solutionId}/reviews/${review.number}`);
-            navigate(`/solution/${number}/reviews`);
+            navigate(`/solution/${number}/reviews`, { replace: true });
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.error || 'Ошибка при удалении');
