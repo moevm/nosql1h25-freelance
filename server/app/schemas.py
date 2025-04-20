@@ -24,6 +24,8 @@ class Solution(BaseModel):
     contestId: str    # ObjectId(Contest._id)
     freelancerId: str    # ObjectId(User._id)
     number: Optional[int] = None    # Порядковый номер для url страницы решения
+    title: str
+    annotation: str
     description: str
     files: List[str] = []
     status: int = 1    # 1 - Новое, 2 - Просмотрено, 3 - Победитель, 4 - Необходимы правки, 5 - Правки внесены

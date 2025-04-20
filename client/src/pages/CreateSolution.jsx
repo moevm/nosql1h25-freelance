@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react';
-import { Container, Form, Button, Modal } from 'react-bootstrap';
+import { Container, Form, Button, Modal, Card } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -44,9 +44,7 @@ const CreateSolution = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        solution.validateField('description');
-
-        if (solution.form.description.error || solution.form.files.error) {
+        if (!solution.validateForm()) {
             return;
         }
 
@@ -64,6 +62,8 @@ const CreateSolution = () => {
         const data = {
             contestId,
             freelancerId: user.user.id,
+            title: solution.form.title.value,
+            annotation: solution.form.annotation.value,
             description: solution.form.description.value
         };
 
@@ -127,13 +127,38 @@ const CreateSolution = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Отправить решение</h1>
+            <h1 className="mb-4">Создание решения</h1>
             <Form noValidate onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Название"
+                        value={solution.form.title.value}
+                        onChange={(e) => solution.setFormField('title', e.target.value)}
+                        isInvalid={solution.form.title.error.length > 0}
+                        isValid={solution.form.title.error === '' && !!solution.form.title.value}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {solution.form.title.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        placeholder="Аннотация"
+                        value={solution.form.annotation.value}
+                        onChange={e => solution.setFormField('annotation', e.target.value)}
+                        isInvalid={solution.form.annotation.error.length > 0}
+                        isValid={solution.form.annotation.error === '' && !!solution.form.annotation.value}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {solution.form.annotation.error}
+                    </Form.Control.Feedback>
+                </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Control
                         as="textarea"
                         rows={10}
-                        placeholder="Описание решения"
+                        placeholder="Описание"
                         value={solution.form.description.value}
                         onChange={e => solution.setFormField('description', e.target.value)}
                         isInvalid={solution.form.description.error.length > 0}
@@ -165,15 +190,94 @@ const CreateSolution = () => {
 
             <Modal show={showPreview} onHide={handleClosePreview} size="xl" centered scrollable>
                 <Modal.Header>
-                    <Modal.Title>Предпросмотр описания решения</Modal.Title>
+                    <Modal.Title>Предпросмотр решения</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <Markdown options={{ disableParsingRawHTML: true }}>
-                        {mdDescription}
-                    </Markdown>
+
+                <Modal.Body style={{ overflowY: 'auto' }}>
+                    <Card className="mb-4 shadow-sm">
+                        <Card.Header className="position-relative">
+                            <div className="d-flex justify-content-between align-items-start flex-wrap">
+                                <div>
+                                    <Card.Title className="mb-2">
+                                        <h1>{solution.form.title.value || 'Без названия'}</h1>
+                                    </Card.Title>
+                                    <h5 className="text-muted mb-2">
+                                        Конкурс «{contest.currentContest?.title || 'Неизвестный конкурс'}» от {user.getById(contest.currentContest?.employerId)?.login || 'Неизвестно'}
+                                    </h5>
+                                    <div className="d-inline-block">
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                fontSize: '1.4rem',
+                                                fontWeight: '700',
+                                                lineHeight: '1',
+                                                color: solution.getStatus(1).textColor,
+                                                backgroundColor: solution.getStatus(1).color,
+                                                padding: '0.35em 0.65em',
+                                                borderRadius: '0.375rem',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            {solution.getStatus(1).label}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
+                                    <h5 className="text-muted">
+                                        {user.user?.login || "Вы"}
+                                    </h5>
+                                </div>
+                            </div>
+
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '0.5rem',
+                                    right: '1rem',
+                                    textAlign: 'right'
+                                }}
+                            >
+                                <h5 className="mb-1"><strong>Создано:</strong> —</h5>
+                            </div>
+                        </Card.Header>
+
+                        <Card.Body>
+                            <Card.Subtitle className="mb-2">
+                                <h2>Описание:</h2>
+                            </Card.Subtitle>
+
+                            <Markdown options={{ disableParsingRawHTML: true }}>
+                                {solution.form.description.value || '*Нет описания*'}
+                            </Markdown>
+                        </Card.Body>
+
+                        <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">
+                            <div className="d-flex flex-wrap gap-2">
+                                <Button variant="secondary" size="sm" disabled>
+                                    Перейти к конкурсу
+                                </Button>
+                                <Button variant="primary" size="sm" disabled>
+                                    Перейти к моим решениям
+                                </Button>
+                            </div>
+
+                            <div className="d-flex flex-wrap gap-2">
+                                <Button variant="success" size="sm" disabled>
+                                    Редактировать решение
+                                </Button>
+                                <Button variant="danger" size="sm" disabled>
+                                    Удалить решение
+                                </Button>
+                            </div>
+                        </Card.Footer>
+                    </Card>
                 </Modal.Body>
+
                 <Modal.Footer>
-                    <Button variant="primary" onClick={handleClosePreview}>Закрыть</Button>
+                    <Button variant="primary" onClick={handleClosePreview}>
+                        Закрыть предпросмотр
+                    </Button>
                 </Modal.Footer>
             </Modal>
 
@@ -183,16 +287,19 @@ const CreateSolution = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <div style={{ whiteSpace: 'pre-line' }}>
-                        Описание решения должно содержать от {solution.form.description.rules.min} до {solution.form.description.rules.max} символов.
-                        Файлы: zip-архивы и изображения (jpg, png, gif), не более {solution.form.files.rules.max} штук.
-                        Используйте Markdown для оформления текста.
-                        <br /><br />
-                        Пример изображения: ![alt](image.jpg)
-                        <br /><br />
-                        Подробнее о Markdown:{" "}
-                        <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">
+                        Название должно содержать от {solution.form.title.rules.min} до {solution.form.title.rules.max} символов.<br />
+                        Аннотация должна содержать от {solution.form.annotation.rules.min} до {solution.form.annotation.rules.max} символов.<br />
+                        Описание должно содержать от {solution.form.description.rules.min} до {solution.form.description.rules.max} символов.<br />
+                        Файлы: zip-архивы и изображения (.zip, .png, .jpg, .jpeg, .gif.), не более {solution.form.files.rules.max} штук.<br />
+                        <br />
+                        Используйте Markdown для оформления описания.<br />
+                        Подробнее:{" "}
+                            <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">
                             https://www.markdownguide.org/cheat-sheet/
-                        </a>
+                            </a><br />
+                        <br />
+                        Пример вставки изображения в Markdown-описание:<br />
+                        ![alt](image.jpg)<br />
                     </div>
                 </Modal.Body>
                 <Modal.Footer>

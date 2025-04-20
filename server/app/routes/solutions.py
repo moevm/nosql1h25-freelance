@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
-from app.database import solutions_collection
+from app.database import solutions_collection, users_collection, contests_collection
 from app.utils import serialize_mongo
 from app.schemas import validate_solution, validate_review
 from werkzeug.utils import secure_filename
+from datetime import datetime
 import os, re, json
 
 
@@ -85,6 +86,18 @@ def get_solutions_by_contest(contest_id):
         return jsonify({"error": str(e)}), 500
 
 
+# Маршрут получения решения по его номеру
+@solutions_bp.route("/solutions/number/<int:number>", methods=["GET"])
+def get_solution_by_number(number):
+    try:
+        solution = solutions_collection.find_one({"number": int(number)})
+        if not solution:
+            return jsonify({"error": "Solution not found"}), 404
+        return jsonify(serialize_mongo(solution)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # Маршрут удаления решения по ID
 @solutions_bp.route("/solutions/<solution_id>", methods=["DELETE"])
 def delete_solution(solution_id):
@@ -132,6 +145,116 @@ def update_solution(solution_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+# Маршрут для получения отфильтрованных решений
+@solutions_bp.route("/solutions/filter", methods=["GET"])
+def get_filtered_contests():
+    addedBefore = request.args.get("addedBefore", None)
+    addedAfter = request.args.get("addedAfter", None)
+    search = request.args.get("search", None)
+    statuses = request.args.get("statuses", None)
+    freelancer_id = request.args.get("freelancerId", None)
+    contest_id = request.args.get("contestId", None)
+    search_for_my_solutions = request.args.get("searchForMySolutions", None)
+
+    query = {}
+
+    updated_at_conditions = {}
+
+    if addedBefore:
+        try:
+            added_before_date = datetime.strptime(addedBefore, "%Y-%m-%d")
+            updated_at_conditions["$lte"] = added_before_date
+        except ValueError:
+            return jsonify({"error": "Invalid addedBefore date format"}), 400
+
+    if addedAfter:
+        try:
+            added_after_date = datetime.strptime(addedAfter, "%Y-%m-%d")
+            updated_at_conditions["$gte"] = added_after_date
+        except ValueError:
+            return jsonify({"error": "Invalid addedAfter date format"}), 400
+
+    if updated_at_conditions:
+        query["updatedAt"] = updated_at_conditions
+
+    if statuses:
+            try:
+                status_ids = [int(status) for status in statuses.split(',')]
+                query["status"] = {"$in": status_ids}
+            except ValueError:
+                return jsonify({"error": "Invalid status format"}), 400
+
+    if search:
+        regex = {"$regex": search, "$options": "i"}
+        search_conditions = []
+
+        search_conditions.append({"title": regex})
+        search_conditions.append({"annotation": regex})
+
+        if search_for_my_solutions:
+            contest_query = {
+                "$or": [
+                    {"title": regex},
+                    {"annotation": regex}
+                ]
+            }
+
+            matching_employers = list(users_collection.find({"login": regex}, {"_id": 1}))
+            matching_employer_ids = [str(employer["_id"]) for employer in matching_employers]
+            if matching_employer_ids:
+                contest_query["$or"].append({"employerId": {"$in": matching_employer_ids}})
+
+            matching_contests = list(contests_collection.find(contest_query, {"_id": 1}))
+            matching_contest_ids = [str(contest["_id"]) for contest in matching_contests]
+
+            if matching_contest_ids:
+                search_conditions.append({"contestId": {"$in": matching_contest_ids}})
+        else:
+            matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
+            matching_user_ids = [str(user["_id"]) for user in matching_users]
+            if matching_user_ids:
+                search_conditions.append({"freelancerId": {"$in": matching_user_ids}})
+
+        query["$or"] = search_conditions
+
+    if freelancer_id:
+        query["freelancerId"] = freelancer_id
+
+    if contest_id:
+        query["contestId"] = contest_id
+
+    solutions = list(solutions_collection.find(query))
+
+    contest_ids = {solution["contestId"] for solution in solutions}
+    contests = list(contests_collection.find({"_id": {"$in": [ObjectId(cid) for cid in contest_ids]}}))
+
+    contest_map = {}
+    employer_ids = set()
+    for contest in contests:
+        cid = str(contest["_id"])
+        contest_map[cid] = contest
+        if "employerId" in contest:
+            employer_ids.add(ObjectId(contest["employerId"]))
+
+    freelancer_ids = {ObjectId(s["freelancerId"]) for s in solutions if "freelancerId" in s}
+
+    all_user_ids = list(freelancer_ids.union(employer_ids))
+    users = list(users_collection.find({"_id": {"$in": all_user_ids}}, {"login": 1}))
+    user_logins = {str(user["_id"]): user["login"] for user in users}
+
+    for solution in solutions:
+        contest_id = solution.get("contestId")
+        contest = contest_map.get(contest_id)
+
+        employer_id = contest.get("employerId") if contest else None
+        solution["contestTitle"] = contest.get("title", "Неизвестный конкурс") if contest else "Неизвестный конкурс"
+        solution["freelancerLogin"] = user_logins.get(solution.get("freelancerId"))
+        solution["employerLogin"] = user_logins.get(str(employer_id)) if employer_id else None
+
+    return jsonify(serialize_mongo(solutions))
+
+
 # Добавление ревью к решению
 @solutions_bp.route("/solutions/<solution_id>/reviews", methods=["POST"])
 def add_review(solution_id):
@@ -176,11 +299,3 @@ def get_reviews(solution_id):
         return jsonify({"error": "Solution not found"}), 404
 
     return jsonify(serialize_mongo(sol["reviews"])), 200
-
-# получаем решение по полю number
-@solutions_bp.route("/solutions/number/<int:number>", methods=["GET"])
-def get_solution_by_number(number):
-    sol = solutions_collection.find_one({"number": number})
-    if not sol:
-        return jsonify({"error": "Solution not found"}), 404
-    return jsonify(serialize_mongo(sol)), 200
