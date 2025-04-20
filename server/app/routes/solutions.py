@@ -300,14 +300,6 @@ def get_reviews(solution_id):
 
     return jsonify(serialize_mongo(sol["reviews"])), 200
 
-# получаем решение по полю number
-@solutions_bp.route("/solutions/number/<int:number>", methods=["GET"])
-def get_solution_by_number(number):
-    sol = solutions_collection.find_one({"number": number})
-    if not sol:
-        return jsonify({"error": "Solution not found"}), 404
-    return jsonify(serialize_mongo(sol)), 200
-
 # Редактирование ревью по номеру внутри решения
 @solutions_bp.route("/solutions/<solution_id>/reviews/<int:review_number>", methods=["PUT"])
 def update_review(solution_id, review_number):
