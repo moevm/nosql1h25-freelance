@@ -1,15 +1,16 @@
 import React, { useContext } from 'react';
-import { Card, Col } from "react-bootstrap";
+import { Card, Col, Badge } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 import { Context } from "../main.jsx";
 import { SOLUTION_ROUTE } from "../utils/consts.js";
 
-const SolutionCard = ({ solution, contestTitle, freelancerLogin, employerLogin, showContestTitle, showFreelancerLogin  }) => {
-    const { solution: solutionContext } = useContext(Context);
+const SolutionCard = ({ currentSolution, contest, freelancer, showContestTitle, showFreelancerLogin  }) => {
+    const { solution } = useContext(Context);
     const navigate = useNavigate();
 
-    const status = solutionContext.getStatus(solution.status);
-
+    const status = solution.getStatus(currentSolution.status);
+    
+    // Форматирование даты
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('ru-RU', {
             day: '2-digit',
@@ -20,88 +21,67 @@ const SolutionCard = ({ solution, contestTitle, freelancerLogin, employerLogin, 
         });
     };
 
-    const isCreated = solution.updatedAt === solution.createdAt;
+    // Определяем, нужно ли писать "Создано" или "Обновлено"
+    const isCreated = currentSolution.updatedAt === currentSolution.createdAt;
     const dateLabel = isCreated ? "Создано" : "Обновлено";
-    const formattedDate = formatDate(isCreated ? solution.createdAt : solution.updatedAt);
+    const formattedDate = formatDate(isCreated ? currentSolution.createdAt : currentSolution.updatedAt);
 
-    return (<Col
-        xs={12}
-        className="my-2"
-        onClick={(e) => {
-            const selection = window.getSelection();
-            if (selection && selection.toString().length > 0) return;
-    
-            solutionContext.setCurrentSolution(solution);
-            navigate(SOLUTION_ROUTE + '/' + solution.number);
-        }}
-    >
-        <Card
-            border="light"
-            className="shadow-lg rounded-lg"
-            style={{
-                cursor: 'pointer',
-                minHeight: '220px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '1rem',
-            }}
-        >
-            {/* Верхняя часть */}
-            <div>
-                {/* Заголовок */}
-                <h4 className="mb-2 text-dark fw-bold text-truncate">
-                    {solution.title || "Неизвестное название"}
-                </h4>
-    
-                {/* Аннотация */}
-                <p className="mb-3 text-muted" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
-                    {solution.annotation || "Неизвестная аннотация"}
-                </p>
-            </div>
-    
-            {/* Нижняя часть */}
-            <div className="d-flex justify-content-between align-items-end mt-3">
-                {/* Левая часть: конкурс, фрилансер, статус */}
-                <div className="d-flex flex-column align-items-start">
-                    {/* Конкурс */}
+    return (
+        <Col md={4} className="mb-3">
+            <Card
+                border="light"
+                className="shadow"
+                style={{ height: showContestTitle ? '230px' : '210px', cursor: 'pointer' }} // Адаптируем высоту
+                onClick={(e) => {
+                    const selection = window.getSelection();
+                    if (selection && selection.toString().length > 0) return;
+
+                    // Сохраняем решение в store перед переходом
+                    solution.setCurrentSolution(currentSolution);
+                    navigate(SOLUTION_ROUTE + '/' + currentSolution.number);
+                }}
+            >
+                <Card.Body className="d-flex flex-column">
+                    {/* Заголовок решения */}
+                    <Card.Title style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#222' }}>
+                        Решение
+                    </Card.Title>
+
+                    {/* Описание конкурса (условный рендеринг) */}
                     {showContestTitle && (
-                        <div className="text-muted mb-1" style={{ fontSize: '1rem' }}>
-                            Конкурс «{contestTitle || "Неизвестный конкурс"}» от {employerLogin}
+                        <div className="mt-1" style={{ fontSize: '0.9rem', color: '#555' }}>
+                            <strong>Конкурс:</strong> {contest?.title || currentSolution.contestId}
                         </div>
                     )}
-    
-                    {/* Фрилансер */}
+
+                    {/* Фрилансер (условный рендеринг) */}
                     {showFreelancerLogin && (
-                        <div className="text-muted mb-1" style={{ fontSize: '1rem' }}>
-                            {freelancerLogin || "Неизвестный фрилансер"}
+                        <div className="mt-2" style={{ fontSize: '0.9rem' }}>
+                            <strong>Фрилансер:</strong> {freelancer?.login || currentSolution.freelancerId}
                         </div>
                     )}
-    
-                    {/* Статус */}
-                    <span
-                        style={{
-                            fontSize: '0.9rem',
-                            color: status.textColor,
-                            fontWeight: '500',
-                            background: status.color,
-                            padding: '4px 10px',
-                            borderRadius: '8px'
-                        }}
-                    >
-                        {status.label}
-                    </span>
-                </div>
-    
-                {/* Правая часть: дата */}
-                <div>
-                    <span style={{ fontSize: '1rem', color: '#666' }}>
-                        {dateLabel}: {formattedDate}
-                    </span>
-                </div>
-            </div>
-        </Card>
-    </Col>
+
+                    {/* Блок с датой и статусом */}
+                    <div className="mt-auto d-flex justify-content-between align-items-end">
+                        {/* Дата */}
+                        <div style={{ fontSize: '0.8rem', color: '#555' }}>
+                            {dateLabel}: {formattedDate}
+                        </div>
+                        
+                        {/* Статус */}
+                        <Badge 
+                            style={{ 
+                                backgroundColor: status.color,
+                                color: status.textColor,
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            {status.label}
+                        </Badge>
+                    </div>
+                </Card.Body>
+            </Card>
+        </Col>
     );
 };
 

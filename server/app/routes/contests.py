@@ -72,7 +72,6 @@ def get_contests():
     contests = list(contests_collection.find({}))
     return jsonify(serialize_mongo(contests))
 
-
 @contests_bp.route("/contests/filter", methods=["GET"])
 def get_filtered_contests():
     min_reward = int(request.args.get("minReward", 0))
