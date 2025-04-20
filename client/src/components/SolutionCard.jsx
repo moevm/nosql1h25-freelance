@@ -27,7 +27,7 @@ const SolutionCard = ({ currentSolution, contestTitle, freelancer, showContestTi
     return (
         <Col
             xs={12}
-            className="my-3"
+            className="my-2"
             onClick={(e) => {
                 const selection = window.getSelection();
                 if (selection && selection.toString().length > 0) return;
@@ -40,7 +40,7 @@ const SolutionCard = ({ currentSolution, contestTitle, freelancer, showContestTi
                 border="light"
                 className="shadow-lg rounded-lg"
                 style={{
-                    cursor: 'pointer', minHeight: '200px',
+                    cursor: 'pointer', minHeight: '180px',
                 }}
             >
                 <Card.Body>
