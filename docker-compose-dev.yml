@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  server:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ./server:/app
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      - MONGO_URI=mongodb://db:27017/
+      - DB_NAME=freelance_db
+      - FLASK_APP=app.main
+      - FLASK_ENV=development
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - "127.0.0.1:5173:5173"  # 80 в контейнере, 3000 для доступа снаружи
+    volumes:
+     - ./client/src:/app/src
+    depends_on:
+      - server
+
+  db:
+    image: mongo:8.0.5
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongosh admin -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --quiet | grep 1
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    expose: 
+      - 27017
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
