@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, url_for, current_app
 from bson import ObjectId
 from app.database import solutions_collection, users_collection, contests_collection
 from app.utils import serialize_mongo
-from app.schemas import validate_solution
+from app.schemas import validate_solution, validate_review
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os, re, json
@@ -87,7 +87,7 @@ def get_solutions_by_contest(contest_id):
 
 
 # Маршрут получения решения по его номеру
-@solutions_bp.route("/solutions/number/<number>", methods=["GET"])
+@solutions_bp.route("/solutions/number/<int:number>", methods=["GET"])
 def get_solution_by_number(number):
     try:
         solution = solutions_collection.find_one({"number": int(number)})
@@ -253,3 +253,49 @@ def get_filtered_contests():
         solution["employerLogin"] = user_logins.get(str(employer_id)) if employer_id else None
 
     return jsonify(serialize_mongo(solutions))
+
+
+# Добавление ревью к решению
+@solutions_bp.route("/solutions/<solution_id>/reviews", methods=["POST"])
+def add_review(solution_id):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    data = request.get_json()  # ожидаем { score: float, commentary: str }
+    # получаем текущее решение
+    sol = solutions_collection.find_one({"_id": ObjectId(solution_id)})
+    if not sol:
+        return jsonify({"error": "Solution not found"}), 404
+
+    # вычисляем порядковый номер нового ревью
+    existing = sol.get("reviews", [])
+    next_number = len(existing) + 1
+
+    # валидируем ревью через Pydantic
+    review_dict = validate_review({
+        **data,
+        "number": next_number
+    })
+
+    # пушим в массив reviews
+    solutions_collection.update_one(
+        {"_id": ObjectId(solution_id)},
+        {"$push": {"reviews": review_dict}}
+    )
+
+    return jsonify(review_dict), 201
+
+# Получение всех ревью для решения
+@solutions_bp.route("/solutions/<solution_id>/reviews", methods=["GET"])
+def get_reviews(solution_id):
+    if not ObjectId.is_valid(solution_id):
+        return jsonify({"error": "Invalid solution ID"}), 400
+
+    sol = solutions_collection.find_one(
+        {"_id": ObjectId(solution_id)},
+        {"reviews": 1, "_id": 0}
+    )
+    if not sol:
+        return jsonify({"error": "Solution not found"}), 404
+
+    return jsonify(serialize_mongo(sol["reviews"])), 200

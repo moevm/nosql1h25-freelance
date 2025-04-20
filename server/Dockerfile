@@ -10,4 +10,6 @@ COPY . .
 ENV FLASK_APP=app.main
 ENV FLASK_ENV=development
 
+EXPOSE 8000
+
 CMD ["flask", "run", "--host=0.0.0.0", "--port=8000"]

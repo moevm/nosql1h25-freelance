@@ -9,7 +9,10 @@ import {
     MY_CONTESTS_ROUTE,
     CREATE_SOLUTION_ROUTE,
     SOLUTION_ROUTE,
-    SOLUTIONS_ROUTE
+    SOLUTIONS_ROUTE,
+    CREATE_REVIEW_ROUTE,
+    SOLUTION_REVIEWS_ROUTE,
+    REVIEW_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
 import Contests from "./pages/Contests.jsx";
@@ -21,6 +24,9 @@ import MyContests from "./pages/MyContests.jsx";
 import MySolutions from "./pages/MySolutions.jsx";
 import Solutions from "./pages/Solutions.jsx";
 import SolutionPage from "./pages/SolutionPage.jsx";
+import CreateReview from "./pages/CreateReview.jsx";
+import SolutionReviews from "./pages/SolutionReviews.jsx";
+import ReviewPage from './pages/ReviewPage.jsx';
 
 export const authRoutes = [
     {
@@ -50,7 +56,19 @@ export const authRoutes = [
     {
         path: SOLUTION_ROUTE + '/:number',
         element: <SolutionPage />
-    }
+    },
+    {
+        path: CREATE_REVIEW_ROUTE,
+        element: <CreateReview />
+    },
+    {
+        path: SOLUTION_REVIEWS_ROUTE,
+        element: <SolutionReviews />
+    },
+    {
+        path: REVIEW_ROUTE,
+        element: <ReviewPage />
+    },
 ]
 
 export const publicRoutes = [

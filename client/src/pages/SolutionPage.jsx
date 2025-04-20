@@ -41,7 +41,6 @@ const SolutionPage = () => {
 
                 await user.fetchUserById(sol.freelancerId);
                 setFreelancer(user.getById(sol.freelancerId));
-
             } catch (err) {
                 console.error(err);
                 setError(err.message);
@@ -88,10 +87,7 @@ const SolutionPage = () => {
                 return;
             }
 
-            const updatedSolution = await solution.updateSolutionStatus(
-                currentSolution.id,
-                newStatus
-            );
+            const updatedSolution = await solution.updateSolutionStatus(currentSolution.id, newStatus);
             setCurrentSolution(updatedSolution); 
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
@@ -122,7 +118,6 @@ const SolutionPage = () => {
         <Container>
             <h1 className="mb-3" style={{ fontWeight: '600' }}>Решение</h1>
             <Card className="mb-4 shadow-sm">
-
                 <Card.Header className="position-relative">
                     <div className="d-flex justify-content-between align-items-start flex-wrap">
                         {/* Левая часть: Заголовок, конкурс и статус */}
@@ -230,15 +225,21 @@ const SolutionPage = () => {
                     <div className="d-flex flex-wrap gap-2">
                         {isOwner && (
                             <>
-                                <Button 
-                                    variant="success" 
-                                    size="sm"
-                                    onClick={handleEditSolution}
+                                <Button
+                                    variant="info"
+                                    className="sm"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
+                                    variant="success"
+                                    className="sm"
+                                    onClick={() => navigate(handleEditSolution)}
                                 >
                                     Редактировать решение
                                 </Button>
-
-                                <Button 
+                                <Button
                                     variant="danger"
                                     size="sm"
                                     onClick={() => setShowDeleteModal(true)}
@@ -260,8 +261,15 @@ const SolutionPage = () => {
 
                         {isEmployer && (
                             <>
-                                <Button 
+                                <Button
                                     variant="info"
+                                    className="sm"
+                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                >
+                                    Просмотреть отзывы
+                                </Button>
+                                <Button
+                                    variant="warning"
                                     size="sm"
                                     onClick={() => setShowStatusModal(true)}
                                 >
