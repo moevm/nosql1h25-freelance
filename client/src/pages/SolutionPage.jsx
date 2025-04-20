@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Context } from '../main.jsx';
-import { Container, Card, Badge, Button, Row, Col } from 'react-bootstrap';
+import { Container, Card, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Markdown from 'markdown-to-jsx';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -14,7 +14,6 @@ const SolutionPage = () => {
     const [currentContest, setCurrentContest] = useState(null);
     const [freelancer, setFreelancer] = useState(null);
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -23,30 +22,40 @@ const SolutionPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const existingSolution = solution.getSolutionIfExists(number);
-                const sol = existingSolution || await solution.fetchSolutionByNumber(number);
-                if (!sol) throw new Error("Решение не найдено");
+                let sol;
+    
+                if (solution.currentSolution && solution.currentSolution.number == number) {
+                    sol = solution.currentSolution;
+                } else {
+                    sol = await solution.fetchSolutionByNumber(number);
+                    if (!sol) {
+                        setError("Решение не найдено.");
+                        return;
+                    }
+                }
+
                 setCurrentSolution(sol);
 
-                const cont = await contest.fetchOneContestById(sol.contestId);
-                setCurrentContest(cont);
+                const fetchedContest = await contest.fetchOneContestById(sol.contestId);
+                setCurrentContest(fetchedContest);
 
                 await user.fetchUserById(sol.freelancerId);
                 setFreelancer(user.getById(sol.freelancerId));
             } catch (err) {
                 console.error(err);
                 setError(err.message);
-            } finally {
-                setLoading(false);
             }
         };
-
         fetchData();
     }, [number]);
 
-    if (loading) return <Container>Загрузка...</Container>;
-    if (error) return <Container>{error}</Container>;
-    if (!currentSolution || !currentContest) return <Container>Данные не загружены</Container>;
+    if (error) {
+        return <Container>{error}</Container>;
+    }
+
+    if (!currentSolution || !currentContest) {
+        return <Container>Загрузка...</Container>;
+    }
 
     const isOwner = user.user?.id === currentSolution.freelancerId;
     const isEmployer = user.user?.role === 2;
@@ -64,8 +73,8 @@ const SolutionPage = () => {
 
     const handleDelete = async () => {
         try {
-            await solution.deleteSolutionById(currentSolution.id);
             navigate('/');
+            await solution.deleteSolutionById(currentSolution.id);
         } catch (error) {
             console.error("Ошибка удаления:", error);
         }
@@ -73,98 +82,166 @@ const SolutionPage = () => {
 
     const handleStatusChange = async (newStatus) => {
         try {
-            if (currentSolution.status === newStatus) return;
+            if (solution.currentSolution.status === newStatus) {
+                console.log('Статус не изменился:', newStatus);
+                return;
+            }
+
             const updatedSolution = await solution.updateSolutionStatus(currentSolution.id, newStatus);
-            setCurrentSolution(updatedSolution);
+            setCurrentSolution(updatedSolution); 
         } catch (error) {
             console.error('Ошибка изменения статуса:', error);
         }
     };
 
+    const handleGoToContest = () => {
+        if (currentContest?.number) {
+            navigate(`/contest/${currentContest.number}`);
+        }
+    };
+    
+    const handleGoToMySolutions = () => {
+        navigate(`/my-solutions`);
+    };
+
+    const handleGoToSolutions = () => {
+        navigate(`/contest/${currentContest.number}/solutions`);
+    };
+
+    const handleEditSolution = () => {
+        if (false) {
+            navigate(`/solution/${currentSolution.number}/edit`);
+        }
+    };
+
     return (
         <Container>
+            <h1 className="mb-3" style={{ fontWeight: '600' }}>Решение</h1>
             <Card className="mb-4 shadow-sm">
-                <Card.Header>
-                    <Card.Title>
-                        <h1>Решение конкурса «{currentContest.title}»</h1>
-                    </Card.Title>
-                    <div className="d-flex align-items-center mt-2">
-                        <Badge
-                            style={{
-                                backgroundColor: solution.getStatus(currentSolution.status).color,
-                                color: solution.getStatus(currentSolution.status).textColor,
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            {solution.getStatus(currentSolution.status).label}
-                        </Badge>
+                <Card.Header className="position-relative">
+                    <div className="d-flex justify-content-between align-items-start flex-wrap">
+                        {/* Левая часть: Заголовок, конкурс и статус */}
+                        <div>
+                            <Card.Title className="mb-2">
+                                <h1>{currentSolution.title || "Без названия"}</h1>
+                            </Card.Title>
+                            <h5 className="text-muted mb-2">
+                                Конкурс «{currentContest.title}»
+                                от {user.getById(currentContest.employerId)?.login || "Неизвестно"}
+                            </h5>
+                            <div className="d-inline-block">
+                                <span
+                                    style={{
+                                        display: 'inline-block',
+                                        fontSize: '1.4rem',
+                                        fontWeight: '700',
+                                        lineHeight: '1',
+                                        color: solution.getStatus(solution.currentSolution.status).textColor, // Заменяем currentSolution.status на solution.currentSolution.status
+                                        backgroundColor: solution.getStatus(solution.currentSolution.status).color,
+                                        padding: '0.35em 0.65em',
+                                        borderRadius: '0.375rem',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {solution.getStatus(solution.currentSolution.status).label}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Правая часть: Фрилансер */}
+                        <div
+                            className="text-end d-flex flex-column justify-content-center align-items-end ms-auto mt-2">
+                            <h5 className="text-muted">
+                                {freelancer?.login || "Неизвестный фрилансер"}
+                            </h5>
+                        </div>
+                    </div>
+
+                    {/* Даты в правом нижнем углу */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '0.5rem',
+                            right: '1rem',
+                            textAlign: 'right'
+                        }}
+                    >
+                        <h5 className="mb-1">
+                            <strong>Создано:</strong> {formatDate(currentSolution.createdAt)}
+                        </h5>
+                        {!isCreated && (
+                            <h5 className="mb-1">
+                                <strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}
+                            </h5>
+                        )}
                     </div>
                 </Card.Header>
 
                 <Card.Body>
-                    <div className="mb-4">
-                        <div><strong>Создано:</strong> {formatDate(currentSolution.createdAt)}</div>
-                        {!isCreated && (
-                            <div><strong>Обновлено:</strong> {formatDate(currentSolution.updatedAt)}</div>
-                        )}
-                    </div>
-
-                    <Card.Subtitle className="mb-3">
-                        <strong>Фрилансер:</strong> {freelancer?.login || 'Неизвестно'}
-                    </Card.Subtitle>
-
+                    {/* Описание */}
                     <Card.Subtitle className="mb-2">
-                        <h3>Описание решения</h3>
+                        <h2>Описание:</h2>
                     </Card.Subtitle>
                     <Markdown options={{ disableParsingRawHTML: true }}>
                         {currentSolution.description}
                     </Markdown>
-
-                    {currentSolution.files && currentSolution.files.length > 0 && (
-                        <div className="mt-4">
-                            <h4>Прикрепленные файлы:</h4>
-                            <Row>
-                                {currentSolution.files.map((file, index) => (
-                                    <Col md={4} key={index}>
-                                        <Card className="mb-2 p-2">
-                                            <a href={file.url} target="_blank" rel="noreferrer">
-                                                {file.name || `Файл ${index + 1}`}
-                                            </a>
-                                        </Card>
-                                    </Col>
-                                ))}
-                            </Row>
-                        </div>
-                    )}
                 </Card.Body>
 
-                <Card.Footer className="d-flex justify-content-between">
-                    <Button
-                        variant="secondary"
-                        onClick={() => navigate(`/contest/${currentContest.number}`)}
-                    >
-                        Перейти к конкурсу
-                    </Button>
+                <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">
+                    <div className="d-flex flex-wrap gap-2">
+                        {isOwner && (
+                            <>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleGoToContest}
+                                >
+                                    Перейти к конкурсу
+                                </Button>
 
-                    <div>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleGoToMySolutions}
+                                >
+                                    Перейти к моим решениям
+                                </Button>
+                            </>
+                        )}
+
+                        {isEmployer && (
+                            <>
+                                <Button 
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleGoToSolutions}
+                                >
+                                    Вернуться к списку решений
+                                </Button>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="d-flex flex-wrap gap-2">
                         {isOwner && (
                             <>
                                 <Button
                                     variant="info"
-                                    className="me-2"
+                                    className="sm"
                                     onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
                                 >
                                     Просмотреть отзывы
                                 </Button>
                                 <Button
-                                    variant="primary"
-                                    className="me-2"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/edit`)}
+                                    variant="success"
+                                    className="sm"
+                                    onClick={() => navigate(handleEditSolution)}
                                 >
                                     Редактировать решение
                                 </Button>
                                 <Button
                                     variant="danger"
+                                    size="sm"
                                     onClick={() => setShowDeleteModal(true)}
                                 >
                                     Удалить решение
@@ -186,13 +263,14 @@ const SolutionPage = () => {
                             <>
                                 <Button
                                     variant="info"
-                                    className="me-2"
+                                    className="sm"
                                     onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
                                 >
                                     Просмотреть отзывы
                                 </Button>
                                 <Button
                                     variant="warning"
+                                    size="sm"
                                     onClick={() => setShowStatusModal(true)}
                                 >
                                     Изменить статус
@@ -201,13 +279,13 @@ const SolutionPage = () => {
                                 <ChangeSolutionStatusModal
                                     show={showStatusModal}
                                     onHide={() => setShowStatusModal(false)}
-                                    currentStatus={currentSolution.status}
+                                    currentStatus={solution.currentSolution.status}
                                     onSave={handleStatusChange}
                                 />
 
-                                <Button
+                                <Button 
                                     variant="success"
-                                    className="me-2"
+                                    size="sm"
                                     onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)}
                                 >
                                     Оставить отзыв
