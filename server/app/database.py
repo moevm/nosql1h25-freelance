@@ -14,14 +14,17 @@ solutions_collection = db["solutions"]
 contest_types_collection = db["contest_types"]
 
 def initialize_data():
-    if contest_types_collection.count_documents({}) == 0:
+    if contest_types_collection.count_documents({}) == 0 and \
+        users_collection.count_documents({}) == 0 and \
+        solutions_collection.count_documents({}) == 0 and \
+        contests_collection.count_documents({}) == 0:
+    
         contest_types_collection.insert_many([
             {'name': 'Программирование'},
             {'name': 'Дизайн'},
             {'name': 'Искусственный интеллект'},
         ])
     
-    if users_collection.count_documents({}) == 0:
         users_collection.insert_many([
             {
                 'email': 'admin@rambler.ru',
@@ -46,11 +49,10 @@ def initialize_data():
             },
         ])
     
-    employer = users_collection.find_one({'login': 'employer'})
-    type_prog = contest_types_collection.find_one({'name': 'Программирование'})
-    type_design = contest_types_collection.find_one({'name': 'Дизайн'})
+        employer = users_collection.find_one({'login': 'employer'})
+        type_prog = contest_types_collection.find_one({'name': 'Программирование'})
+        type_design = contest_types_collection.find_one({'name': 'Дизайн'})
 
-    if contests_collection.count_documents({}) == 0:
         contests_collection.insert_many([
             {
                 'employerId': str(employer['_id']),
@@ -102,5 +104,38 @@ def initialize_data():
                 'winnerId': None,
             },
         ])
+
+        contest = contests_collection.find_one({'number': 2})
+        freelancer = users_collection.find_one({'login': 'freelancer'})
+        
+        solutions_collection.insert_many([
+            {
+                'contestId': str(contest['_id']),
+                'freelancerId': str(freelancer['_id']),
+                'number': 1,
+                'title': 'Решение 1',
+                'annotation': 'Лучшая иконка для нейросети-художника',
+                'description': (' #Лучшая иконка для нейросети-художника\n\n'
+                    'Три иконки на выбор:\n'
+                    '- 🚶\n'
+                    '- 🚶🏽\n'
+                    '- 🚶🏿'
+                ),
+                'files': [],
+                'status': 4,
+                'createdAt': '2025-04-19T20:53:43.300Z',
+                'updatedAt': '2025-04-19T20:53:43.300Z',
+                'reviews': [
+                    {
+                        'number': 1,
+                        'score': 3.0,
+                        'commentary': 'Представленные иконки слишком однообразные и неподходящие',
+                        'createdAt': '2025-04-20T12:50:40.989Z',
+                    }
+                ]
+            }
+        ])
+        
+
 
 initialize_data()
