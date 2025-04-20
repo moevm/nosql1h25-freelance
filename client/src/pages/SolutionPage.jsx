@@ -193,6 +193,7 @@ const SolutionPage = () => {
                                 <Button 
                                     variant="warning"
                                     onClick={() => setShowStatusModal(true)}
+                                    className='me-2'
                                 >
                                     Изменить статус
                                 </Button>
