@@ -5,7 +5,7 @@ import { Context } from "../main.jsx";
 import SolutionCard from './SolutionCard.jsx';
 
 const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
-    const { solution, user } = useContext(Context);
+    const { solution } = useContext(Context);
     const [showLoader, setShowLoader] = useState(false);
 
     useEffect(() => {
@@ -42,7 +42,8 @@ const SolutionsList = ({ showContestTitle, showFreelancerLogin }) => {
                     key={solutionItem.number}
                     solution={solutionItem}
                     contestTitle={solutionItem.contestTitle}
-                    freelancer={user.getById(solutionItem.freelancerId)}
+                    freelancerLogin={solutionItem.freelancerLogin}
+                    employerLogin={solutionItem.employerLogin}
                     showContestTitle={showContestTitle}
                     showFreelancerLogin={showFreelancerLogin}
                 />

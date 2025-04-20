@@ -204,7 +204,6 @@ def get_filtered_contests():
             matching_contests = list(contests_collection.find(contest_query, {"_id": 1}))
             matching_contest_ids = [str(contest["_id"]) for contest in matching_contests]
 
-            # Строим условия для поиска решений
             search_conditions = [{"description": regex}]
             if matching_contest_ids:
                 search_conditions.append({"contestId": {"$in": matching_contest_ids}})
@@ -229,9 +228,29 @@ def get_filtered_contests():
     solutions = list(solutions_collection.find(query))
 
     contest_ids = {solution["contestId"] for solution in solutions}
-    contests = contests_collection.find({"_id": {"$in": [ObjectId(cid) for cid in contest_ids]}})
-    contest_titles = {str(contest["_id"]): contest["title"] for contest in contests}
+    contests = list(contests_collection.find({"_id": {"$in": [ObjectId(cid) for cid in contest_ids]}}))
+
+    contest_map = {}
+    employer_ids = set()
+    for contest in contests:
+        cid = str(contest["_id"])
+        contest_map[cid] = contest
+        if "employerId" in contest:
+            employer_ids.add(ObjectId(contest["employerId"]))
+
+    freelancer_ids = {ObjectId(s["freelancerId"]) for s in solutions if "freelancerId" in s}
+
+    all_user_ids = list(freelancer_ids.union(employer_ids))
+    users = list(users_collection.find({"_id": {"$in": all_user_ids}}, {"login": 1}))
+    user_logins = {str(user["_id"]): user["login"] for user in users}
+
     for solution in solutions:
-        solution["contestTitle"] = contest_titles.get(solution["contestId"], "Неизвестный конкурс")
+        contest_id = solution.get("contestId")
+        contest = contest_map.get(contest_id)
+
+        employer_id = contest.get("employerId") if contest else None
+        solution["contestTitle"] = contest.get("title", "Неизвестный конкурс") if contest else "Неизвестный конкурс"
+        solution["freelancerLogin"] = user_logins.get(solution.get("freelancerId"))
+        solution["employerLogin"] = user_logins.get(str(employer_id)) if employer_id else None
 
     return jsonify(serialize_mongo(solutions))
