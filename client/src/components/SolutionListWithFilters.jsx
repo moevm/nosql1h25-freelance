@@ -1,21 +1,34 @@
 import React, {useContext, useState} from 'react';
 import { Row, Col, Container, Button, Collapse, Card } from "react-bootstrap";
 import { BsFilter } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context } from "../main.jsx";
 import SolutionsFiltersBar from './SolutionsFiltersBar.jsx';
 import SolutionsList from './SolutionsList.jsx';
 
-const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin, searchForMySolutions }) => {
-    const { solution } = useContext(Context);
+const SolutionListWithFilters = ({ title, showContestTitle, showFreelancerLogin, isMySolutions }) => {
+    const { contest, solution } = useContext(Context);
     const [open, setOpen] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleResetFilters = () => {
         solution.resetFilters();
     };
 
+    const handleGoToContest = () => {
+        if (solution.contestId) {
+            navigate(`/contest/${contest.currentContest.number}`);
+        }
+    };
+
     return (
         <Container className="py-3">
+            {title && (
+                <h2 className="mb-3" style={{ fontWeight: '600' }}>{title}</h2>
+            )}
+
             <div className="d-flex mb-2 gap-2">
                 <Button
                     onClick={() => setOpen(!open)}
@@ -59,6 +72,26 @@ const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin, search
                 >
                     Сбросить фильтры
                 </Button>
+
+                {!isMySolutions && (
+                    <Button
+                        onClick={handleGoToContest}
+                        variant="outline-primary"
+                        size="sm"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            fontWeight: '500',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '14px',
+                            height: '35px',
+                            lineHeight: '1',
+                        }}
+                    >
+                        К конкурсу
+                    </Button>
+                )}
             </div>
 
             <Collapse in={open}>
@@ -66,7 +99,7 @@ const SolutionListWithFilters = ({ showContestTitle, showFreelancerLogin, search
                     <Card className="mb-3 shadow-sm border-0">
                         <Card.Body className="py-3 px-3">
                             <SolutionsFiltersBar
-                                searchForMySolutions={searchForMySolutions}
+                                searchForMySolutions={isMySolutions}
                             />
                         </Card.Body>
                     </Card>

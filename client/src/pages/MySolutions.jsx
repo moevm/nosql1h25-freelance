@@ -16,9 +16,10 @@ const MySolutions = () => {
     return (
         <>
             <SolutionListWithFilters
+                title={"Мои решения"}
                 showContestTitle={true}
                 showFreelancerLogin={false}
-                searchForMySolutions={true}
+                isMySolutions={true}
             />
         </>
     );

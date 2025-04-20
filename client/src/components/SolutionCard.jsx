@@ -51,12 +51,12 @@ const SolutionCard = ({ solution, contestTitle, freelancerLogin, employerLogin, 
             <div>
                 {/* Заголовок */}
                 <h4 className="mb-2 text-dark fw-bold text-truncate">
-                    {solution.title}
+                    {solution.title || "Неизвестное название"}
                 </h4>
     
                 {/* Аннотация */}
                 <p className="mb-3 text-muted" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
-                    {solution.annotation}
+                    {solution.annotation || "Неизвестная аннотация"}
                 </p>
             </div>
     

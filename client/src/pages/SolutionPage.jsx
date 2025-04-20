@@ -106,7 +106,7 @@ const SolutionPage = () => {
                         {/* Левая часть: Заголовок, конкурс и статус */}
                         <div>
                             <Card.Title className="mb-2">
-                                <h1>{currentSolution.title}</h1>
+                                <h1>{currentSolution.title || "Неизвестное название"}</h1>
                             </Card.Title>
                             <h5 className="text-muted mb-2">
                                 Конкурс «{currentContest.title}» от {user.getById(currentContest.employerId)?.login || 'Неизвестно'}
