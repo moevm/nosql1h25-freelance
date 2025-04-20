@@ -122,14 +122,6 @@ export default class SolutionStore {
         return this._contestId;
     }
 
-    get addedBefore() {
-        return this._addedBefore;
-    }
-
-    get addedBefore() {
-        return this._addedBefore;
-    }
-
     get statusOptions() {
         return Object.entries(this.statusMap).map(([value, data]) => ({
             value: parseInt(value),

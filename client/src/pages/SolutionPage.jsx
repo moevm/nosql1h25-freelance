@@ -90,7 +90,7 @@ const SolutionPage = () => {
             }
 
             const updatedSolution = await solution.updateSolutionStatus(
-                currentSolution.id, 
+                currentSolution.id,
                 newStatus
             );
 

@@ -86,6 +86,18 @@ def get_solutions_by_contest(contest_id):
         return jsonify({"error": str(e)}), 500
 
 
+# Маршрут получения решения по его номеру
+@solutions_bp.route("/solutions/number/<number>", methods=["GET"])
+def get_solution_by_number(number):
+    try:
+        solution = solutions_collection.find_one({"number": int(number)})
+        if not solution:
+            return jsonify({"error": "Solution not found"}), 404
+        return jsonify(serialize_mongo(solution)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # Маршрут удаления решения по ID
 @solutions_bp.route("/solutions/<solution_id>", methods=["DELETE"])
 def delete_solution(solution_id):
