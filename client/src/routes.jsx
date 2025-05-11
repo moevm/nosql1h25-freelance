@@ -12,7 +12,8 @@ import {
     SOLUTIONS_ROUTE,
     CREATE_REVIEW_ROUTE,
     SOLUTION_REVIEWS_ROUTE,
-    REVIEW_ROUTE
+    REVIEW_ROUTE,
+    PROFILE_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
 import Contests from "./pages/Contests.jsx";
@@ -27,6 +28,7 @@ import SolutionPage from "./pages/SolutionPage.jsx";
 import CreateReview from "./pages/CreateReview.jsx";
 import SolutionReviews from "./pages/SolutionReviews.jsx";
 import ReviewPage from './pages/ReviewPage.jsx';
+import ProfilePage from "./pages/ProfilePage.jsx";
 
 export const authRoutes = [
     {
@@ -68,6 +70,10 @@ export const authRoutes = [
     {
         path: REVIEW_ROUTE,
         element: <ReviewPage />
+    },
+    {
+        path: PROFILE_ROUTE,
+        element: <ProfilePage />
     },
 ]
 
