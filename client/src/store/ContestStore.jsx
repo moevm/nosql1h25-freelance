@@ -34,7 +34,8 @@ const baseForm = {
     },
     files: {
         error: '',
-        rules: { max: 20 }
+        rules: { max: 20 },
+        allowedTypes: ['application/zip', 'application/x-zip-compressed', 'image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
     }
 };
 

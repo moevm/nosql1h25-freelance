@@ -4,6 +4,7 @@ import { Context } from '../main.jsx';
 import { Container, Card, Badge, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Markdown from 'markdown-to-jsx';
+import { downloadFileOrZip } from '../services/apiService.js';
 
 const ContestPage = () => {
     const { contest, user } = useContext(Context);
@@ -66,6 +67,48 @@ const ContestPage = () => {
                         <Markdown options={{ disableParsingRawHTML: true }}>
                             {currentContest.description}
                         </Markdown>
+
+                        {currentContest.files && currentContest.files.length > 0 && (
+                            <>
+                                <hr />
+                                <h4>Файлы:</h4>
+                                <ul>
+                                    {currentContest.files.map((filePath, index) => {
+                                        const fileName = filePath.split('/').pop();
+                                        // получаем относительный путь без "/static/"
+                                        const relativePath = filePath.replace('/static/', '');
+
+                                        return (
+                                            <li key={index}>
+                                                <Button
+                                                    variant="link"
+                                                    className="me-2 p-0"
+                                                    onClick={() =>
+                                                        downloadFileOrZip(`/files/${relativePath}`, fileName)
+                                                    }
+                                                >
+                                                    {fileName}
+                                                </Button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                                <Button
+                                    variant="success"
+                                    onClick={() => {
+                                        const firstFile = currentContest.files[0];
+                                        const relativePath = firstFile.replace('/static/', '');
+                                        const folderPath = relativePath.split('/').slice(0, -1).join('/');
+                                        downloadFileOrZip(
+                                            `/download-folder/${folderPath}`,
+                                            `contest_${currentContest.number}`
+                                        );
+                                    }}
+                                >
+                                    Скачать всё
+                                </Button>
+                            </>
+                        )}
                 </Card.Body>
                 {isFreelancer && 
                     <Card.Footer>
