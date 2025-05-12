@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Button, Container} from "react-bootstrap";
-import ContestTypeModal from "../ContestTypeModal.jsx";
+import ContestTypeModal from "./ContestTypeModal.jsx";
 
 const AddContestTypePanel = () => {
     const [showModal, setShowModal] = useState(false);

@@ -59,16 +59,17 @@ class ContestType(BaseModel):
 
 
 def validate_user(data: dict) -> dict:
-    return User(**data).dict(by_alias=True)
+    return User(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_review(data: dict) -> dict:
-    return Review(**data).dict(by_alias=True)
+    return Review(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_solution(data: dict) -> dict:
-    return Solution(**data).dict(by_alias=True)
+    return Solution(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_contest(data: dict) -> dict:
-    return Contest(**data).dict(by_alias=True)
+    return Contest(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_contest_type(data: dict) -> dict:
-    return ContestType(**data).dict(by_alias=True)
+    return ContestType(**data).dict(by_alias=True, exclude_none=True)
+
