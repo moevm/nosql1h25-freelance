@@ -248,7 +248,7 @@ const CreateSolution = () => {
                             </Card.Subtitle>
 
                             <Markdown options={{ disableParsingRawHTML: true }}>
-                                {solution.form.description.value || '*Нет описания*'}
+                                {mdDescription}
                             </Markdown>
                         </Card.Body>
 
