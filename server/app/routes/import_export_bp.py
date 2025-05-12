@@ -17,6 +17,38 @@ import io, json, traceback
 
 import_export_bp = Blueprint("import_export", __name__)
 
+# Экспорт всех данных
+@import_export_bp.route("/import-export/export", methods=["GET"])
+def export_data():
+    try:
+        users = list(users_collection.find({}))
+        contests = list(contests_collection.find({}))
+        solutions = list(solutions_collection.find({}))
+        contest_types = list(contest_types_collection.find({}))
+
+        data = {
+            "users": [serialize_mongo(u) for u in users],
+            "contests": [serialize_mongo(c) for c in contests],
+            "solutions": [serialize_mongo(s) for s in solutions],
+            "contestTypes": [serialize_mongo(t) for t in contest_types],
+        }
+
+        buffer = io.BytesIO()
+        buffer.write(json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8"))
+        buffer.seek(0)
+
+        return send_file(
+            buffer,
+            mimetype="application/json",
+            as_attachment=True,
+            download_name="exported_data.json"
+        )
+
+    except Exception as e:
+        current_app.logger.error("Ошибка при экспорте:\n" + traceback.format_exc())
+        return jsonify({"error": "Ошибка при экспорте данных", "details": str(e)}), 500
+
+
 # Импорт всех данных
 @import_export_bp.route("/import-export/import", methods=["POST"])
 def import_data():

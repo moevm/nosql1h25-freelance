@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Any
 from datetime import datetime
 from bson import ObjectId
 
@@ -7,9 +7,8 @@ def serialize_mongo(obj: Union[dict, List[dict]]) -> Union[dict, List[dict]]:
         return [serialize_mongo_doc(item) for item in obj]
     return serialize_mongo_doc(obj)
 
-def serialize_mongo_doc(doc: Union[dict, object]) -> dict:
+def serialize_mongo_doc(doc: Any) -> Any:
     if isinstance(doc, dict):
-        doc = dict(doc)
         result = {}
         for key, value in doc.items():
             if key == "_id":
@@ -17,10 +16,11 @@ def serialize_mongo_doc(doc: Union[dict, object]) -> dict:
             else:
                 result[key] = serialize_mongo_doc(value)
         return result
-    if isinstance(doc, list):
+    elif isinstance(doc, list):
         return [serialize_mongo_doc(item) for item in doc]
-    if isinstance(doc, ObjectId):
+    elif isinstance(doc, ObjectId):
         return str(doc)
-    if isinstance(doc, datetime):
+    elif isinstance(doc, datetime):
         return doc.isoformat()
-    return doc
+    else:
+        return doc

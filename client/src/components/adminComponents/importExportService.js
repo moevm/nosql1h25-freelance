@@ -1,9 +1,29 @@
 import { fetchData, sendData} from "../../services/apiService.js";
+import axios from "axios";
 
 // Экспорт всех данных
 export const exportData = async () => {
+    try {
+        const response = await axios.get('http://localhost:8000/api/import-export/export', {
+            responseType: 'blob', 
+        });
 
+        // Создание ссылки для скачивания
+        const blob = new Blob([response.data], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'exported_data.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Ошибка при экспорте данных:", error);
+        throw error;
+    }
 };
+
 
 // Импорт данных из файла
 export const importData = async (file) => {
