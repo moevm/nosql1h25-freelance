@@ -71,21 +71,43 @@ const CreateContest = () => {
         }
     };
 
+    // const handleFilesChange = useCallback((newFiles) => {
+    //     const validFiles = Array.from(newFiles).filter(file =>
+    //             file.type.startsWith('image/') // &&
+    //         //file.size < 5 * 1024 * 1024 // 5MB limit
+    //     );
+    //     contest.form.files.error = validFiles.length > contest.form.files.rules.max
+    //         ? contest.form.files.error = contest.formErrors.files : '';
+    //     const newMap = {};
+    //     validFiles.forEach((file, index) => {
+    //         newMap[`${file.name}`] = URL.createObjectURL(file);
+    //     });
+    //     Object.values(imagesMap).forEach(URL.revokeObjectURL);
+    //     setFiles(validFiles);
+    //     setImagesMap(newMap);
+    // }, [imagesMap]);
+
     const handleFilesChange = useCallback((newFiles) => {
-        const validFiles = Array.from(newFiles).filter(file =>
-                file.type.startsWith('image/') // &&
-            //file.size < 5 * 1024 * 1024 // 5MB limit
-        );
-        contest.form.files.error = validFiles.length > contest.form.files.rules.max
-            ? contest.form.files.error = contest.formErrors.files : '';
+        const allowedTypes = contest.form.files.allowedTypes;
+        const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
+
+        if (validFiles.length > contest.form.files.rules.max) {
+            contest.form.files.error = contest.formErrors.files;
+        } else {
+            contest.form.files.error = '';
+        }
+
         const newMap = {};
-        validFiles.forEach((file, index) => {
-            newMap[`${file.name}`] = URL.createObjectURL(file);
+        validFiles.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                newMap[file.name] = URL.createObjectURL(file);
+            }
         });
+
         Object.values(imagesMap).forEach(URL.revokeObjectURL);
         setFiles(validFiles);
         setImagesMap(newMap);
-    }, [imagesMap]);
+    }, [imagesMap, contest]);
 
     useEffect(() => {
         return () => {
@@ -209,6 +231,9 @@ const CreateContest = () => {
                     <Form.Control.Feedback type="invalid">
                         {contest.form.files.error}
                     </Form.Control.Feedback>
+                    <Form.Text className="text-muted">
+                        Поддерживаемые форматы: .zip, .png, .jpg, .jpeg, .gif. Не более {contest.form.files.rules.max} файлов.
+                    </Form.Text>
                 </Form.Group>
                 <Button className="me-3" type="submit">Опубликовать</Button>
                 <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>

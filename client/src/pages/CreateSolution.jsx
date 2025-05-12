@@ -86,7 +86,7 @@ const CreateSolution = () => {
         const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
 
         if (validFiles.length > solution.form.files.rules.max) {
-            solution.form.files.error = solution.solutionFormErrors.files;
+            solution.form.files.error = solution.formErrors.files;
         } else {
             solution.form.files.error = '';
         }
