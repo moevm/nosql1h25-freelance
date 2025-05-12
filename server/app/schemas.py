@@ -14,6 +14,7 @@ class User(BaseModel):
 
 class Review(BaseModel):
     number: Optional[int] = None    # Порядковый номер для url страницы отзыва
+    reviewerId: str
     score: float
     commentary: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

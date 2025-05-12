@@ -62,6 +62,7 @@ const CreateReview = () => {
             const payload = {
                 score: parseFloat(score),
                 commentary: commentary.trim(),
+                reviewerId: user.user.id
             };
             // POST /api/solutions/{id}/reviews
             await sendData(`/solutions/${currentSolution.id}/reviews`, payload);

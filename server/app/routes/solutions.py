@@ -263,6 +263,9 @@ def add_review(solution_id):
 
     data = request.get_json()  # ожидаем { score: float, commentary: str }
     # получаем текущее решение
+    reviewer_id = data.get("reviewerId")
+    if not reviewer_id or not ObjectId.is_valid(reviewer_id):
+        return jsonify({"error": "Invalid or missing reviewerId"}), 400
     sol = solutions_collection.find_one({"_id": ObjectId(solution_id)})
     if not sol:
         return jsonify({"error": "Solution not found"}), 404
@@ -274,7 +277,8 @@ def add_review(solution_id):
     # валидируем ревью через Pydantic
     review_dict = validate_review({
         **data,
-        "number": next_number
+        "number": next_number,
+        "reviewerId": reviewer_id,
     })
 
     # пушим в массив reviews
