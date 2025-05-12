@@ -42,7 +42,7 @@ const ContestPage = () => {
     }
 
     const isFreelancer = user.user && user.user.role === 1;
-    const isEmployer = user.user && user.user.role === 2;
+    const isAdmin = user.user && user.user.role === 3;
 
     return (
         <Container>
@@ -74,20 +74,22 @@ const ContestPage = () => {
                         </Button>
                     </Card.Footer>
                 }
-                {isEmployer && 
+                {(isAdmin || user.getCurrentUserId() === currentContest.employerId) &&
                     <Card.Footer>
                         <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/solutions`)}>
                             Просмотреть решения
                         </Button>
-                        <Button
-                            variant="primary"
-                            className="ms-2"
-                            onClick={() => navigate(
-                                `/contest/edit/${currentContest.number}`,
-                                { state: JSON.parse(JSON.stringify(currentContest)) })}
-                        >
-                            Редактировать конкурс
-                        </Button>
+                        {user.getCurrentUserId() === currentContest.employerId &&
+                            <Button
+                                variant="primary"
+                                className="ms-2"
+                                onClick={() => navigate(
+                                    `/contest/edit/${currentContest.number}`,
+                                    { state: JSON.parse(JSON.stringify(currentContest)) })}
+                            >
+                                Редактировать конкурс
+                            </Button>
+                        }
                     </Card.Footer>
                 }
             </Card>

@@ -48,6 +48,10 @@ export default class UserStore {
         return this._user;
     }
 
+    getCurrentUserId() {
+        return this._user.id || null;
+    }
+
     get users() {
         return this._users;
     }

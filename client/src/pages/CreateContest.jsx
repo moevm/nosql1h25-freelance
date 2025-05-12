@@ -84,6 +84,7 @@ const CreateContest = () => {
             contest.resetForm();
         }
         if (contestData) {
+            console.log(contestData);
             setState(true);
             setSubmitURL(`/contest/edit/${contestData.number}`);
             contest.setFormField('type', contestData.type);
@@ -237,6 +238,14 @@ const CreateContest = () => {
                 <Button className="me-3" type="submit">Опубликовать</Button>
                 <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
                 <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
+                {state && 
+                    <Button
+                        className="me-3"
+                        onClick={() => navigate(-1)}
+                    >
+                        Отменить редактирование
+                    </Button>
+                }
             </Form>
 
             <Modal show={showPreview} onHide={handleClosePreview} size='xl' centered scrollable>
