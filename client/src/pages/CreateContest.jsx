@@ -246,6 +246,25 @@ const CreateContest = () => {
                             <Markdown options={{ disableParsingRawHTML: true }}>
                                 {mdDescription}
                             </Markdown>
+
+                            {files.length > 0 && (
+                                <>
+                                    <hr />
+                                    <h4>Файлы:</h4>
+                                    <ul>
+                                        {files.map((file, idx) => (
+                                            <li key={idx}>
+                                                <Button variant="link" className="me-2 p-0">
+                                                    {file.name}
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Button variant="success" disabled>
+                                        Скачать всё
+                                    </Button>
+                                </>
+                            )}
                         </Card.Body>
                         <Card.Footer>
                             <Button variant="primary">
