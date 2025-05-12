@@ -19,18 +19,26 @@ import io, json, traceback
 import_export_bp = Blueprint("import_export", __name__)
 
 def restore_ids(docs):
+    """Заменяет 'id' на '_id' в формате строки"""
     for doc in docs:
         if "id" in doc:
             try:
-                doc["_id"] = ObjectId(doc["id"])
+                doc["_id"] = str(ObjectId(doc["id"]))
             except Exception:
                 continue
             del doc["id"]
-
-        for key, value in doc.items():
-            if isinstance(value, ObjectId):
-                doc[key] = str(value)
     return docs
+
+def convert_ids_to_objectid(docs):
+    """Конвертирует строковые '_id' обратно в ObjectId для MongoDB"""
+    for doc in docs:
+        if "_id" in doc and isinstance(doc["_id"], str):
+            try:
+                doc["_id"] = ObjectId(doc["_id"])
+            except Exception:
+                continue
+    return docs
+
 
 
 # Экспорт всех данных
@@ -81,11 +89,17 @@ def import_data():
         solutions_collection.delete_many({})
         contest_types_collection.delete_many({})
 
-        # Преобразование и валидация
+        # Валидация и преобразование
         users = [validate_user(u) for u in restore_ids(data.get("users", []))]
         contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
         solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
         types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
+
+        # Конвертация _id в ObjectId
+        users = convert_ids_to_objectid(users)
+        contests = convert_ids_to_objectid(contests)
+        solutions = convert_ids_to_objectid(solutions)
+        types = convert_ids_to_objectid(types)
 
         # Вставка
         if users:
