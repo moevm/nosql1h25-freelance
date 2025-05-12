@@ -66,6 +66,60 @@ def create_contest():
     return jsonify({"id": str(res.inserted_id)}), 201
 
 
+@contests_bp.route("/contest/edit/<id>", methods=["POST"])
+def update_contest(id):
+    data = json.loads(request.form.get('data'))
+    files = request.files.getlist('files[]')
+    file_urls = []
+    filename_to_url = {}
+
+    current_contest = contests_collection.find_one({'number': int(id)});
+    if (current_contest is None):
+        return jsonify({"error": "Contest was not found"}), 404
+    _id = current_contest['_id'];
+    data['number'] = current_contest['number'];
+    file_paths = current_contest['files'];
+
+    for file in files:
+        if file.filename != '':
+            filename = secure_filename(file.filename)
+            rel_path = os.path.join('contests_uploads', str(_id), filename)
+            abs_path = os.path.join(current_app.static_folder, rel_path)
+
+            os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+            file.save(abs_path)
+
+            file_paths.append(f'/static/{rel_path}')
+            file_url = url_for('static', filename=f'contests_uploads/{str(_id)}/{filename}', _external=True)
+            file_urls.append(file_url)
+            filename_to_url[filename] = file_url
+
+    if 'description' in data:
+        def replace_image_path(match):
+            alt_text = match.group(1)
+            image_filename = match.group(2)
+            secure_name = secure_filename(image_filename)
+            
+            if secure_name in filename_to_url:
+                return f"![{alt_text}]({filename_to_url[secure_name]})"
+            return match.group(0)
+
+        data['description'] = re.sub(
+            r'!\[(.*?)\]\((.*?)\)',
+            replace_image_path,
+            data['description']
+        )
+
+    data['files'] = file_paths
+
+    contest = validate_contest(data)
+    contests_collection.update_one(
+        {'number': int(id)}, 
+        {'$set': contest}
+    )
+    return jsonify({"id": str(contests_collection.find_one({'number': int(id)}))}), 201
+    
+
 # Маршрут для получения списка всех конкурсов
 @contests_bp.route("/contests", methods=["GET"])
 def get_contests():

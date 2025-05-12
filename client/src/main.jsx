@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
           contest: new ContestStore(),
           solution: new SolutionStore()
       }}>
-    <App />
+        <App />
       </Context.Provider>
   </StrictMode>,
 )
