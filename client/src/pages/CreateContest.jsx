@@ -71,22 +71,6 @@ const CreateContest = () => {
         }
     };
 
-    // const handleFilesChange = useCallback((newFiles) => {
-    //     const validFiles = Array.from(newFiles).filter(file =>
-    //             file.type.startsWith('image/') // &&
-    //         //file.size < 5 * 1024 * 1024 // 5MB limit
-    //     );
-    //     contest.form.files.error = validFiles.length > contest.form.files.rules.max
-    //         ? contest.form.files.error = contest.formErrors.files : '';
-    //     const newMap = {};
-    //     validFiles.forEach((file, index) => {
-    //         newMap[`${file.name}`] = URL.createObjectURL(file);
-    //     });
-    //     Object.values(imagesMap).forEach(URL.revokeObjectURL);
-    //     setFiles(validFiles);
-    //     setImagesMap(newMap);
-    // }, [imagesMap]);
-
     const handleFilesChange = useCallback((newFiles) => {
         const allowedTypes = contest.form.files.allowedTypes;
         const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
