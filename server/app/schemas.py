@@ -4,6 +4,7 @@ from typing import List, Optional
 
 
 class User(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     email: str
     login: str
     password: str
@@ -13,6 +14,7 @@ class User(BaseModel):
 
 
 class Review(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     number: Optional[int] = None    # Порядковый номер для url страницы отзыва
     score: float
     commentary: str
@@ -21,6 +23,7 @@ class Review(BaseModel):
 
 
 class Solution(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     contestId: str    # ObjectId(Contest._id)
     freelancerId: str    # ObjectId(User._id)
     number: Optional[int] = None    # Порядковый номер для url страницы решения
@@ -35,6 +38,7 @@ class Solution(BaseModel):
 
 
 class Contest(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     employerId: str    # ObjectId(User._id)
     number: Optional[int] = None    # Порядковый номер для url страницы конкурса
     title: str
@@ -50,24 +54,21 @@ class Contest(BaseModel):
 
 
 class ContestType(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     name: str
 
 
 def validate_user(data: dict) -> dict:
-    return User(**data).dict()
-
+    return User(**data).dict(by_alias=True)
 
 def validate_review(data: dict) -> dict:
-    return Review(**data).dict()
-
+    return Review(**data).dict(by_alias=True)
 
 def validate_solution(data: dict) -> dict:
-    return Solution(**data).dict()
-
+    return Solution(**data).dict(by_alias=True)
 
 def validate_contest(data: dict) -> dict:
-    return Contest(**data).dict()
-
+    return Contest(**data).dict(by_alias=True)
 
 def validate_contest_type(data: dict) -> dict:
-    return ContestType(**data).dict()
+    return ContestType(**data).dict(by_alias=True)

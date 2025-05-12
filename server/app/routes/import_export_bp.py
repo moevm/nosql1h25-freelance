@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
+from bson import ObjectId
 from app.database import (
     users_collection,
     contests_collection,
@@ -16,6 +17,21 @@ import io, json, traceback
 
 
 import_export_bp = Blueprint("import_export", __name__)
+
+def restore_ids(docs):
+    for doc in docs:
+        if "id" in doc:
+            try:
+                doc["_id"] = ObjectId(doc["id"])
+            except Exception:
+                continue
+            del doc["id"]
+
+        for key, value in doc.items():
+            if isinstance(value, ObjectId):
+                doc[key] = str(value)
+    return docs
+
 
 # Экспорт всех данных
 @import_export_bp.route("/import-export/export", methods=["GET"])
@@ -59,18 +75,19 @@ def import_data():
     try:
         data = json.load(file)
 
-        # Очистка старых данных
+        # Очистка коллекций
         users_collection.delete_many({})
         contests_collection.delete_many({})
         solutions_collection.delete_many({})
         contest_types_collection.delete_many({})
 
-        # Валидация и вставка
-        users = [validate_user(u) for u in data.get("users", [])]
-        contests = [validate_contest(c) for c in data.get("contests", [])]
-        solutions = [validate_solution(s) for s in data.get("solutions", [])]
-        types = [validate_contest_type(t) for t in data.get("contestTypes", [])]
+        # Преобразование и валидация
+        users = [validate_user(u) for u in restore_ids(data.get("users", []))]
+        contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
+        solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
+        types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
 
+        # Вставка
         if users:
             users_collection.insert_many(users)
         if contests:
