@@ -79,6 +79,15 @@ const ContestPage = () => {
                         <Button variant="primary" onClick={() => navigate(`/contest/${currentContest.number}/solutions`)}>
                             Просмотреть решения
                         </Button>
+                        <Button
+                            variant="primary"
+                            className="ms-2"
+                            onClick={() => navigate(
+                                `/contest/edit/${currentContest.number}`,
+                                { state: JSON.parse(JSON.stringify(currentContest)) })}
+                        >
+                            Редактировать конкурс
+                        </Button>
                     </Card.Footer>
                 }
             </Card>
