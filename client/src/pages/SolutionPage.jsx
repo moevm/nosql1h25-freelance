@@ -113,10 +113,6 @@ const SolutionPage = () => {
         navigate(`/solution/${currentSolution.number}/edit`, { state: JSON.parse(JSON.stringify(currentSolution)) })
     };
 
-    const handleDownloadFile = () => {
-        downloadFileOrZip(`/files/${relativePath}`, fileName);
-    };
-
     const handleDownloadArchive = () => {
         const firstFile = currentSolution.files[0];
         const relativePath = firstFile.replace('/static/', '');
@@ -210,7 +206,6 @@ const SolutionPage = () => {
                             <ul>
                                 {currentSolution.files.map((filePath, index) => {
                                     const fileName = filePath.split('/').pop();
-                                    // получаем относительный путь без "/static/"
                                     const relativePath = filePath.replace('/static/', '');
 
                                     return (
@@ -218,7 +213,7 @@ const SolutionPage = () => {
                                             <Button
                                                 variant="link"
                                                 className="me-2 p-0"
-                                                onClick={handleDownloadFile}
+                                                onClick={() => downloadFileOrZip(`/files/${relativePath}`, fileName)}
                                             >
                                                 {fileName}
                                             </Button>
