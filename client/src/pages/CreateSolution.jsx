@@ -1,8 +1,8 @@
-import React, { useEffect, useContext, useState, useCallback } from 'react';
+import { useEffect, useContext, useState, useCallback } from 'react';
 import { Container, Form, Button, Modal, Card } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
 import Markdown from 'markdown-to-jsx';
 
@@ -10,23 +10,25 @@ const CreateSolution = () => {
     const { contest, solution, user } = useContext(Context);
     const { number } = useParams();
     const [error, setError] = useState(null);
+    const location = useLocation();
+    const solutionData = location.state;
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetch = async () => {
-            if (contest.currentContest && contest.currentContest.number == number) {
-                contest.setCurrentContest(contest.currentContest);
+            if (solution.currentSolution && solution.currentSolution.number == number) {
+                solution.setCurrentSolution(solution.currentSolution);
             } else {
-                const fetched = await contest.fetchOneContestByNumber(number);
+                const fetched = await solution.fetchSolutionByNumber(number);
                 if (fetched) {
-                    contest.setCurrentContest(fetched);
+                    solution.setCurrentSolution(fetched);
                 } else {
-                    setError("Конкурс не найден.");
+                    setError("Решение не найдено.");
                 }
             }
         };
         fetch();
-    }, [number, contest]);
+    }, [number, solution]);
 
     const contestId = contest.currentContest?.id;
 
@@ -35,6 +37,8 @@ const CreateSolution = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [mdDescription, setMdDescription] = useState('');
+    const [state, setState] = useState(false);
+    const [submitURL, setSubmitURL] = useState('/solutions');
 
     const handleClosePreview = () => setShowPreview(false);
     const handleShowPreview = () => setShowPreview(true);
@@ -70,16 +74,32 @@ const CreateSolution = () => {
         formData.append('data', JSON.stringify(data));
 
         try {
-            const res = await sendData('/solutions', formData, true);
+            const res = await sendData(submitURL, formData, true);
             solution.resetForm();
-            navigate('/');
-            alert('Решение успешно отправлено!');
+            navigate(-1);
+            alert(`Решение успешно ${state ? 'изменёно' : 'отправлено'}!`);
             console.log('Ответ сервера:', res);
         } catch (error) {
             console.error('Ошибка при отправке решения:', error);
-            alert('Ошибка при отправке решения');
+            alert(`Ошибка при ${state ? 'редактировании' : 'отправке'} решения`);
         }
     };
+
+    useEffect(() => {
+        if (!number) {
+            setState(false);
+            setSubmitURL('/my-solutions');
+            solution.resetForm();
+        }
+        if (solutionData) {
+            console.log(solutionData);
+            setState(true);
+            setSubmitURL(`/solution/${solutionData.number}/edit`);
+            solution.setFormField('title', solutionData.title);
+            solution.setFormField('annotation', solutionData.annotation);
+            solution.setFormField('description', solutionData.description);
+        }
+    }, [number, solutionData]);
 
     const handleFilesChange = useCallback((newFiles) => {
         const allowedTypes = solution.form.files.allowedTypes;
@@ -127,7 +147,7 @@ const CreateSolution = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Создание решения</h1>
+            <h1 className="mb-4">{state ? 'Редактирование решения' : 'Создание решения' }</h1>
             <Form noValidate onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Form.Control
@@ -186,6 +206,14 @@ const CreateSolution = () => {
                 <Button className="me-3" type="submit">Отправить</Button>
                 <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
                 <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
+                {state && 
+                    <Button
+                        className="me-3"
+                        onClick={() => navigate(-1)}
+                    >
+                        Отменить редактирование
+                    </Button>
+                }
             </Form>
 
             <Modal show={showPreview} onHide={handleClosePreview} size="xl" centered scrollable>

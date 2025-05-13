@@ -110,9 +110,22 @@ const SolutionPage = () => {
     };
 
     const handleEditSolution = () => {
-        if (false) {
-            navigate(`/solution/${currentSolution.number}/edit`);
-        }
+        navigate(`/solution/${currentSolution.number}/edit`, { state: JSON.parse(JSON.stringify(currentSolution)) })
+    };
+
+    const handleDownloadArchive = () => {
+        const firstFile = currentSolution.files[0];
+        const relativePath = firstFile.replace('/static/', '');
+        const folderPath = relativePath.split('/').slice(0, -1).join('/');
+        downloadFileOrZip(`/download-folder/${folderPath}`, `solution_${currentSolution.number}`);
+    };
+
+    const handleGoToReviews = () => {
+        navigate(`/solution/${currentSolution.number}/reviews`);
+    };
+
+    const handleLeaveReview = () => {
+        navigate(`/solution/${currentSolution.number}/create-review`);
     };
 
     return (
@@ -193,7 +206,6 @@ const SolutionPage = () => {
                             <ul>
                                 {currentSolution.files.map((filePath, index) => {
                                     const fileName = filePath.split('/').pop();
-                                    // получаем относительный путь без "/static/"
                                     const relativePath = filePath.replace('/static/', '');
 
                                     return (
@@ -201,9 +213,7 @@ const SolutionPage = () => {
                                             <Button
                                                 variant="link"
                                                 className="me-2 p-0"
-                                                onClick={() =>
-                                                    downloadFileOrZip(`/files/${relativePath}`, fileName)
-                                                }
+                                                onClick={() => downloadFileOrZip(`/files/${relativePath}`, fileName)}
                                             >
                                                 {fileName}
                                             </Button>
@@ -213,15 +223,7 @@ const SolutionPage = () => {
                             </ul>
                             <Button
                                 variant="success"
-                                onClick={() => {
-                                    const firstFile = currentSolution.files[0];
-                                    const relativePath = firstFile.replace('/static/', '');
-                                    const folderPath = relativePath.split('/').slice(0, -1).join('/');
-                                    downloadFileOrZip(
-                                        `/download-folder/${folderPath}`,
-                                        `solution_${currentSolution.number}`
-                                    );
-                                }}
+                                onClick={handleDownloadArchive}
                             >
                                 Скачать всё
                             </Button>
@@ -270,14 +272,14 @@ const SolutionPage = () => {
                                 <Button
                                     variant="info"
                                     className="sm"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                    onClick={handleGoToReviews}
                                 >
                                     Просмотреть отзывы
                                 </Button>
                                 <Button
                                     variant="success"
                                     className="sm"
-                                    onClick={() => navigate(handleEditSolution)}
+                                    onClick={handleEditSolution}
                                 >
                                     Редактировать решение
                                 </Button>
@@ -306,7 +308,7 @@ const SolutionPage = () => {
                                 <Button
                                     variant="info"
                                     className="sm"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/reviews`)}
+                                    onClick={handleGoToReviews}
                                 >
                                     Просмотреть отзывы
                                 </Button>
@@ -328,7 +330,7 @@ const SolutionPage = () => {
                                 <Button 
                                     variant="success"
                                     size="sm"
-                                    onClick={() => navigate(`/solution/${currentSolution.number}/create-review`)}
+                                    onClick={handleLeaveReview}
                                 >
                                     Оставить отзыв
                                 </Button>

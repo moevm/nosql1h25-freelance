@@ -13,7 +13,8 @@ import {
     CREATE_REVIEW_ROUTE,
     SOLUTION_REVIEWS_ROUTE,
     REVIEW_ROUTE,
-    PROFILE_ROUTE
+    PROFILE_ROUTE,
+    EDIT_ROUTE
 } from "./utils/consts.js";
 import Auth from "./pages/Auth.jsx";
 import Contests from "./pages/Contests.jsx";
@@ -49,6 +50,10 @@ export const authRoutes = [
     },
     {
         path: CONTEST_ROUTE + '/:number' + CREATE_SOLUTION_ROUTE,
+        element: <CreateSolution />
+    },
+    {
+        path: SOLUTION_ROUTE + '/:number' + EDIT_ROUTE,
         element: <CreateSolution />
     },
     {
