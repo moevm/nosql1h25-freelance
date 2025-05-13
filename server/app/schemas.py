@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -15,7 +15,7 @@ class User(BaseModel):
 
 class Review(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    number: Optional[int] = None    # Порядковый номер для url страницы отзыва
+    number: Optional[int] = None
     score: float
     commentary: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -24,14 +24,14 @@ class Review(BaseModel):
 
 class Solution(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    contestId: str    # ObjectId(Contest._id)
-    freelancerId: str    # ObjectId(User._id)
-    number: Optional[int] = None    # Порядковый номер для url страницы решения
+    contestId: str
+    freelancerId: str
+    number: Optional[int] = None
     title: str
     annotation: str
     description: str
     files: List[str] = []
-    status: int = 1    # 1 - Новое, 2 - Просмотрено, 3 - Победитель, 4 - Необходимы правки, 5 - Правки внесены
+    status: int = 1
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviews: List[Review] = []
