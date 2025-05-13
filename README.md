@@ -8,48 +8,93 @@
 - Администратор - управляет платформой, типами конкурсов, проверяет корректность конкурсов и решений
 
 
-### Фрилансер
-Логин: freelancer  
-Пароль: freelancer
+### Фрилансеры
+1. **Аккаунт 1**  
+  Логин: freelancer  
+  Пароль: freelancer
+2. **Аккаунт 2**  
+  Логин: finder  
+  Пароль: 123456 
 
-### Заказчик
-Логин: employer  
-Пароль: employer
-
-### Администратор
-Логин: admin  
-Пароль: admin
-
-### Данные фрилансера
+#### Данные фрилансеров
 ```
 {
+  'id': '6822f88a0d1450eafe512e9f',
   'email': 'freelancer@mail.ru',
   'login': 'freelancer',
   'password': 'freelancer',
   'role': 1,
   'status': 1,
+  'createdAt': '2025-05-13T11:35:41.138000'
+},
+{
+  'id': '6823329d287514ab3b0195f8',
+  'email': 'finder@mail.ru',
+  'login': 'finder',
+  'password': '123456',
+  'role': 1,
+  'status': 1,
+  'createdAt': '2025-05-13T11:53:01.004000'
 }
 ```
 
-### Данные заказчика
+### Заказчики
+1. **Аккаунт 1**  
+  Логин: employer  
+  Пароль: employer
+2. **Аккаунт 2**  
+  Логин: enthusiast   
+  Пароль: 33333337
+3. **Аккаунт 3**  
+  Логин: someman   
+  Пароль: 123456
+
+#### Данные заказчиков
 ```
 {
+  'id': '6822f88a0d1450eafe512ea0',
   'email': 'employer@yandex.ru',
   'login': 'employer',
   'password': 'employer',
   'role': 2,
   'status': 1,
+  'createdAt': '2025-05-13T11:35:41.138000'
+},
+{
+  'id': '6823193fd8bb90c43b9795fc',
+  'email': 'enthusiast@outlook.com',
+  'login': 'enthusiast',
+  'password': '33333337',
+  'role': 2,
+  'status': 1,
+  'createdAt': '2025-05-13T10:04:47.756000'
+},
+{
+  'id': '6823151bd8bb90c43b9795f2',
+  'email': 'someman@gmail.com',
+  'login': 'someman',
+  'password': '123456',
+  'role': 2,
+  'status': 1,
+  'createdAt': '2025-05-13T09:47:07.434000'
 }
 ```
+
+### Администратор
+Логин: admin  
+Пароль: admin
+
 
 ### Данные администратора
 ```
 {
+  'id': '6822f88a0d1450eafe512e9e',
   'email': 'admin@rambler.ru',
   'login': 'admin',
   'password': 'admin',
   'role': 3,
   'status': 1,
+  'createdAt': '2025-05-13T11:35:41.138000'
 }
 ``` 
 
