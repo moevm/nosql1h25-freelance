@@ -2,19 +2,25 @@ import React, { useEffect, useContext, useState, useCallback } from 'react';
 import { Container, Form, Button, Dropdown, Modal, Card, Badge } from 'react-bootstrap';
 import { Context } from '../main.jsx';
 import { sendData } from '../services/apiService.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
 import Markdown from 'markdown-to-jsx'
 
 const CreateContest = () => {
     const { contest, user } = useContext(Context);
+    const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const contestData = location.state;
 
     const [files, setFiles] = useState([]);
     const [imagesMap, setImagesMap] = useState({});
     const [showPreview, setShowPreview] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [mdDescription, setMdDescription] = useState('');
+    // false - добавление конкурса, true - редактирование
+    const [state, setState] = useState(false);
+    const [submitURL, setSubmitURL] = useState('/contests');
 
     const handleClosePreview = () => setShowPreview(false);
     const handleShowPreview = () => setShowPreview(true);
@@ -60,32 +66,57 @@ const CreateContest = () => {
         formData.append('data', JSON.stringify(data));
 
         try {
-            const res = await sendData('/contests', formData, true);
+            const res = await sendData(submitURL, formData, true);
             contest.resetForm();
-            navigate('/');
-            alert("Конкурс успешно добавлен!");
+            navigate(-1);
+            alert(`Конкурс успешно ${state ? 'изменён' : 'добавлен'}!`);
             console.log('Ответ сервера:', res);
         } catch (error) {
             console.error("Ошибка при отправке:", error);
-            alert("Ошибка при создании конкурса");
+            alert(`Ошибка при ${state ? 'редактировании' : 'создании'} конкурса`);
         }
     };
 
+    useEffect(() => {
+        if (!id) {
+            setState(false);
+            setSubmitURL('/contests');
+            contest.resetForm();
+        }
+        if (contestData) {
+            console.log(contestData);
+            setState(true);
+            setSubmitURL(`/contest/edit/${contestData.number}`);
+            contest.setFormField('type', contestData.type);
+            contest.setFormField('title', contestData.title);
+            contest.setFormField('annotation', contestData.annotation);
+            contest.setFormField('description', contestData.description);
+            contest.setFormField('prizepool', contestData.prizepool);
+            contest.setFormField('endBy', (new Date(contestData.endBy)).toISOString().split('T')[0]);
+        }
+    }, [id, contestData]);
+
     const handleFilesChange = useCallback((newFiles) => {
-        const validFiles = Array.from(newFiles).filter(file =>
-                file.type.startsWith('image/') // &&
-            //file.size < 5 * 1024 * 1024 // 5MB limit
-        );
-        contest.form.files.error = validFiles.length > contest.form.files.rules.max
-            ? contest.form.files.error = contest.formErrors.files : '';
+        const allowedTypes = contest.form.files.allowedTypes;
+        const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
+
+        if (validFiles.length > contest.form.files.rules.max) {
+            contest.form.files.error = contest.formErrors.files;
+        } else {
+            contest.form.files.error = '';
+        }
+
         const newMap = {};
-        validFiles.forEach((file, index) => {
-            newMap[`${file.name}`] = URL.createObjectURL(file);
+        validFiles.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                newMap[file.name] = URL.createObjectURL(file);
+            }
         });
+
         Object.values(imagesMap).forEach(URL.revokeObjectURL);
         setFiles(validFiles);
         setImagesMap(newMap);
-    }, [imagesMap]);
+    }, [imagesMap, contest]);
 
     useEffect(() => {
         return () => {
@@ -109,7 +140,7 @@ const CreateContest = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Добавить конкурс</h1>
+            <h1 className="mb-4">{state ? 'Редактировать конкурс' : 'Добавить конкурс' }</h1>
             <Form noValidate onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Dropdown>
@@ -209,10 +240,21 @@ const CreateContest = () => {
                     <Form.Control.Feedback type="invalid">
                         {contest.form.files.error}
                     </Form.Control.Feedback>
+                    <Form.Text className="text-muted">
+                        Поддерживаемые форматы: .zip, .png, .jpg, .jpeg, .gif. Не более {contest.form.files.rules.max} файлов.
+                    </Form.Text>
                 </Form.Group>
                 <Button className="me-3" type="submit">Опубликовать</Button>
                 <Button className="me-3" onClick={handleShowPreview}>Предпросмотр</Button>
                 <Button className="me-3" onClick={handleShowHelp}>Справка</Button>
+                {state && 
+                    <Button
+                        className="me-3"
+                        onClick={() => navigate(-1)}
+                    >
+                        Отменить редактирование
+                    </Button>
+                }
             </Form>
 
             <Modal show={showPreview} onHide={handleClosePreview} size='xl' centered scrollable>
@@ -237,6 +279,25 @@ const CreateContest = () => {
                             <Markdown options={{ disableParsingRawHTML: true }}>
                                 {mdDescription}
                             </Markdown>
+
+                            {files.length > 0 && (
+                                <>
+                                    <hr />
+                                    <h4>Файлы:</h4>
+                                    <ul>
+                                        {files.map((file, idx) => (
+                                            <li key={idx}>
+                                                <Button variant="link" className="me-2 p-0">
+                                                    {file.name}
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Button variant="success" disabled>
+                                        Скачать всё
+                                    </Button>
+                                </>
+                            )}
                         </Card.Body>
                         <Card.Footer>
                             <Button variant="primary">
