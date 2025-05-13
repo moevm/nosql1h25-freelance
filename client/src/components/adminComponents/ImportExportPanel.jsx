@@ -66,7 +66,7 @@ const ImportExportPanel = () => {
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="application/json"
+                    accept="application/zip"
                     onChange={handleImport}
                     style={{ display: 'none' }}
                 />
