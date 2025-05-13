@@ -4,8 +4,9 @@ from app.routes.users import users_bp
 from app.routes.contests import contests_bp
 from app.routes.solutions import solutions_bp
 from app.routes.contest_types import contest_types_bp
-from app.routes.import_export_bp import import_export_bp
+from app.routes.import_export_bp import import_export_bp, import_from_zip
 from app.routes.common import common_bp
+from app.database import isClear
 import os
 
 def create_app():
@@ -20,6 +21,14 @@ def create_app():
     app.register_blueprint(contest_types_bp, url_prefix="/api")
     app.register_blueprint(import_export_bp, url_prefix="/api")
     app.register_blueprint(common_bp, url_prefix="/api")
+    
+    zip_path = os.path.join(os.path.dirname(__file__), "initial_data.zip")
+    
+    if isClear():
+        import_from_zip(
+            zip_path,
+            static_root=os.path.join(os.path.dirname(__file__)),  # Путь к статике
+        )
 
     return app
 

@@ -45,6 +45,48 @@ def convert_ids_to_objectid(docs):
     return docs
 
 
+def import_from_zip(zip_path, static_root):
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+
+            json_path = os.path.join(temp_dir, "exported_data.json")
+            if not os.path.exists(json_path):
+                raise FileNotFoundError("exported_data.json not found in archive")
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            users_collection.delete_many({})
+            contests_collection.delete_many({})
+            solutions_collection.delete_many({})
+            contest_types_collection.delete_many({})
+
+            users = [validate_user(u) for u in restore_ids(data.get("users", []))]
+            contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
+            solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
+            types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
+
+            if users: users_collection.insert_many(convert_ids_to_objectid(users))
+            if contests: contests_collection.insert_many(convert_ids_to_objectid(contests))
+            if solutions: solutions_collection.insert_many(convert_ids_to_objectid(solutions))
+            if types: contest_types_collection.insert_many(convert_ids_to_objectid(types))
+
+            for section in ['contests', 'solutions']:
+                for item in data.get(section, []):
+                    for file_path in item.get('files', []):
+                        relative_path = file_path.lstrip("/")
+                        src = os.path.join(temp_dir, relative_path)
+                        dst = os.path.join(static_root, relative_path)
+                        os.makedirs(os.path.dirname(dst), exist_ok=True)
+                        if os.path.exists(src):
+                            shutil.copy2(src, dst)
+
+        return True
+    except Exception as e:
+        print(f"Import error: {str(e)}")
+        return False
 
 @import_export_bp.route("/import-export/export", methods=["GET"])
 def export_data():
@@ -98,55 +140,17 @@ def import_data():
         return jsonify({"error": "Файл не загружен"}), 400
 
     try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            zip_path = os.path.join(temp_dir, "import.zip")
-            file.save(zip_path)
-
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(temp_dir)
-
-            json_path = os.path.join(temp_dir, "exported_data.json")
-            if not os.path.exists(json_path):
-                return jsonify({"error": "Файл exported_data.json не найден в архиве"}), 400
-
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-
-            # Очистка коллекций
-            users_collection.delete_many({})
-            contests_collection.delete_many({})
-            solutions_collection.delete_many({})
-            contest_types_collection.delete_many({})
-
-            # Валидация
-            users = [validate_user(u) for u in restore_ids(data.get("users", []))]
-            contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
-            solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
-            types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
-
-            users = convert_ids_to_objectid(users)
-            contests = convert_ids_to_objectid(contests)
-            solutions = convert_ids_to_objectid(solutions)
-            types = convert_ids_to_objectid(types)
-
-            if users: users_collection.insert_many(users)
-            if contests: contests_collection.insert_many(contests)
-            if solutions: solutions_collection.insert_many(solutions)
-            if types: contest_types_collection.insert_many(types)
-
-            # Копирование статики
-            for section in ['contests', 'solutions']:
-                for item in data.get(section, []):
-                    for file_path in item.get('files', []):
-                        relative_path = file_path.lstrip("/")
-                        src = os.path.join(temp_dir, relative_path)
-                        dst = os.path.join(current_app.root_path, relative_path)
-                        os.makedirs(os.path.dirname(dst), exist_ok=True)
-                        if os.path.exists(src):
-                            shutil.copy2(src, dst)
-
-        return jsonify({"message": "Импорт завершён успешно"}), 200
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            file.save(tmp.name)
+            success = import_from_zip(
+                tmp.name, 
+                current_app.root_path
+            )
+        
+        if success:
+            return jsonify({"message": "Импорт завершён успешно"}), 200
+        else:
+            return jsonify({"error": "Ошибка при импорте данных"}), 500
 
     except Exception as e:
-        current_app.logger.error("Ошибка при импорте:\n" + traceback.format_exc())
-        return jsonify({"error": "Ошибка при импорте данных", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
