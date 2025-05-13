@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Card, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import {Container, Card, Row, Col, Spinner, Alert, Button} from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main.jsx';
 import { fetchData } from '../services/apiService.js';
@@ -87,6 +87,12 @@ const SolutionReviews = () => {
                     ))}
                 </Row>
             )}
+            {/* Кнопка «Назад» к странице решения */}
+            <div className="mt-4">
+                 <Button variant="secondary" onClick={() => navigate(`/solution/${number}`)}>
+                      Назад к решению
+                 </Button>
+            </div>
         </Container>
     );
 };

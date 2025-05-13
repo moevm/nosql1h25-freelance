@@ -19,6 +19,7 @@ const ReviewPage = () => {
     const [editScore, setEditScore]       = useState('');
     const [editCommentary, setEditCommentary] = useState('');
     const [saving, setSaving]             = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
 
     useEffect(() => {
         if (error === 'Отзыв не найден') {
@@ -49,6 +50,9 @@ const ReviewPage = () => {
                 // добавляем решение id внутрь для запросов
                 rv.solutionId = sol.id;
                 setReview(rv);
+
+                const isReviewer = user.user?.id === rv.reviewerId;
+                setIsOwner(isReviewer);
 
                 // подготовка формы
                 setEditScore(rv.score);
@@ -114,14 +118,20 @@ const ReviewPage = () => {
                 </Card.Body>
                 <Card.Footer className="d-flex justify-content-between">
                     <Button variant="secondary" onClick={() => navigate(-1)}>Назад</Button>
-                    <div>
-                        <Button variant="outline-primary" className="me-2" onClick={() => setShowEdit(true)}>
-                            Редактировать
-                        </Button>
-                        <Button variant="outline-danger" onClick={handleDelete}>
-                            Удалить
-                        </Button>
-                    </div>
+                    {isOwner && (
+                        <div>
+                            <Button
+                                variant="outline-primary"
+                                className="me-2"
+                                onClick={() => setShowEdit(true)}
+                            >
+                                Редактировать
+                            </Button>
+                            <Button variant="outline-danger" onClick={handleDelete}>
+                                Удалить
+                            </Button>
+                        </div>
+                    )}
                 </Card.Footer>
             </Card>
 

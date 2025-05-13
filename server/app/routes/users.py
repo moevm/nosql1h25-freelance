@@ -60,3 +60,46 @@ def login():
         "message": "Вход выполнен успешно",
         "user": serialize_mongo(user)
     }), 200
+
+
+# GET /api/profile?userId=<user_id>
+@users_bp.route("/profile", methods=["GET"])
+def get_profile():
+    user_id = request.args.get("userId")
+    if not user_id or not ObjectId.is_valid(user_id):
+        return jsonify({"error": "Invalid or missing userId parameter"}), 400
+
+    user = users_collection.find_one({"_id": ObjectId(user_id)}, {"password": 0})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(serialize_mongo(user)), 200
+
+# PUT /api/profile
+# BODY: { id: "<user_id>", email: "...", login: "...", [password: "..."] }
+@users_bp.route("/profile", methods=["PUT"])
+def update_profile():
+    data = request.get_json()
+    user_id = data.get("id")
+    if not user_id or not ObjectId.is_valid(user_id):
+        return jsonify({"error": "Invalid or missing id in request body"}), 400
+
+    # Разрешаем обновлять только email, login и пароль
+    allowed = {}
+    for field in ("email", "login", "password"):
+        if field in data:
+            allowed[field] = data[field]
+    # TODO: здесь можно прямо хешировать пароль, если нужно
+
+    if not allowed:
+        return jsonify({"error": "No updatable fields provided"}), 400
+
+    result = users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": allowed}
+    )
+    if result.matched_count == 0:
+        return jsonify({"error": "User not found"}), 404
+
+    updated = users_collection.find_one({"_id": ObjectId(user_id)}, {"password": 0})
+    return jsonify(serialize_mongo(updated)), 200
