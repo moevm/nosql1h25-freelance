@@ -15,7 +15,7 @@ class User(BaseModel):
 
 class Review(BaseModel):
     number: Optional[int] = None    # Порядковый номер для url страницы отзыва
-    reviewerId: str
+    reviewerId: Optional[str] = None
     id: Optional[str] = Field(default=None, alias="_id")
     score: float
     commentary: str
