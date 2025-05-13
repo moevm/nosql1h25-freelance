@@ -76,9 +76,9 @@ def update_contest(id):
     current_contest = contests_collection.find_one({'number': int(id)});
     if (current_contest is None):
         return jsonify({"error": "Contest was not found"}), 404
-    _id = current_contest['_id'];
-    data['number'] = current_contest['number'];
-    file_paths = current_contest['files'];
+    _id = current_contest['_id']
+    data['number'] = current_contest['number']
+    file_paths = current_contest['files']
 
     for file in files:
         if file.filename != '':
@@ -118,7 +118,7 @@ def update_contest(id):
         {'$set': contest}
     )
     return jsonify({"id": str(contests_collection.find_one({'number': int(id)}))}), 201
-    
+
 
 # Маршрут для получения списка всех конкурсов
 @contests_bp.route("/contests", methods=["GET"])

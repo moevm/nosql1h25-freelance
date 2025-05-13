@@ -88,6 +88,72 @@ def create_solution():
         print("Error in create_solution:", str(e))
         return jsonify({"error": str(e)}), 400
 
+
+@solutions_bp.route("/solution/<id>/edit", methods=["POST"])
+def update_solution(id):
+    try:
+        data = json.loads(request.form.get('data'))
+        files = request.files.getlist('files[]')
+
+        current_solution = solutions_collection.find_one({'number': int(id)})
+        if current_solution is None:
+            return jsonify({"error": "Solution was not found"}), 404
+
+        _id = current_solution['_id']
+        data['number'] = current_solution['number']
+        data['freelancerId'] = current_solution['freelancerId']
+        data['contestId'] = current_solution['contestId']
+        file_paths = current_solution.get('files', [])
+        file_urls = []
+        filename_to_url = {}
+
+        for file in files:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                rel_path = os.path.join('solutions_uploads', str(_id), filename)
+                abs_path = os.path.join(current_app.static_folder, rel_path)
+
+                os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+                file.save(abs_path)
+
+                file_url = url_for('static', filename=f'solutions_uploads/{str(_id)}/{filename}', _external=True)
+                file_paths.append(f'/static/{rel_path}')
+                file_urls.append(file_url)
+                filename_to_url[filename] = file_url
+
+        if 'description' in data:
+            def replace_image_path(match):
+                alt_text = match.group(1)
+                image_filename = secure_filename(match.group(2))
+                if image_filename in filename_to_url:
+                    return f"![{alt_text}]({filename_to_url[image_filename]})"
+                return match.group(0)
+
+            data['description'] = re.sub(
+                r'!\[(.*?)\]\((.*?)\)',
+                replace_image_path,
+                data['description']
+            )
+
+        data['files'] = file_paths
+
+        solution = validate_solution(data)
+
+        solutions_collection.update_one(
+            {'number': int(id)},
+            {'$set': solution}
+        )
+
+        return jsonify({"id": str(_id)}), 201
+
+    except json.JSONDecodeError as e:
+        print("JSON decode error:", str(e))
+        return jsonify({"error": "Invalid JSON in data field"}), 400
+    except Exception as e:
+        print("Error in update_solution:", str(e))
+        return jsonify({"error": str(e)}), 400
+
+
 # Маршрут получения всех решений одного пользователя-фрилансера
 @solutions_bp.route("/solutions/user/<user_id>", methods=["GET"])
 def get_solutions_by_user(user_id):
@@ -140,7 +206,7 @@ def delete_solution(solution_id):
 
 # Маршрут для обновления статуса решения
 @solutions_bp.route("/solutions/<solution_id>", methods=["PUT"])
-def update_solution(solution_id):
+def update_solution_status(solution_id):
     try:
         data = request.json
 
