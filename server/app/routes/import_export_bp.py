@@ -1,5 +1,10 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
 from bson import ObjectId
+import zipfile
+import os
+import tempfile
+import shutil
+from pathlib import Path
 from app.database import (
     users_collection,
     contests_collection,
@@ -41,7 +46,6 @@ def convert_ids_to_objectid(docs):
 
 
 
-# Экспорт всех данных
 @import_export_bp.route("/import-export/export", methods=["GET"])
 def export_data():
     try:
@@ -58,14 +62,27 @@ def export_data():
         }
 
         buffer = io.BytesIO()
-        buffer.write(json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8"))
+
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+            # Добавляем JSON
+            json_bytes = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+            zipf.writestr("exported_data.json", json_bytes)
+
+            # Добавляем файлы из статики
+            for section in ['contests', 'solutions']:
+                for item in data[section]:
+                    for file_path in item.get('files', []):
+                        abs_path = os.path.join(current_app.root_path, file_path.lstrip("/"))
+                        if os.path.exists(abs_path):
+                            zipf.write(abs_path, arcname=file_path.lstrip("/"))
+
         buffer.seek(0)
 
         return send_file(
             buffer,
-            mimetype="application/json",
+            mimetype="application/zip",
             as_attachment=True,
-            download_name="exported_data.json"
+            download_name="exported_data_with_files.zip"
         )
 
     except Exception as e:
@@ -81,35 +98,52 @@ def import_data():
         return jsonify({"error": "Файл не загружен"}), 400
 
     try:
-        data = json.load(file)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            zip_path = os.path.join(temp_dir, "import.zip")
+            file.save(zip_path)
 
-        # Очистка коллекций
-        users_collection.delete_many({})
-        contests_collection.delete_many({})
-        solutions_collection.delete_many({})
-        contest_types_collection.delete_many({})
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
 
-        # Валидация и преобразование
-        users = [validate_user(u) for u in restore_ids(data.get("users", []))]
-        contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
-        solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
-        types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
+            json_path = os.path.join(temp_dir, "exported_data.json")
+            if not os.path.exists(json_path):
+                return jsonify({"error": "Файл exported_data.json не найден в архиве"}), 400
 
-        # Конвертация _id в ObjectId
-        users = convert_ids_to_objectid(users)
-        contests = convert_ids_to_objectid(contests)
-        solutions = convert_ids_to_objectid(solutions)
-        types = convert_ids_to_objectid(types)
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
 
-        # Вставка
-        if users:
-            users_collection.insert_many(users)
-        if contests:
-            contests_collection.insert_many(contests)
-        if solutions:
-            solutions_collection.insert_many(solutions)
-        if types:
-            contest_types_collection.insert_many(types)
+            # Очистка коллекций
+            users_collection.delete_many({})
+            contests_collection.delete_many({})
+            solutions_collection.delete_many({})
+            contest_types_collection.delete_many({})
+
+            # Валидация
+            users = [validate_user(u) for u in restore_ids(data.get("users", []))]
+            contests = [validate_contest(c) for c in restore_ids(data.get("contests", []))]
+            solutions = [validate_solution(s) for s in restore_ids(data.get("solutions", []))]
+            types = [validate_contest_type(t) for t in restore_ids(data.get("contestTypes", []))]
+
+            users = convert_ids_to_objectid(users)
+            contests = convert_ids_to_objectid(contests)
+            solutions = convert_ids_to_objectid(solutions)
+            types = convert_ids_to_objectid(types)
+
+            if users: users_collection.insert_many(users)
+            if contests: contests_collection.insert_many(contests)
+            if solutions: solutions_collection.insert_many(solutions)
+            if types: contest_types_collection.insert_many(types)
+
+            # Копирование статики
+            for section in ['contests', 'solutions']:
+                for item in data.get(section, []):
+                    for file_path in item.get('files', []):
+                        relative_path = file_path.lstrip("/")
+                        src = os.path.join(temp_dir, relative_path)
+                        dst = os.path.join(current_app.root_path, relative_path)
+                        os.makedirs(os.path.dirname(dst), exist_ok=True)
+                        if os.path.exists(src):
+                            shutil.copy2(src, dst)
 
         return jsonify({"message": "Импорт завершён успешно"}), 200
 

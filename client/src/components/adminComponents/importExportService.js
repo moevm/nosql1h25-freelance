@@ -5,15 +5,14 @@ import axios from "axios";
 export const exportData = async () => {
     try {
         const response = await axios.get('http://localhost:8000/api/import-export/export', {
-            responseType: 'blob', 
+            responseType: 'blob',
         });
 
-        // Создание ссылки для скачивания
-        const blob = new Blob([response.data], { type: 'application/json' });
+        const blob = new Blob([response.data], { type: 'application/zip' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'exported_data.json';
+        link.download = 'exported_data_with_files.zip';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -25,11 +24,12 @@ export const exportData = async () => {
 };
 
 
+
 // Импорт данных из файла
 export const importData = async (file) => {
     try {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', file); // ZIP-файл
 
         const response = await sendData('/import-export/import', formData, true);
         console.log("Импорт завершён успешно", response);
