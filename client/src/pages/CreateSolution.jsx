@@ -86,7 +86,7 @@ const CreateSolution = () => {
         const validFiles = Array.from(newFiles).filter(file => allowedTypes.includes(file.type));
 
         if (validFiles.length > solution.form.files.rules.max) {
-            solution.form.files.error = solution.solutionFormErrors.files;
+            solution.form.files.error = solution.formErrors.files;
         } else {
             solution.form.files.error = '';
         }
@@ -248,8 +248,27 @@ const CreateSolution = () => {
                             </Card.Subtitle>
 
                             <Markdown options={{ disableParsingRawHTML: true }}>
-                                {solution.form.description.value || '*Нет описания*'}
+                                {mdDescription}
                             </Markdown>
+
+                            {files.length > 0 && (
+                                <>
+                                    <hr />
+                                    <h4>Файлы:</h4>
+                                    <ul>
+                                        {files.map((file, idx) => (
+                                            <li key={idx}>
+                                                <Button variant="link" className="me-2 p-0">
+                                                    {file.name}
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Button variant="success" disabled>
+                                        Скачать всё
+                                    </Button>
+                                </>
+                            )}
                         </Card.Body>
 
                         <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">

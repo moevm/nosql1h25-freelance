@@ -1,9 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from datetime import datetime, timezone
 from typing import List, Optional
 
 
 class User(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     email: str
     login: str
     password: str
@@ -15,6 +16,7 @@ class User(BaseModel):
 class Review(BaseModel):
     number: Optional[int] = None    # Порядковый номер для url страницы отзыва
     reviewerId: str
+    id: Optional[str] = Field(default=None, alias="_id")
     score: float
     commentary: str
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -22,20 +24,22 @@ class Review(BaseModel):
 
 
 class Solution(BaseModel):
-    contestId: str    # ObjectId(Contest._id)
-    freelancerId: str    # ObjectId(User._id)
-    number: Optional[int] = None    # Порядковый номер для url страницы решения
+    id: Optional[str] = Field(default=None, alias="_id")
+    contestId: str
+    freelancerId: str
+    number: Optional[int] = None
     title: str
     annotation: str
     description: str
     files: List[str] = []
-    status: int = 1    # 1 - Новое, 2 - Просмотрено, 3 - Победитель, 4 - Необходимы правки, 5 - Правки внесены
+    status: int = 1
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviews: List[Review] = []
 
 
 class Contest(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     employerId: str    # ObjectId(User._id)
     number: Optional[int] = None    # Порядковый номер для url страницы конкурса
     title: str
@@ -51,24 +55,22 @@ class Contest(BaseModel):
 
 
 class ContestType(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
     name: str
 
 
 def validate_user(data: dict) -> dict:
-    return User(**data).dict()
-
+    return User(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_review(data: dict) -> dict:
-    return Review(**data).dict()
-
+    return Review(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_solution(data: dict) -> dict:
-    return Solution(**data).dict()
-
+    return Solution(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_contest(data: dict) -> dict:
-    return Contest(**data).dict()
-
+    return Contest(**data).dict(by_alias=True, exclude_none=True)
 
 def validate_contest_type(data: dict) -> dict:
-    return ContestType(**data).dict()
+    return ContestType(**data).dict(by_alias=True, exclude_none=True)
+

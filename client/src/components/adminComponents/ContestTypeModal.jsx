@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { sendData } from '../services/apiService.js';
+import { sendData } from '../../services/apiService.js';
 import { observer } from "mobx-react-lite";
 
 const ContestTypeModal = ({ show, onHide, onSuccess }) => {
@@ -24,7 +24,7 @@ const ContestTypeModal = ({ show, onHide, onSuccess }) => {
     };
 
     return (
-        <Modal show={show} onHide={onHide} centered>
+        <Modal show={show} onHide={onHide} >
             <Modal.Header closeButton>
                 <Modal.Title>Добавить тип конкурса</Modal.Title>
             </Modal.Header>

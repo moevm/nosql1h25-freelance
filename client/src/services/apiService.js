@@ -57,3 +57,26 @@ export const deleteData = async (endpoint) => {
         throw error;
     }
 };
+
+// GET-запрос одного файла или архива со всеми файлами
+export const downloadFileOrZip = async (endpoint, filename) => {
+    try {
+        const response = await api.get(endpoint, {
+            responseType: 'blob',
+        });
+
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error(`Ошибка при скачивании файла с ${endpoint}:`, error);
+        throw error;
+    }
+};

@@ -11,12 +11,24 @@ import os, re, json
 solutions_bp = Blueprint("solutions", __name__)
 
 
-# Маршрут добавления нового решения
 @solutions_bp.route("/solutions", methods=["POST"])
 def create_solution():
     try:
         data = json.loads(request.form.get('data'))
+
         files = request.files.getlist('files[]')
+
+        # Проверяем обязательные поля
+        if not data.get('contestId') or not ObjectId.is_valid(data.get('contestId')):
+            return jsonify({"error": "Invalid or missing contestId"}), 400
+        if not data.get('freelancerId') or not ObjectId.is_valid(data.get('freelancerId')):
+            return jsonify({"error": "Invalid or missing freelancerId"}), 400
+        if not data.get('title'):
+            return jsonify({"error": "Missing title"}), 400
+        if not data.get('annotation'):
+            return jsonify({"error": "Missing annotation"}), 400
+        if not data.get('description'):
+            return jsonify({"error": "Missing description"}), 400
 
         file_paths = []
         file_urls = []
@@ -25,7 +37,7 @@ def create_solution():
         _id = ObjectId()
 
         for file in files:
-            if file.filename:
+            if file and file.filename:
                 filename = secure_filename(file.filename)
                 rel_path = os.path.join('solutions_uploads', str(_id), filename)
                 abs_path = os.path.join(current_app.static_folder, rel_path)
@@ -37,6 +49,8 @@ def create_solution():
                 file_paths.append(f'/static/{rel_path}')
                 file_urls.append(file_url)
                 filename_to_url[filename] = file_url
+            else:
+                print("Skipping empty file:", file)
 
         if 'description' in data:
             def replace_image_path(match):
@@ -53,18 +67,26 @@ def create_solution():
             )
 
         data['files'] = file_paths
-        data['_id'] = _id
+        data['_id'] = str(_id)
         last_solution = solutions_collection.find_one(sort=[("number", -1)])
         next_number = 1 if last_solution is None else last_solution["number"] + 1
         data["number"] = next_number
 
+        print("Data before validation:", data)
         solution = validate_solution(data)
+        print("Validated solution:", solution)
+
+        solution['_id'] = _id
+
         res = solutions_collection.insert_one(solution)
         return jsonify({"id": str(res.inserted_id)}), 201
 
+    except json.JSONDecodeError as e:
+        print("JSON decode error:", str(e))
+        return jsonify({"error": "Invalid JSON in data field"}), 400
     except Exception as e:
+        print("Error in create_solution:", str(e))
         return jsonify({"error": str(e)}), 400
-
 
 # Маршрут получения всех решений одного пользователя-фрилансера
 @solutions_bp.route("/solutions/user/<user_id>", methods=["GET"])

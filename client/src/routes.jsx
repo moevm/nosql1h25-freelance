@@ -40,6 +40,10 @@ export const authRoutes = [
         element: <CreateContest />
     },
     {
+        path: CONTEST_ROUTE + '/edit/:id',
+        element: <CreateContest />
+    },
+    {
         path: MY_SOLUTIONS_ROUTE,
         element: <MySolutions />
     },
