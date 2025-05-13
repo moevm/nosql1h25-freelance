@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Button, Container} from "react-bootstrap";
+import React, { useState } from 'react';
+import { Button } from "react-bootstrap";
 import ContestTypeModal from "./ContestTypeModal.jsx";
 
 const AddContestTypePanel = () => {
@@ -13,19 +13,26 @@ const AddContestTypePanel = () => {
     };
 
     return (
-        <div>
-            <Container className="mt-4">
-                <h2>Админ-панель</h2>
-                <Button variant="primary" onClick={handleOpenModal}>
-                    Добавить тип конкурса
-                </Button>
+        <div className="text-center">
+            <h4 className="mb-4">Добавление типа конкурса</h4>
 
-                <ContestTypeModal
-                    show={showModal}
-                    onHide={handleCloseModal}
-                    onSuccess={handleTypeAdded}
-                />
-            </Container>
+            <Button
+                onClick={handleOpenModal}
+                style={{
+                    backgroundColor: "#543787",
+                    borderColor: "#543787",
+                    color: "white",
+                    padding: "10px 20px",
+                }}
+            >
+                Добавить тип конкурса
+            </Button>
+
+            <ContestTypeModal
+                show={showModal}
+                onHide={handleCloseModal}
+                onSuccess={handleTypeAdded}
+            />
         </div>
     );
 };

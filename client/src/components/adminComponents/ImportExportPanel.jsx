@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button } from "react-bootstrap";
-import { importData, exportData} from "./importExportService.js";
+import { importData, exportData } from "./importExportService.js";
 
 const ImportExportPanel = () => {
     const fileInputRef = useRef(null);
@@ -12,9 +12,9 @@ const ImportExportPanel = () => {
         setIsExporting(true);
         try {
             await exportData();
-            setImportStatus("Экспорт завершён успешно");
+            setImportStatus("✅ Экспорт завершён успешно");
         } catch (error) {
-            setImportStatus("Ошибка при экспорте данных");
+            setImportStatus("❌ Ошибка при экспорте данных");
         } finally {
             setIsExporting(false);
         }
@@ -31,25 +31,35 @@ const ImportExportPanel = () => {
         setIsImporting(true);
         try {
             await importData(file);
-            setImportStatus("Импорт завершён успешно");
+            setImportStatus("✅ Импорт завершён успешно");
         } catch (error) {
-            setImportStatus("Ошибка при импорте данных");
+            setImportStatus("❌ Ошибка при импорте данных");
         } finally {
             setIsImporting(false);
-            e.target.value = ''; // Сброс input
+            e.target.value = '';
         }
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white p-4 rounded border shadow-sm">
-            <h2 className="text-center mb-4">Импорт / Экспорт данных</h2>
+        <div className="p-2">
+            <h4 className="text-center mb-4">
+                Импорт / Экспорт данных
+            </h4>
 
             <div className="d-grid gap-3">
-                <Button onClick={handleExport} disabled={isExporting}>
+                <Button
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    style={{ backgroundColor: "#543787", borderColor: "#543787" }}
+                >
                     {isExporting ? 'Экспорт...' : 'Экспортировать'}
                 </Button>
 
-                <Button variant="secondary" onClick={handleImportClick} disabled={isImporting}>
+                <Button
+                    variant="outline-secondary"
+                    onClick={handleImportClick}
+                    disabled={isImporting}
+                >
                     {isImporting ? 'Импорт...' : 'Импортировать'}
                 </Button>
 
@@ -62,7 +72,7 @@ const ImportExportPanel = () => {
                 />
 
                 {importStatus && (
-                    <p className="text-center text-muted small">{importStatus}</p>
+                    <p className="text-center text-muted small mb-0">{importStatus}</p>
                 )}
             </div>
         </div>

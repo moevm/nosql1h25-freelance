@@ -24,7 +24,7 @@ const ContestTypeModal = ({ show, onHide, onSuccess }) => {
     };
 
     return (
-        <Modal show={show} onHide={onHide} centered>
+        <Modal show={show} onHide={onHide} >
             <Modal.Header closeButton>
                 <Modal.Title>Добавить тип конкурса</Modal.Title>
             </Modal.Header>
