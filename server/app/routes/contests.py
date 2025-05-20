@@ -219,3 +219,71 @@ def get_contest_by_number(number):
         return jsonify(serialize_mongo(contest))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@contests_bp.route("/contests/stats", methods=["GET"])
+def get_stats():
+    min_reward = int(request.args.get("minReward", 0))
+    max_reward = int(request.args.get("maxReward", 9999999))
+    end_by = request.args.get("endBy", None)
+    end_after = request.args.get("endAfter", None)
+    types = request.args.get("types", None)
+    search = request.args.get("search", None)
+    statuses = request.args.get("statuses", None)
+    employer_id = request.args.get("employerId", None)
+
+    query = {
+        "prizepool": {"$gte": min_reward, "$lte": max_reward}
+    }
+
+    end_by_conditions = {}
+
+    if end_by:
+        try:
+            end_date = datetime.strptime(end_by, "%Y-%m-%d")
+            end_by_conditions["$lte"] = end_date
+        except ValueError:
+            return jsonify({"error": "Invalid endBy date format"}), 400
+
+    if end_after:
+        try:
+            end_date = datetime.strptime(end_after, "%Y-%m-%d")
+            end_by_conditions["$gte"] = end_date
+        except ValueError:
+            return jsonify({"error": "Invalid endAfter date format"}), 400
+
+    if end_by_conditions:
+        query["endBy"] = end_by_conditions
+
+    if types:
+            type_ids = types.split(',')
+            query["type"] = {"$in": type_ids}
+
+    if statuses:
+            try:
+                status_ids = [int(status) for status in statuses.split(',')]
+                query["status"] = {"$in": status_ids}
+            except ValueError:
+                return jsonify({"error": "Invalid status format"}), 400
+
+    if search:
+        regex = {"$regex": search, "$options": "i"}
+
+        matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
+        matching_user_ids = [str(user["_id"]) for user in matching_users]
+
+        search_conditions = [
+            {"title": regex},
+            {"annotation": regex},
+        ]
+
+        if matching_user_ids:
+            search_conditions.append({"employerId": {"$in": matching_user_ids}})
+
+        query["$or"] = search_conditions
+
+    if employer_id:
+        query["employerId"] = employer_id
+
+    contests = list(contests_collection.find(query))
+    return jsonify(serialize_mongo(contests))
