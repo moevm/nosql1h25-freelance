@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Card } from "react-bootstrap";
 import AddContestTypePanel from "../components/adminComponents/AddContestTypePanel.jsx";
 import ImportExportPanel from "../components/adminComponents/ImportExportPanel.jsx";
+import StatisticsPanel from "../components/adminComponents/StatisticsPanel.jsx";
 
 const Admin = () => {
     return (
@@ -24,12 +25,7 @@ const Admin = () => {
                 </Col>
 
                 <Col md={12}>
-                    <Card className="shadow-sm">
-                        <Card.Body>
-                            <h2 style={{ color: "#543787" }}>Статистика</h2>
-                            <p className="text-muted">Раздел в разработке...</p>
-                        </Card.Body>
-                    </Card>
+                    <StatisticsPanel />
                 </Col>
             </Row>
         </Container>
