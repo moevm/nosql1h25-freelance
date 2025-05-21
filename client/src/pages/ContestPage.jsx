@@ -4,7 +4,7 @@ import { Context } from '../main.jsx';
 import { Container, Card, Badge, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Markdown from 'markdown-to-jsx';
-import { downloadFileOrZip } from '../services/apiService.js';
+import { downloadFileOrZip, deleteData } from '../services/apiService.js';
 
 const ContestPage = () => {
     const { contest, user } = useContext(Context);
@@ -44,6 +44,19 @@ const ContestPage = () => {
 
     const isFreelancer = user.user && user.user.role === 1;
     const isAdmin = user.user && user.user.role === 3;
+
+    const handleDelete = async () => {
+        if (!window.confirm('Вы точно хотите удалить этот конкурс?')) return;
+        try {
+            await deleteData(`/contests/${currentContest.id}`, {
+                headers: { 'X-User-Role': user.user.role }
+            });
+            navigate('/');  // после успешного удаления возвращаемся на главную
+        } catch (e) {
+            console.error(e);
+            alert('Не удалось удалить конкурс');
+        }
+    };
 
     return (
         <Container>
@@ -133,6 +146,16 @@ const ContestPage = () => {
                                 Редактировать конкурс
                             </Button>
                         }
+
+                        {isAdmin && (
+                            <Button
+                                variant="danger"
+                                className="ms-auto"
+                                onClick={handleDelete}
+                            >
+                                Удалить конкурс
+                            </Button>
+                        )}
                     </Card.Footer>
                 }
             </Card>
