@@ -74,6 +74,8 @@ export default class ContestStore {
         this.isLoading = false;
         this._employerId = null;
         this._lastFilterParams = null;
+        this.currentPage = 1;
+        this.totalPages = 1;
         makeAutoObservable(this);
     }
 
@@ -154,6 +156,14 @@ export default class ContestStore {
 
     setContests(contest) {
         this._contests = contest;
+    }
+
+    setTotalPages(totalPages) {
+        this.totalPages = totalPages;
+    }
+
+    setCurrentPage(currentPage) {
+        this.currentPage = currentPage;
     }
 
     setCurrentContest(contest) {
@@ -268,6 +278,21 @@ export default class ContestStore {
         }
     }
 
+    async fetchContestsByPage(page) {
+        console.log('fetchContestsByPage')
+        try {
+            this.setLoading(true);
+            const data = await fetchData(`/contests/${page}`);
+            this.setContests(data.contests);
+            this.setTotalPages(data.total_pages);
+            this.setCurrentPage(page);
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        } finally {
+            this.setLoading(false)
+        }
+    }
+
     hasFiltersChanged(params) {
         if (!this._lastFilterParams) return true;
         return JSON.stringify(params) !== JSON.stringify(this._lastFilterParams);
@@ -323,12 +348,14 @@ export default class ContestStore {
 
             this.setLoading(true)
 
-            const endpoint = hasFilters ? "/contests/filter" : "/contests";
+            const endpoint = hasFilters ? "/contests/filter" : "/contests/1";
 
             console.log('Fetching contests with params:', params);
 
-            const contests = await fetchData(endpoint, params);
-            this.setContests(contests);
+            const data = await fetchData(endpoint, params);
+            this.setContests(data.contests);
+            this.setTotalPages(data.total_pages);
+            this.setCurrentPage(1);
             this._lastFilterParams = params;
         } catch (error) {
             console.error("Ошибка при отправке:", error);
@@ -339,7 +366,7 @@ export default class ContestStore {
 
     async fetchOneContestById(id) {
         try {
-            const contest = await fetchData(`/contests/${id}`);
+            const contest = await fetchData(`/contest/${id}`);
             return contest;
         } catch (error) {
             console.error("Ошибка при загрузке конкурса по ID:", error);

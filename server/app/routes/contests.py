@@ -119,12 +119,22 @@ def update_contest(id):
     )
     return jsonify({"id": str(contests_collection.find_one({'number': int(id)}))}), 201
 
+def get_contests_on_page(page: int, query = {}):
+    contests_per_page = 2
+    total_contests = contests_collection.count_documents(query)
+    total_pages = (total_contests + contests_per_page - 1) // contests_per_page
+    start_idx = (page - 1) * contests_per_page
+    contests_cursor = contests_collection.find(query).skip(start_idx).limit(contests_per_page)
+    contests_list = list(contests_cursor)
+    return total_pages, contests_list
 
-# Маршрут для получения списка всех конкурсов
-@contests_bp.route("/contests", methods=["GET"])
-def get_contests():
-    contests = list(contests_collection.find({}))
-    return jsonify(serialize_mongo(contests))
+@contests_bp.route("/contests/<id>", methods=["GET"])
+def get_contests_by_page(id):
+    total_pages, contests = get_contests_on_page(int(id))
+    return jsonify({
+        "total_pages": total_pages,
+        "contests": serialize_mongo(contests)
+    })
 
 
 @contests_bp.route("/contests/filter", methods=["GET"])
@@ -191,12 +201,15 @@ def get_filtered_contests():
     if employer_id:
         query["employerId"] = employer_id
 
-    contests = list(contests_collection.find(query))
-    return jsonify(serialize_mongo(contests))
+    total_pages, contests = get_contests_on_page(1, query)
+    return jsonify({
+        "total_pages": total_pages,
+        "contests": serialize_mongo(contests)
+    })
 
 
 # Маршрут для получения одного конкурса по ID
-@contests_bp.route("/contests/<id>", methods=["GET"])
+@contests_bp.route("/contest/<id>", methods=["GET"])
 def get_contest(id):
     try:
         contest = contests_collection.find_one({"_id": ObjectId(id)})
