@@ -137,8 +137,8 @@ def get_contests_by_page(id):
     })
 
 
-@contests_bp.route("/contests/filter", methods=["GET"])
-def get_filtered_contests():
+@contests_bp.route("/contests/filter/<id>", methods=["GET"])
+def get_filtered_contests(id):
     min_reward = int(request.args.get("minReward", 0))
     max_reward = int(request.args.get("maxReward", 9999999))
     end_by = request.args.get("endBy", None)
@@ -201,7 +201,7 @@ def get_filtered_contests():
     if employer_id:
         query["employerId"] = employer_id
 
-    total_pages, contests = get_contests_on_page(1, query)
+    total_pages, contests = get_contests_on_page(int(id), query)
     return jsonify({
         "total_pages": total_pages,
         "contests": serialize_mongo(contests)

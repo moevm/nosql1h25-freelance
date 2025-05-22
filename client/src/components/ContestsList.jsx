@@ -10,11 +10,11 @@ const ContestsList = observer(() => {
     const [showLoader, setShowLoader] = useState(false); // Изначально лоадер скрыт
 
     useEffect(() => {
-        contest.fetchContestsByPage(contest.currentPage);
+        contest.fetchContestsFiltered(contest.currentPage);
     }, []);
 
     const handlePageChange = (pageNumber) => {
-        contest.fetchContestsByPage(pageNumber);
+        contest.fetchContestsFiltered(pageNumber);
     }
 
     useEffect(() => {
