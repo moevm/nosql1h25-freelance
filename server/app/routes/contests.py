@@ -300,6 +300,7 @@ def get_stats():
         else:
             bin_width = (max_y - min_y) / num_bins
             bins = [min_y + i * bin_width for i in range(num_bins + 1)]
+            bins[num_bins] += 1
 
         pipeline = [
             {"$match": query},
@@ -307,8 +308,20 @@ def get_stats():
                 "x": "$" + x_field,
                 "y_bin": {
                     "$floor": {
-                        "$divide": [{"$subtract": ["$" + y_field, min_y]}, bin_width] if bin_width > 0 else 0
+                        "$divide": [
+                            {"$subtract": ["$" + y_field, min_y]},
+                            bin_width
+                        ]
                     }
+                }
+            }},
+            {"$addFields": {
+                "y_bin": {
+                    "$cond": [
+                        {"$gte": ["$y_bin", num_bins]},
+                        num_bins-1,
+                        "$y_bin"
+                    ]
                 }
             }},
             {"$group": {"_id": {"x": "$x", "y_bin": "$y_bin"}, "count": {"$sum": 1}}},
