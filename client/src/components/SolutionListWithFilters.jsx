@@ -1,5 +1,5 @@
-import React, {useContext, useState} from 'react';
-import { Row, Col, Container, Button, Collapse, Card } from "react-bootstrap";
+import {useContext, useState} from 'react';
+import { Row, Col, Container, Button, Collapse, Card, Pagination } from "react-bootstrap";
 import { BsFilter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
@@ -22,6 +22,13 @@ const SolutionListWithFilters = ({ title, showContestTitle, showFreelancerLogin,
             navigate(`/contest/${contest.currentContest.number}`);
         }
     };
+
+    const handlePageChange = (newPage) => {
+        solution.setPage(newPage);
+        solution.fetchSolutionsFiltered();
+    };
+
+    const totalPages = Math.ceil(solution.totalCount / solution.limit);
 
     return (
         <Container className="py-3">
@@ -112,6 +119,26 @@ const SolutionListWithFilters = ({ title, showContestTitle, showFreelancerLogin,
                         showContestTitle={showContestTitle}
                         showFreelancerLogin={showFreelancerLogin}
                     />
+                    {totalPages > 1 && (
+                        <Pagination className="justify-content-center mt-3">
+                            <Pagination.First disabled={solution.page === 1} onClick={() => handlePageChange(1)} />
+                            <Pagination.Prev disabled={solution.page === 1} onClick={() => handlePageChange(solution.page - 1)} />
+                            {[...Array(totalPages)].map((_, index) => {
+                                const pageNum = index + 1;
+                                return (
+                                    <Pagination.Item
+                                        key={pageNum}
+                                        active={solution.page === pageNum}
+                                        onClick={() => handlePageChange(pageNum)}
+                                    >
+                                        {pageNum}
+                                    </Pagination.Item>
+                                );
+                            })}
+                            <Pagination.Next disabled={solution.page === totalPages} onClick={() => handlePageChange(solution.page + 1)} />
+                            <Pagination.Last disabled={solution.page === totalPages} onClick={() => handlePageChange(totalPages)} />
+                        </Pagination>
+                    )}
                 </Col>
             </Row>
         </Container>

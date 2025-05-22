@@ -119,16 +119,26 @@ def update_contest(id):
     )
     return jsonify({"id": str(contests_collection.find_one({'number': int(id)}))}), 201
 
+def get_contests_on_page(page: int, query = {}):
+    contests_per_page = 2
+    total_contests = contests_collection.count_documents(query)
+    total_pages = (total_contests + contests_per_page - 1) // contests_per_page
+    start_idx = (page - 1) * contests_per_page
+    contests_cursor = contests_collection.find(query).skip(start_idx).limit(contests_per_page)
+    contests_list = list(contests_cursor)
+    return total_pages, contests_list
 
-# Маршрут для получения списка всех конкурсов
-@contests_bp.route("/contests", methods=["GET"])
-def get_contests():
-    contests = list(contests_collection.find({}))
-    return jsonify(serialize_mongo(contests))
+@contests_bp.route("/contests/<id>", methods=["GET"])
+def get_contests_by_page(id):
+    total_pages, contests = get_contests_on_page(int(id))
+    return jsonify({
+        "total_pages": total_pages,
+        "contests": serialize_mongo(contests)
+    })
 
 
-@contests_bp.route("/contests/filter", methods=["GET"])
-def get_filtered_contests():
+@contests_bp.route("/contests/filter/<id>", methods=["GET"])
+def get_filtered_contests(id):
     min_reward = int(request.args.get("minReward", 0))
     max_reward = int(request.args.get("maxReward", 9999999))
     end_by = request.args.get("endBy", None)
@@ -191,12 +201,15 @@ def get_filtered_contests():
     if employer_id:
         query["employerId"] = employer_id
 
-    contests = list(contests_collection.find(query))
-    return jsonify(serialize_mongo(contests))
+    total_pages, contests = get_contests_on_page(int(id), query)
+    return jsonify({
+        "total_pages": total_pages,
+        "contests": serialize_mongo(contests)
+    })
 
 
 # Маршрут для получения одного конкурса по ID
-@contests_bp.route("/contests/<id>", methods=["GET"])
+@contests_bp.route("/contest/<id>", methods=["GET"])
 def get_contest(id):
     try:
         contest = contests_collection.find_one({"_id": ObjectId(id)})
@@ -406,3 +419,20 @@ def get_stats():
         datasets = [{'label': y_labels[y_values.index(y)], 'data': data[y]} for y in y_values]
 
     return jsonify({'x_labels': x_labels, 'datasets': datasets})
+  
+  
+@contests_bp.route("/contests/<id>", methods=["DELETE"])
+def delete_contest(id):
+    # проверяем, что в заголовках пришла роль админа
+    role = request.headers.get("X-User-Role", type=int)
+    if role != 3:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if not ObjectId.is_valid(id):
+        return jsonify({"error": "Invalid contest ID"}), 400
+
+    result = contests_collection.delete_one({"_id": ObjectId(id)})
+    if result.deleted_count == 0:
+        return jsonify({"error": "Contest not found"}), 404
+
+    return jsonify({"message": "Contest deleted successfully"}), 200

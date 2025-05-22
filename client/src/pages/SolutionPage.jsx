@@ -58,6 +58,7 @@ const SolutionPage = () => {
         return <Container>Загрузка...</Container>;
     }
 
+    const isAdmin = user.user?.role === 3;
     const isOwner = user.user?.id === currentSolution.freelancerId;
     const isEmployer = user.user?.role === 2;
     const isCreated = currentSolution.createdAt === currentSolution.updatedAt;
@@ -233,7 +234,7 @@ const SolutionPage = () => {
 
                 <Card.Footer className="d-flex justify-content-between flex-wrap align-items-center gap-2">
                     <div className="d-flex flex-wrap gap-2">
-                        {isOwner && (
+                        {(isOwner || isAdmin) && (
                             <>
                                 <Button
                                     variant="secondary"
@@ -267,7 +268,7 @@ const SolutionPage = () => {
                     </div>
 
                     <div className="d-flex flex-wrap gap-2">
-                        {isOwner && (
+                        {(isOwner || isAdmin) && (
                             <>
                                 <Button
                                     variant="info"

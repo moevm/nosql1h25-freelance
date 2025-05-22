@@ -75,6 +75,8 @@ export default class ContestStore {
         this._employerId = null;
         this._lastFilterParams = null;
         this._statistics = null;
+        this.currentPage = 1;
+        this.totalPages = 1;
         makeAutoObservable(this);
     }
 
@@ -163,6 +165,14 @@ export default class ContestStore {
 
     setContests(contest) {
         this._contests = contest;
+    }
+
+    setTotalPages(totalPages) {
+        this.totalPages = totalPages;
+    }
+
+    setCurrentPage(currentPage) {
+        this.currentPage = currentPage;
     }
 
     setCurrentContest(contest) {
@@ -277,67 +287,100 @@ export default class ContestStore {
         }
     }
 
+    async fetchContestsByPage(page) {
+        console.log('fetchContestsByPage')
+        try {
+            this.setLoading(true);
+            const data = await fetchData(`/contests/${page}`);
+            this.setContests(data.contests);
+            this.setTotalPages(data.total_pages);
+            this.setCurrentPage(page);
+        } catch (error) {
+            console.error("Ошибка при отправке:", error);
+        } finally {
+            this.setLoading(false)
+        }
+    }
+
     hasFiltersChanged(params) {
         if (!this._lastFilterParams) return true;
         return JSON.stringify(params) !== JSON.stringify(this._lastFilterParams);
     }
 
-    async fetchContestsFiltered() {
+    getFiltersAndParams() {
+        const params = {
+            minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
+            maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
+        };
+
+        if (this._selectedTypes?.length > 0) {
+            params.types = this._selectedTypes.map(t => t.id).join(',');
+        }
+
+        if (this._selectedStatuses?.length > 0) {
+            params.statuses = this._selectedStatuses.join(',');
+        }
+
+        if (this._searchQuery) {
+            params.search = this._searchQuery;
+        }
+
+        if (this._endBy) {
+            params.endBy = this._endBy.toISOString().split('T')[0];
+        }
+
+        if (this._endAfter) {
+            params.endAfter = this._endAfter.toISOString().split('T')[0];
+        }
+
+        if (this._employerId) {
+            params.employerId = this._employerId;
+        }
+
+        const hasFilters = (
+            params.minReward !== 0 ||
+            params.maxReward !== 9999999 ||
+            this._selectedTypes?.length > 0 ||
+            this._selectedStatuses?.length > 0 ||
+            this._searchQuery ||
+            this._endBy ||
+            this._endAfter ||
+            this._employerId
+        );
+
+        return params;
+    }
+
+    async fetchContestsFiltered(page = 1) {
+        const params = this.getFiltersAndParams();
+        if (!this.hasFiltersChanged(params) && page === this.currentPage && this._contests.length > 0) return;
         try {
-            const params = {
-                minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
-                maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
-            };
-
-            if (this._selectedTypes?.length > 0) {
-                params.types = this._selectedTypes.map(t => t.id).join(',');
-            }
-
-            if (this._selectedStatuses?.length > 0) {
-                params.statuses = this._selectedStatuses.join(',');
-            }
-
-            if (this._searchQuery) {
-                params.search = this._searchQuery;
-            }
-
-            if (this._endBy) {
-                params.endBy = this._endBy.toISOString().split('T')[0];
-            }
-
-            if (this._endAfter) {
-                params.endAfter = this._endAfter.toISOString().split('T')[0];
-            }
-
-            if (this._employerId) {
-                params.employerId = this._employerId;
-            }
-
-            const hasFilters = (
-                params.minReward !== 0 ||
-                params.maxReward !== 9999999 ||
-                this._selectedTypes?.length > 0 ||
-                this._selectedStatuses?.length > 0 ||
-                this._searchQuery ||
-                this._endBy ||
-                this._endAfter ||
-                this._employerId
-            );
-
             if (!this.hasFiltersChanged(params) && this._contests.length > 0) {
-                console.log('Using cached contests');
-                this.setLoading(false);
+                try {
+                    this.setLoading(true);
+                    const endpoint = `/contests/filter/${page}`;
+                    const data = await fetchData(endpoint, params);
+                    this.setContests(data.contests);
+                    this.setTotalPages(data.total_pages);
+                    this.setCurrentPage(page);
+                } catch (error) {
+
+                } finally {
+                    this.setLoading(false);
+                }
                 return;
             }
 
-            this.setLoading(true)
+            this.setLoading(true);
 
-            const endpoint = hasFilters ? "/contests/filter" : "/contests";
-
+            //const endpoint = hasFilters ? "/contests/filter" : "/contests/1";
+            const endpoint = '/contests/filter/1';
             console.log('Fetching contests with params:', params);
 
-            const contests = await fetchData(endpoint, params);
-            this.setContests(contests);
+            const data = await fetchData(endpoint, params);
+            this.setContests(data.contests);
+            this.setTotalPages(data.total_pages);
+            this.setCurrentPage(1);
             this._lastFilterParams = params;
         } catch (error) {
             console.error("Ошибка при отправке:", error);
@@ -348,7 +391,7 @@ export default class ContestStore {
 
     async fetchOneContestById(id) {
         try {
-            const contest = await fetchData(`/contests/${id}`);
+            const contest = await fetchData(`/contest/${id}`);
             return contest;
         } catch (error) {
             console.error("Ошибка при загрузке конкурса по ID:", error);
