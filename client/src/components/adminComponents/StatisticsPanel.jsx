@@ -1,17 +1,102 @@
-import React from 'react';
-import {Card} from "react-bootstrap";
+import React, { useState, useEffect, useContext } from 'react';
+import { Card } from "react-bootstrap";
+import { Bar } from 'react-chartjs-2';
+import { observer } from 'mobx-react-lite';
+import { Context } from "../../main.jsx";
+import { Chart } from 'chart.js';
+import { BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 
-const StatisticsPanel = () => {
+// Регистрация компонентов Chart.js
+Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+const StatisticsPanel = observer(() => {
+    const { contest } = useContext(Context);
+    const [selectedX, setSelectedX] = useState('type');
+    const [selectedY, setSelectedY] = useState('prizepool');
+
+    useEffect(() => {
+        contest.fetchStatistics(selectedX, selectedY);
+    }, [selectedX, selectedY]);
+
+    const xOptions = [
+        { value: 'type', label: 'Тип конкурса' },
+        { value: 'status', label: 'Статус' }
+    ];
+    const yOptions = [
+        { value: 'type', label: 'Тип конкурса' },
+        { value: 'status', label: 'Статус' },
+        { value: 'prizepool', label: 'Призовой фонд' }
+    ];
+
+    const { statistics } = contest;
+    if (!statistics || !statistics.x_labels) {
+        return (
+            <div>
+                <Card className="shadow-sm">
+                    <Card.Body>
+                        <h2 style={{ color: "#543787" }}>Статистика</h2>
+                        <p className="text-muted">Загрузка...</p>
+                    </Card.Body>
+                </Card>
+            </div>
+        );
+    }
+
+    let labels = statistics.x_labels;
+    if (selectedX === 'type' && contest.types) {
+        const typeMap = contest.types.reduce((map, t) => ({ ...map, [t.id]: t.name }), {});
+        labels = labels.map(id => typeMap[id] || id);
+    } else if (selectedX === 'status' && contest.status) {
+        const statusMap = contest.status; // Используем объект status напрямую
+        labels = labels.map(id => statusMap[id] || id);
+    }
+
+    let datasets = statistics.datasets;
+    if (selectedY === 'type' && contest.types) {
+        const typeMap = contest.types.reduce((map, t) => ({ ...map, [t.id]: t.name }), {});
+        datasets = datasets.map(ds => ({ ...ds, label: typeMap[ds.label] || ds.label }));
+    } else if (selectedY === 'status' && contest.status) {
+        const statusMap = contest.status; // Используем объект status напрямую
+        datasets = datasets.map(ds => ({ ...ds, label: statusMap[ds.label] || ds.label }));
+    }
+
+    const colors = ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0'];
+    datasets = datasets.map((ds, index) => ({
+        ...ds,
+        backgroundColor: colors[index % colors.length]
+    }));
+
+    const chartData = {
+        labels,
+        datasets
+    };
+
     return (
         <div>
             <Card className="shadow-sm">
                 <Card.Body>
                     <h2 style={{ color: "#543787" }}>Статистика</h2>
-                    <p className="text-muted">Раздел в разработке...</p>
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ marginRight: '10px' }}>Ось X: </label>
+                        <select value={selectedX} onChange={e => setSelectedX(e.target.value)}>
+                            {xOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ marginRight: '10px' }}>Ось Y: </label>
+                        <select value={selectedY} onChange={e => setSelectedY(e.target.value)}>
+                            {yOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <Bar data={chartData} />
                 </Card.Body>
             </Card>
         </div>
     );
-};
+});
 
 export default StatisticsPanel;

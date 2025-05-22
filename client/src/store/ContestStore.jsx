@@ -74,7 +74,16 @@ export default class ContestStore {
         this.isLoading = false;
         this._employerId = null;
         this._lastFilterParams = null;
+        this._statistics = null;
         makeAutoObservable(this);
+    }
+
+    setStatistics(data) {
+        this._statistics = data;
+    }
+
+    get statistics() {
+        return this._statistics;
     }
 
     setFormField(field, value) {
@@ -382,5 +391,45 @@ export default class ContestStore {
         this._endAfter = null;
         this._searchQuery = '';
         this.fetchContestsFiltered();
+    }
+
+    async fetchStatistics(xField, yField) {
+        try {
+            const params = {
+                minReward: this._minReward !== undefined && this._minReward !== null && this._minReward !== '' ? this._minReward : 0,
+                maxReward: this._maxReward !== undefined && this._maxReward !== null && this._maxReward !== '' ? this._maxReward : 9999999,
+            };
+
+            if (this._selectedTypes?.length > 0) {
+                params.types = this._selectedTypes.map(t => t.id).join(',');
+            }
+            if (this._selectedStatuses?.length > 0) {
+                params.statuses = this._selectedStatuses.join(',');
+            }
+            if (this._searchQuery) {
+                params.search = this._searchQuery;
+            }
+            if (this._endBy) {
+                params.endBy = this._endBy.toISOString().split('T')[0];
+            }
+            if (this._endAfter) {
+                params.endAfter = this._endAfter.toISOString().split('T')[0];
+            }
+            if (this._employerId) {
+                params.employerId = this._employerId;
+            }
+
+            params.xField = xField;
+            params.yField = yField;
+
+            this.setLoading(true);
+            const dataStats = await fetchData("/contests/stats", params);
+            this.setStatistics(dataStats)
+            this.setLoading(false);
+        } catch (error) {
+            console.error("Ошибка при загрузке статистики:", error);
+        } finally {
+            this.setLoading(false);
+        }
     }
 }

@@ -223,6 +223,7 @@ def get_contest_by_number(number):
 
 @contests_bp.route("/contests/stats", methods=["GET"])
 def get_stats():
+    # Существующие параметры фильтров
     min_reward = int(request.args.get("minReward", 0))
     max_reward = int(request.args.get("maxReward", 9999999))
     end_by = request.args.get("endBy", None)
@@ -232,58 +233,115 @@ def get_stats():
     statuses = request.args.get("statuses", None)
     employer_id = request.args.get("employerId", None)
 
+    # Новые параметры для X и Y
+    x_field = request.args.get("xField")
+    y_field = request.args.get("yField")
+
+    # Определение типов полей
+    categorical_fields = ['type', 'status']
+    numerical_fields = ['prizepool']
+
+    # Проверка валидности полей
+    if x_field not in categorical_fields or y_field not in categorical_fields + numerical_fields:
+        return jsonify({"error": "Неверно выбраны поля"}), 400
+
+    # Формирование запроса фильтрации
     query = {
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
     }
-
-    end_by_conditions = {}
-
     if end_by:
         try:
             end_date = datetime.strptime(end_by, "%Y-%m-%d")
-            end_by_conditions["$lte"] = end_date
+            query["endBy"] = {"$lte": end_date}
         except ValueError:
-            return jsonify({"error": "Invalid endBy date format"}), 400
-
+            return jsonify({"error": "Неверный формат даты endBy"}), 400
     if end_after:
         try:
             end_date = datetime.strptime(end_after, "%Y-%m-%d")
-            end_by_conditions["$gte"] = end_date
+            query["endBy"] = {"$gte": end_date}
         except ValueError:
-            return jsonify({"error": "Invalid endAfter date format"}), 400
-
-    if end_by_conditions:
-        query["endBy"] = end_by_conditions
-
+            return jsonify({"error": "Неверный формат даты endAfter"}), 400
     if types:
-            type_ids = types.split(',')
-            query["type"] = {"$in": type_ids}
-
+        type_ids = types.split(',')
+        query["type"] = {"$in": type_ids}
     if statuses:
-            try:
-                status_ids = [int(status) for status in statuses.split(',')]
-                query["status"] = {"$in": status_ids}
-            except ValueError:
-                return jsonify({"error": "Invalid status format"}), 400
-
+        try:
+            status_ids = [int(status) for status in statuses.split(',')]
+            query["status"] = {"$in": status_ids}
+        except ValueError:
+            return jsonify({"error": "Неверный формат статуса"}), 400
     if search:
         regex = {"$regex": search, "$options": "i"}
-
         matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
         matching_user_ids = [str(user["_id"]) for user in matching_users]
-
         search_conditions = [
             {"title": regex},
             {"annotation": regex},
         ]
-
         if matching_user_ids:
             search_conditions.append({"employerId": {"$in": matching_user_ids}})
-
         query["$or"] = search_conditions
-
     if employer_id:
         query["employerId"] = employer_id
 
-    contests = list(contests_collection.find(query))
-    return jsonify(serialize_mongo(contests))
+    # Обработка числового Y (prizepool)
+    if y_field in numerical_fields:
+        min_max = list(contests_collection.aggregate([
+            {"$match": query},
+            {"$group": {"_id": None, "min_y": {"$min": "$" + y_field}, "max_y": {"$max": "$" + y_field}}}
+        ]))
+        if not min_max:
+            return jsonify({'x_labels': [], 'datasets': []})
+        min_y = min_max[0]['min_y']
+        max_y = min_max[0]['max_y']
+        num_bins = 5
+        if min_y == max_y:
+            bins = [min_y]
+        else:
+            bin_width = (max_y - min_y) / num_bins
+            bins = [min_y + i * bin_width for i in range(num_bins + 1)]
+
+        pipeline = [
+            {"$match": query},
+            {"$project": {
+                "x": "$" + x_field,
+                "y_bin": {
+                    "$floor": {
+                        "$divide": [{"$subtract": ["$" + y_field, min_y]}, bin_width] if bin_width > 0 else 0
+                    }
+                }
+            }},
+            {"$group": {"_id": {"x": "$x", "y_bin": "$y_bin"}, "count": {"$sum": 1}}},
+            {"$sort": {"_id.x": 1, "_id.y_bin": 1}}
+        ]
+        result = list(contests_collection.aggregate(pipeline))
+        x_values = sorted(set(r['_id']['x'] for r in result))
+        y_labels = [f"{bins[i]:.2f}-{bins[i+1]:.2f}" for i in range(len(bins)-1)] if len(bins) > 1 else [f"{min_y}"]
+        data = {label: [0] * len(x_values) for label in y_labels}
+        for r in result:
+            x = r['_id']['x']
+            y_bin = int(r['_id']['y_bin'])
+            if y_bin < len(y_labels):
+                label = y_labels[y_bin]
+                x_idx = x_values.index(x)
+                data[label][x_idx] = r['count']
+        datasets = [{'label': label, 'data': data[label]} for label in y_labels]
+    # Обработка категориального Y
+    else:
+        pipeline = [
+            {"$match": query},
+            {"$group": {"_id": {"x": "$" + x_field, "y": "$" + y_field}, "count": {"$sum": 1}}},
+            {"$sort": {"_id.x": 1, "_id.y": 1}}
+        ]
+        result = list(contests_collection.aggregate(pipeline))
+        x_values = sorted(set(r['_id']['x'] for r in result))
+        y_values = sorted(set(r['_id']['y'] for r in result))
+        data = {y: [0] * len(x_values) for y in y_values}
+        for r in result:
+            x = r['_id']['x']
+            y = r['_id']['y']
+            x_idx = x_values.index(x)
+            data[y][x_idx] = r['count']
+        datasets = [{'label': str(y), 'data': data[y]} for y in y_values]
+
+    return jsonify({'x_labels': x_values, 'datasets': datasets})
