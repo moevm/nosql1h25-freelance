@@ -180,15 +180,6 @@ export default class SolutionStore {
                 params.searchForMySolutions = this._searchForMySolutions;
             }
 
-            const hasFilters = (
-                this._searchQuery ||
-                this._selectedStatuses?.length > 0 ||
-                this._addedBefore ||
-                this._addedAfter ||
-                this._freelancerId ||
-                this._contestId
-            );
-
             if (!this.hasFiltersChanged(params) && this._solutions.length > 0) {
                 console.log('Using cached solutions');
                 this.setLoading(false);
@@ -196,11 +187,10 @@ export default class SolutionStore {
             }
 
             this.setLoading(true)
-            const endpoint = hasFilters ? "/solutions/filter" : `/solutions/contest/${this._contestId}`;
 
             console.log('Fetching solutions with params:', params);
 
-            const solutions = await fetchData(endpoint, params);
+            const solutions = await fetchData("/solutions/filter", params);
             this.setSolutions(solutions);
             this._lastFilterParams = params;
         } catch (error) {
