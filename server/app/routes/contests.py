@@ -309,39 +309,41 @@ def get_stats():
             min_y = min_max[0]['min_y']
             max_y = min_max[0]['max_y']
             num_bins = 5
+
             if min_y == max_y:
-                bins = [min_y]
+                boundaries = [min_y, min_y + 1]
             else:
                 bin_width = (max_y - min_y) / num_bins
-                bins = [min_y + i * bin_width for i in range(num_bins + 1)]
-                bins[num_bins] += 1
+                boundaries = [min_y + i * bin_width for i in range(num_bins)]
+                boundaries.append(max_y + 1)
 
             pipeline = [
                 {"$match": query},
-                {"$group": {
-                    "_id": {
-                        "x": {"$dateToString": {"format": "%Y-%m", "date": "$" + x_field}},
-                        "y_bin": {
-                            "$floor": {
-                                "$divide": [{"$subtract": ["$" + y_field, min_y]}, bin_width]
-                            }
-                        }
-                    },
-                    "count": {"$sum": 1}
-                }},
-                {"$sort": {"_id.x": 1, "_id.y_bin": 1}}
+                {"$bucket": {
+                    "groupBy": "$" + y_field,
+                    "boundaries": boundaries,
+                    "default": "Other",
+                    "output": {
+                        "count": {"$sum": 1},
+                        "x_values": {"$addToSet": {"$dateToString": {"format": "%Y-%m", "date": "$" + x_field}}}
+                    }
+                }}
             ]
             result = list(contests_collection.aggregate(pipeline))
-            x_values = sorted(set(r['_id']['x'] for r in result))
-            y_labels = [f"{bins[i]:.2f}-{bins[i+1]:.2f}" for i in range(len(bins)-1)] if len(bins) > 1 else [f"{min_y}"]
+
+            x_values = sorted(set(x for r in result for x in r['x_values']))
+
+            y_labels = [f"{boundaries[i]:.2f}-{boundaries[i+1]:.2f}" for i in range(len(boundaries) - 1)]
+
             data = {label: [0] * len(x_values) for label in y_labels}
+
             for r in result:
-                x = r['_id']['x']
-                y_bin = int(r['_id']['y_bin'])
-                if y_bin < len(y_labels):
-                    label = y_labels[y_bin]
+                bin_index = boundaries.index(r['_id']) if r['_id'] in boundaries else len(boundaries) - 2
+                label = y_labels[bin_index]
+                for x in r['x_values']:
                     x_idx = x_values.index(x)
-                    data[label][x_idx] = r['count']
+                    data[label][x_idx] += r['count']
+
             datasets = [{'label': label, 'data': data[label]} for label in y_labels]
         else:
             pipeline = [
