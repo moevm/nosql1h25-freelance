@@ -116,22 +116,12 @@ const StatisticsPanel = observer(() => {
                                 <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
                         </select>
-                        <Button onClick={() => setUpdateCounter(prev => prev + 1)} className="ms-3">Применить фильтры</Button>
+                        <Button style={{ background: "#543787" }} onClick={() => setUpdateCounter(prev => prev + 1)} className="ms-3">Применить фильтры</Button>
                         <Button
+                            className='ms-2'
                             onClick={handleResetFilters}
                             variant="outline-secondary"
                             size="sm"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontWeight: '500',
-                                padding: '4px 10px',
-                                borderRadius: '20px',
-                                fontSize: '14px',
-                                height: '35px',
-                                lineHeight: '1',
-                            }}
                         >
                             Сбросить фильтры
                         </Button>
