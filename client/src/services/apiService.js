@@ -48,9 +48,9 @@ export const updateData = async (endpoint, data = {}) => {
 };
 
 // DELETE-запрос
-export const deleteData = async (endpoint) => {
+export const deleteData = async (endpoint, config = {}) => {
     try {
-        const response = await api.delete(endpoint);
+        const response = await api.delete(endpoint, config);
         return response.data;
     } catch (error) {
         console.error(`Error deleting data at ${endpoint}:`, error);

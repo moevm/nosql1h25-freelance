@@ -232,3 +232,19 @@ def get_contest_by_number(number):
         return jsonify(serialize_mongo(contest))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@contests_bp.route("/contests/<id>", methods=["DELETE"])
+def delete_contest(id):
+    # проверяем, что в заголовках пришла роль админа
+    role = request.headers.get("X-User-Role", type=int)
+    if role != 3:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if not ObjectId.is_valid(id):
+        return jsonify({"error": "Invalid contest ID"}), 400
+
+    result = contests_collection.delete_one({"_id": ObjectId(id)})
+    if result.deleted_count == 0:
+        return jsonify({"error": "Contest not found"}), 404
+
+    return jsonify({"message": "Contest deleted successfully"}), 200
