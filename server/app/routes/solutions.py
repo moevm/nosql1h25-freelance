@@ -154,26 +154,6 @@ def update_solution(id):
         return jsonify({"error": str(e)}), 400
 
 
-# Маршрут получения всех решений одного пользователя-фрилансера
-@solutions_bp.route("/solutions/user/<user_id>", methods=["GET"])
-def get_solutions_by_user(user_id):
-    try:
-        solutions = list(solutions_collection.find({"freelancerId": user_id}))
-        return jsonify(serialize_mongo(solutions)), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# Маршрут получения всех решений одного конкурса
-@solutions_bp.route("/solutions/contest/<contest_id>", methods=["GET"])
-def get_solutions_by_contest(contest_id):
-    try:
-        solutions = list(solutions_collection.find({"contestId": contest_id}))
-        return jsonify(serialize_mongo(solutions)), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 # Маршрут получения решения по его номеру
 @solutions_bp.route("/solutions/number/<int:number>", methods=["GET"])
 def get_solution_by_number(number):
