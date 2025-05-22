@@ -30,12 +30,15 @@ const StatisticsPanel = observer(() => {
         { value: 'type', label: 'Тип конкурса' },
         { value: 'status', label: 'Статус' },
         { value: 'createdAt', label: 'Дата создания' },
-        { value: 'endBy', label: 'Дата окончания' }
+        { value: 'endBy', label: 'Дата окончания' },
+        { value: 'prizepool', label: 'Призовой фонд' },
     ];
 
     const yOptions = [
         { value: 'type', label: 'Тип конкурса' },
         { value: 'status', label: 'Статус' },
+        { value: 'createdAt', label: 'Дата создания' },
+        { value: 'endBy', label: 'Дата окончания' },
         { value: 'prizepool', label: 'Призовой фонд' },
         { value: 'count', label: 'Количество' }
     ];

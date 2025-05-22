@@ -223,6 +223,7 @@ def get_contest_by_number(number):
 
 @contests_bp.route("/contests/stats", methods=["GET"])
 def get_stats():
+    # Фильтры из запроса
     min_reward = int(request.args.get("minReward", 0))
     max_reward = int(request.args.get("maxReward", 9999999))
     end_by = request.args.get("endBy", None)
@@ -235,36 +236,50 @@ def get_stats():
     x_field = request.args.get("xField")
     y_field = request.args.get("yField")
 
-    categorical_fields = ['type', 'status', 'createdAt', 'endBy']
+    # Классификация полей
+    categorical_fields = ['type', 'status']
+    date_fields = ['createdAt', 'endBy']
     numerical_fields = ['prizepool']
 
-    if x_field not in categorical_fields or y_field not in categorical_fields + numerical_fields + ['count']:
+    # Проверка валидности полей
+    valid_x_fields = categorical_fields + date_fields + numerical_fields
+    valid_y_fields = categorical_fields + date_fields + numerical_fields + ['count']
+    if x_field not in valid_x_fields or y_field not in valid_y_fields:
         return jsonify({"error": "Неверно выбраны поля"}), 400
 
+    # Построение запроса фильтрации
     query = {
         "prizepool": {"$gte": min_reward, "$lte": max_reward}
     }
+
     if end_by:
         try:
             end_date = datetime.strptime(end_by, "%Y-%m-%d")
             query["endBy"] = {"$lte": end_date}
         except ValueError:
             return jsonify({"error": "Неверный формат даты endBy"}), 400
+
     if end_after:
         try:
             end_date = datetime.strptime(end_after, "%Y-%m-%d")
-            query["endBy"] = {"$gte": end_date}
+            if "endBy" in query:
+                query["endBy"]["$gte"] = end_date
+            else:
+                query["endBy"] = {"$gte": end_date}
         except ValueError:
             return jsonify({"error": "Неверный формат даты endAfter"}), 400
+
     if types:
         type_ids = types.split(',')
         query["type"] = {"$in": type_ids}
+
     if statuses:
         try:
             status_ids = [int(status) for status in statuses.split(',')]
             query["status"] = {"$in": status_ids}
         except ValueError:
             return jsonify({"error": "Неверный формат статуса"}), 400
+
     if search:
         regex = {"$regex": search, "$options": "i"}
         matching_users = list(users_collection.find({"login": regex}, {"_id": 1}))
@@ -276,167 +291,118 @@ def get_stats():
         if matching_user_ids:
             search_conditions.append({"employerId": {"$in": matching_user_ids}})
         query["$or"] = search_conditions
+
     if employer_id:
         query["employerId"] = employer_id
 
-    if y_field == 'count':
-        if x_field in ['createdAt', 'endBy']:
-            pipeline = [
-                {"$match": query},
-                {"$group": {
-                    "_id": {"$dateToString": {"format": "%Y-%m", "date": "$" + x_field}},
-                    "count": {"$sum": 1}
-                }},
-                {"$sort": {"_id": 1}}
-            ]
-        else:
-            pipeline = [
-                {"$match": query},
-                {"$group": {"_id": "$" + x_field, "count": {"$sum": 1}}},
-                {"$sort": {"_id": 1}}
-            ]
-        result = list(contests_collection.aggregate(pipeline))
-        x_values = [r['_id'] for r in result]
-        datasets = [{'label': 'Количество', 'data': [r['count'] for r in result]}]
-    elif x_field in ['createdAt', 'endBy']:
-        if y_field in numerical_fields:
-            min_max = list(contests_collection.aggregate([
-                {"$match": query},
-                {"$group": {"_id": None, "min_y": {"$min": "$" + y_field}, "max_y": {"$max": "$" + y_field}}}
-            ]))
-            if not min_max:
-                return jsonify({'x_labels': [], 'datasets': []})
-            min_y = min_max[0]['min_y']
-            max_y = min_max[0]['max_y']
-            num_bins = 5
-
-            if min_y == max_y:
-                boundaries = [min_y, min_y + 1]
-            else:
-                bin_width = (max_y - min_y) / num_bins
-                boundaries = [min_y + i * bin_width for i in range(num_bins)]
-                boundaries.append(max_y + 1)
-
-            pipeline = [
-                {"$match": query},
-                {"$bucket": {
-                    "groupBy": "$" + y_field,
-                    "boundaries": boundaries,
-                    "default": "Other",
-                    "output": {
-                        "count": {"$sum": 1},
-                        "x_values": {"$addToSet": {"$dateToString": {"format": "%Y-%m", "date": "$" + x_field}}}
-                    }
-                }}
-            ]
-            result = list(contests_collection.aggregate(pipeline))
-
-            x_values = sorted(set(x for r in result for x in r['x_values']))
-
-            y_labels = [f"{boundaries[i]:.2f}-{boundaries[i+1]:.2f}" for i in range(len(boundaries) - 1)]
-
-            data = {label: [0] * len(x_values) for label in y_labels}
-
-            for r in result:
-                bin_index = boundaries.index(r['_id']) if r['_id'] in boundaries else len(boundaries) - 2
-                label = y_labels[bin_index]
-                for x in r['x_values']:
-                    x_idx = x_values.index(x)
-                    data[label][x_idx] += r['count']
-
-            datasets = [{'label': label, 'data': data[label]} for label in y_labels]
-        else:
-            pipeline = [
-                {"$match": query},
-                {"$group": {
-                    "_id": {
-                        "x": {"$dateToString": {"format": "%Y-%m", "date": "$" + x_field}},
-                        "y": "$" + y_field
-                    },
-                    "count": {"$sum": 1}
-                }},
-                {"$sort": {"_id.x": 1, "_id.y": 1}}
-            ]
-            result = list(contests_collection.aggregate(pipeline))
-            x_values = sorted(set(r['_id']['x'] for r in result))
-            y_values = sorted(set(r['_id']['y'] for r in result))
-            data = {y: [0] * len(x_values) for y in y_values}
-            for r in result:
-                x = r['_id']['x']
-                y = r['_id']['y']
-                x_idx = x_values.index(x)
-                data[y][x_idx] = r['count']
-            datasets = [{'label': str(y), 'data': data[y]} for y in y_values]
+    # Границы числовых значений
+    if x_field in numerical_fields:
+        min_max_x = list(contests_collection.aggregate([
+            {"$match": query},
+            {"$group": {
+                "_id": None,
+                "min_x": {"$min": f"${x_field}"},
+                "max_x": {"$max": f"${x_field}"}
+            }}
+        ]))
+        if not min_max_x:
+            return jsonify({'x_labels': [], 'datasets': []})
+        min_x = min_max_x[0]['min_x']
+        max_x = min_max_x[0]['max_x']
+        num_bins_x = 5
+        bin_width_x = 1 if min_x == max_x else (max_x - min_x) / num_bins_x
+        boundaries_x = [min_x + i * bin_width_x for i in range(num_bins_x)]
+        boundaries_x.append(max_x + bin_width_x)
     else:
+        min_x = max_x = bin_width_x = None
+
+    if y_field != 'count' and y_field in numerical_fields:
+        min_max_y = list(contests_collection.aggregate([
+            {"$match": query},
+            {"$group": {
+                "_id": None,
+                "min_y": {"$min": f"${y_field}"},
+                "max_y": {"$max": f"${y_field}"}
+            }}
+        ]))
+        if not min_max_y:
+            return jsonify({'x_labels': [], 'datasets': []})
+        min_y = min_max_y[0]['min_y']
+        max_y = min_max_y[0]['max_y']
+        num_bins_y = 5
+        bin_width_y = 1 if min_y == max_y else (max_y - min_y) / num_bins_y
+        boundaries_y = [min_y + i * bin_width_y for i in range(num_bins_y)]
+        boundaries_y.append(max_y + bin_width_y)
+    else:
+        min_y = max_y = bin_width_y = None
+
+    # Агрегация
+    pipeline = [{"$match": query}]
+
+    if x_field in numerical_fields:
+        pipeline.append({"$addFields": {
+            "x_group": {"$floor": {"$divide": [{"$subtract": [f"${x_field}", min_x]}, bin_width_x]}}
+        }})
+        pipeline.append({"$addFields": {
+            "x_group": {"$min": ["$x_group", num_bins_x - 1]}
+        }})
+    elif x_field in date_fields:
+        pipeline.append({"$addFields": {
+            "x_group": {"$dateToString": {"format": "%Y-%m", "date": f"${x_field}"}}
+        }})
+    else:
+        pipeline.append({"$addFields": {"x_group": f"${x_field}"}})
+
+    if y_field != 'count':
         if y_field in numerical_fields:
-            min_max = list(contests_collection.aggregate([
-                {"$match": query},
-                {"$group": {"_id": None, "min_y": {"$min": "$" + y_field}, "max_y": {"$max": "$" + y_field}}}
-            ]))
-            if not min_max:
-                return jsonify({'x_labels': [], 'datasets': []})
-            min_y = min_max[0]['min_y']
-            max_y = min_max[0]['max_y']
-            num_bins = 5
-            if min_y == max_y:
-                bins = [min_y]
-            else:
-                bin_width = (max_y - min_y) / num_bins
-                bins = [min_y + i * bin_width for i in range(num_bins + 1)]
-                bins[num_bins] += 1
-
-            pipeline = [
-                {"$match": query},
-                {"$project": {
-                    "x": "$" + x_field,
-                    "y_bin": {
-                        "$floor": {
-                            "$divide": [
-                                {"$subtract": ["$" + y_field, min_y]},
-                                bin_width
-                            ]
-                        }
-                    }
-                }},
-                {"$addFields": {
-                    "y_bin": {
-                        "$cond": [
-                            {"$gte": ["$y_bin", num_bins]},
-                            num_bins-1,
-                            "$y_bin"
-                        ]
-                    }
-                }},
-                {"$group": {"_id": {"x": "$x", "y_bin": "$y_bin"}, "count": {"$sum": 1}}},
-                {"$sort": {"_id.x": 1, "_id.y_bin": 1}}
-            ]
-            result = list(contests_collection.aggregate(pipeline))
-            x_values = sorted(set(r['_id']['x'] for r in result))
-            y_labels = [f"{bins[i]:.2f}-{bins[i+1]:.2f}" for i in range(len(bins)-1)] if len(bins) > 1 else [f"{min_y}"]
-            data = {label: [0] * len(x_values) for label in y_labels}
-            for r in result:
-                x = r['_id']['x']
-                y_bin = int(r['_id']['y_bin'])
-                if y_bin < len(y_labels):
-                    label = y_labels[y_bin]
-                    x_idx = x_values.index(x)
-                    data[label][x_idx] = r['count']
-            datasets = [{'label': label, 'data': data[label]} for label in y_labels]
+            pipeline.append({"$addFields": {
+                "y_group": {"$floor": {"$divide": [{"$subtract": [f"${y_field}", min_y]}, bin_width_y]}}
+            }})
+            pipeline.append({"$addFields": {
+                "y_group": {"$min": ["$y_group", num_bins_y - 1]}
+            }})
+        elif y_field in date_fields:
+            pipeline.append({"$addFields": {
+                "y_group": {"$dateToString": {"format": "%Y-%m", "date": f"${y_field}"}}
+            }})
         else:
-            pipeline = [
-                {"$match": query},
-                {"$group": {"_id": {"x": "$" + x_field, "y": "$" + y_field}, "count": {"$sum": 1}}},
-                {"$sort": {"_id.x": 1, "_id.y": 1}}
-            ]
-            result = list(contests_collection.aggregate(pipeline))
-            x_values = sorted(set(r['_id']['x'] for r in result))
-            y_values = sorted(set(r['_id']['y'] for r in result))
-            data = {y: [0] * len(x_values) for y in y_values}
-            for r in result:
-                x = r['_id']['x']
-                y = r['_id']['y']
-                x_idx = x_values.index(x)
-                data[y][x_idx] = r['count']
-            datasets = [{'label': str(y), 'data': data[y]} for y in y_values]
+            pipeline.append({"$addFields": {"y_group": f"${y_field}"}})
 
-    return jsonify({'x_labels': x_values, 'datasets': datasets})
+    if y_field == 'count':
+        pipeline.append({"$group": {"_id": "$x_group", "count": {"$sum": 1}}})
+        pipeline.append({"$sort": {"_id": 1}})
+    else:
+        pipeline.append({"$group": {"_id": {"x": "$x_group", "y": "$y_group"}, "count": {"$sum": 1}}})
+        pipeline.append({"$sort": {"_id.x": 1, "_id.y": 1}})
+
+    result = list(contests_collection.aggregate(pipeline))
+
+    if y_field == 'count':
+        x_values = [r['_id'] for r in result]
+        if x_field in numerical_fields:
+            x_labels = [f"{boundaries_x[int(i)]:.2f}-{boundaries_x[int(i)+1]:.2f}" for i in x_values]
+        else:
+            x_labels = [str(i) for i in x_values]
+        datasets = [{'label': 'Количество', 'data': [r['count'] for r in result]}]
+    else:
+        x_values = sorted(set(r['_id']['x'] for r in result))
+        if x_field in numerical_fields:
+            x_labels = [f"{boundaries_x[int(i)]:.2f}-{boundaries_x[int(i)+1]:.2f}" for i in x_values]
+        else:
+            x_labels = [str(i) for i in x_values]
+
+        y_values = sorted(set(r['_id']['y'] for r in result))
+        if y_field in numerical_fields:
+            y_labels = [f"{boundaries_y[int(y)]:.2f}-{boundaries_y[int(y)+1]:.2f}" for y in y_values]
+        else:
+            y_labels = [str(y) for y in y_values]
+
+        data = {y: [0] * len(x_values) for y in y_values}
+        for r in result:
+            x = r['_id']['x']
+            y = r['_id']['y']
+            x_idx = x_values.index(x)
+            data[y][x_idx] = r['count']
+        datasets = [{'label': y_labels[y_values.index(y)], 'data': data[y]} for y in y_values]
+
+    return jsonify({'x_labels': x_labels, 'datasets': datasets})
