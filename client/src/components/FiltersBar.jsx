@@ -13,6 +13,7 @@ const FiltersBar = () => {
     const {contest} = useContext(Context);
     useEffect(() => {
         const timeout = setTimeout(() => {
+            console.log(11111111);
             contest.fetchContestsFiltered();
         }, 500);
 
