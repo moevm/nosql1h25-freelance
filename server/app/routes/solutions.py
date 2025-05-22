@@ -217,6 +217,14 @@ def update_solution_status(solution_id):
 # Маршрут для получения отфильтрованных решений
 @solutions_bp.route("/solutions/filter", methods=["GET"])
 def get_filtered_contests():
+    try:
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 2))
+    except ValueError:
+        return jsonify({"error": "Invalid pagination params"}), 400
+
+    skip = (page - 1) * limit
+
     addedBefore = request.args.get("addedBefore", None)
     addedAfter = request.args.get("addedAfter", None)
     search = request.args.get("search", None)
@@ -292,7 +300,8 @@ def get_filtered_contests():
     if contest_id:
         query["contestId"] = contest_id
 
-    solutions = list(solutions_collection.find(query))
+    total = solutions_collection.count_documents(query)
+    solutions = list(solutions_collection.find(query).skip(skip).limit(limit))
 
     contest_ids = {solution["contestId"] for solution in solutions}
     contests = list(contests_collection.find({"_id": {"$in": [ObjectId(cid) for cid in contest_ids]}}))
@@ -320,7 +329,12 @@ def get_filtered_contests():
         solution["freelancerLogin"] = user_logins.get(solution.get("freelancerId"))
         solution["employerLogin"] = user_logins.get(str(employer_id)) if employer_id else None
 
-    return jsonify(serialize_mongo(solutions))
+    return jsonify({
+            "solutions": serialize_mongo(solutions),
+            "total": total,
+            "page": page,
+            "limit": limit
+        }), 200
 
 
 # Добавление ревью к решению
