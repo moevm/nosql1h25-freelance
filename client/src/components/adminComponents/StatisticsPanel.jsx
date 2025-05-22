@@ -28,12 +28,16 @@ const StatisticsPanel = observer(() => {
 
     const xOptions = [
         { value: 'type', label: 'Тип конкурса' },
-        { value: 'status', label: 'Статус' }
+        { value: 'status', label: 'Статус' },
+        { value: 'createdAt', label: 'Дата создания' },
+        { value: 'endBy', label: 'Дата окончания' }
     ];
+
     const yOptions = [
         { value: 'type', label: 'Тип конкурса' },
         { value: 'status', label: 'Статус' },
-        { value: 'prizepool', label: 'Призовой фонд' }
+        { value: 'prizepool', label: 'Призовой фонд' },
+        { value: 'count', label: 'Количество' }
     ];
 
     const { statistics } = contest;
