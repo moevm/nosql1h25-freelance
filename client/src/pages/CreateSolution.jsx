@@ -16,19 +16,19 @@ const CreateSolution = () => {
 
     useEffect(() => {
         const fetch = async () => {
-            if (solution.currentSolution && solution.currentSolution.number == number) {
-                solution.setCurrentSolution(solution.currentSolution);
+            if (contest.currentContest && contest.currentContest.number == number) {
+                contest.setCurrentContest(contest.currentContest);
             } else {
-                const fetched = await solution.fetchSolutionByNumber(number);
+                const fetched = await contest.fetchOneContestByNumber(number);
                 if (fetched) {
-                    solution.setCurrentSolution(fetched);
+                    contest.setCurrentContest(fetched);
                 } else {
-                    setError("Решение не найдено.");
+                    setError("Конкурс не найден.");
                 }
             }
         };
         fetch();
-    }, [number, solution]);
+    }, [number, contest]);
 
     const contestId = contest.currentContest?.id;
 

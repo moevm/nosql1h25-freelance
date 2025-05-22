@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Context } from "../main.jsx";
-import { Container, Row, Spinner } from "react-bootstrap";
+import { Row, Spinner, Pagination } from "react-bootstrap";
 import ContestCard from "./ContestCard.jsx";
 import { observer } from "mobx-react-lite";
 
@@ -8,6 +8,14 @@ const ContestsList = observer(() => {
     const { contest } = useContext(Context);
 
     const [showLoader, setShowLoader] = useState(false); // Изначально лоадер скрыт
+
+    useEffect(() => {
+        contest.fetchContestsFiltered(contest.currentPage);
+    }, []);
+
+    const handlePageChange = (pageNumber) => {
+        contest.fetchContestsFiltered(pageNumber);
+    }
 
     useEffect(() => {
         if (contest.isLoading) {
@@ -38,15 +46,28 @@ const ContestsList = observer(() => {
     }
 
     return (
-        <Row className="d-flex justify-content-center">
-            {contest.contests.map((contestItem) => (
-                <ContestCard
-                    key={contestItem.id}
-                    contest={contestItem}
-                    type={contest.getTypeNameById(contestItem.type)}
-                />
-            ))}
-        </Row>
+        <>
+            <Row className="d-flex justify-content-center">
+                {contest.contests.map((contestItem) => (
+                    <ContestCard
+                        key={contestItem.id}
+                        contest={contestItem}
+                        type={contest.getTypeNameById(contestItem.type)}
+                    />
+                ))}
+            </Row>
+            <Pagination className="justify-content-center my-4">
+                {[...Array(contest.totalPages)].map((_, idx) => (
+                    <Pagination.Item
+                        key={idx + 1}
+                        active={contest.currentPage === idx + 1}
+                        onClick={() => handlePageChange(idx + 1)}
+                    >
+                        {idx + 1}
+                    </Pagination.Item>
+                ))}
+            </Pagination>
+        </>
     );
 });
 

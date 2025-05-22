@@ -11,6 +11,7 @@ const SolutionsFiltersBar = ({ isMySolutions }) => {
     const {solution} = useContext(Context);
     useEffect(() => {
         const timeout = setTimeout(() => {
+            solution.setPage(1);
             solution.fetchSolutionsFiltered();
         }, 500);
 

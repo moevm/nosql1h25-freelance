@@ -54,6 +54,9 @@ export default class SolutionStore {
         this.isLoading = true;
         this._lastFilterParams = null;
         this._searchForMySolutions = null;
+        this._page = 1;
+        this._limit = 2;
+        this._totalCount = 0;
         makeAutoObservable(this);
     }
 
@@ -102,6 +105,14 @@ export default class SolutionStore {
         this.isLoading = bool;
     }
 
+    setPage(page) {
+        this._page = page;
+    }
+
+    setLimit(limit) {
+        this._limit = limit;
+    }
+
     get solutions() {
         return this._solutions;
     }
@@ -134,6 +145,18 @@ export default class SolutionStore {
         return this._contestId;
     }
 
+    get page() {
+        return this._page;
+    }
+
+    get limit() {
+        return this._limit;
+    }
+
+    get totalCount() {
+        return this._totalCount;
+    }
+
     get statusOptions() {
         return Object.entries(this.statusMap).map(([value, data]) => ({
             value: parseInt(value),
@@ -151,6 +174,8 @@ export default class SolutionStore {
     async fetchSolutionsFiltered() {
         try {
             const params = {};
+            params.page = this._page;
+            params.limit = this._limit;
 
             if (this._searchQuery) {
                 params.search = this._searchQuery;
@@ -180,15 +205,6 @@ export default class SolutionStore {
                 params.searchForMySolutions = this._searchForMySolutions;
             }
 
-            const hasFilters = (
-                this._searchQuery ||
-                this._selectedStatuses?.length > 0 ||
-                this._addedBefore ||
-                this._addedAfter ||
-                this._freelancerId ||
-                this._contestId
-            );
-
             if (!this.hasFiltersChanged(params) && this._solutions.length > 0) {
                 console.log('Using cached solutions');
                 this.setLoading(false);
@@ -196,12 +212,12 @@ export default class SolutionStore {
             }
 
             this.setLoading(true)
-            const endpoint = hasFilters ? "/solutions/filter" : `/solutions/contest/${this._contestId}`;
 
             console.log('Fetching solutions with params:', params);
 
-            const solutions = await fetchData(endpoint, params);
-            this.setSolutions(solutions);
+            const response = await fetchData("/solutions/filter", params);
+            this.setSolutions(response.solutions || []);
+            this._totalCount = response.total || 0;
             this._lastFilterParams = params;
         } catch (error) {
             console.error("Ошибка при отправке:", error);
